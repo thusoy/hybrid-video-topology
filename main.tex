@@ -3,6 +3,7 @@
 % this package is just to generate text for demo-purposes
 \usepackage{blindtext}
 \usepackage{todonotes}
+\usepackage{pgfplots}
 \usepackage[pdf,tmpdir]{graphviz}
 
 
@@ -38,6 +39,14 @@
     breaklines=true,
     captionpos=t,
 }
+
+\pgfplotsset{every axis/.append style={
+                    axis x line=middle,    % put the x axis in the middle
+                    axis y line=middle,    % put the y axis in the middle
+                    axis line style={<->}, % arrows on the axis
+                    xlabel={$x$},          % default put x on x-axis
+                    ylabel={$y$},          % default put y on y-axis
+                }}
 
 \begin{document}
 \listoftodos
