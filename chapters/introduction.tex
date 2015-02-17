@@ -48,7 +48,7 @@ But before we start trying to find a optimal solution to the problem, let's see 
     \end{tabular}
 \end{center}
 
-These conversations are not extensive, but should cover enough corner cases to be able to highlight the pros and cons of the different topologies. The examples cover the low-latency, few peers conversations; the bandwidth-challenged cases; the high-latency conversations; and the very hetrogenous device conversations, where one or more party is severly challenged in terms of either bandwidth or latency. 
+These conversations are not extensive, but should cover enough corner cases to be able to highlight the pros and cons of the different topologies. The examples cover the low-latency, few peers conversations; the bandwidth-challenged cases; the high-latency conversations; and the very hetrogenous device conversations, where one or more party is severly challenged in terms of either bandwidth or latency.
 
 We assume that the backend networks are not saturated, and that each user is bandwidth-constrained only by their connection. By extension, the maximum bandwidth attainable between any pair of nodes in our network is the lesser of the upload bandwidth of the sending party and the download bandwidth of the receiving party. However, latency has to be defined for any pair of the nodes in the network, as this is mostly determined by their geographical location in relation to each other. To best illustrate the physical topology, we can draw each scenario as a complete graph:
 
@@ -108,6 +108,25 @@ We assume that the backend networks are not saturated, and that each user is ban
     \caption{Example conversation ``business''}\label{fig:example-conv-business}
 \end{figure}
 
+\section{Approaching a solution}
+
+We've now seen the problem domain, we've seen some of the current approaches to the problem and how they perform, and we have an inkling of thought that says that the there's lots of room for improvement. From the graphs we've drawn up of the example conversations, it's clear that we can find better topologies than what's currently available. My suggestion is to use the utility function we described earlier to calculate the utility gained from a given topology, and then use a modified shortest-path algorithm from each client to find the optimal routing to all the other clients.
+
+Should the solution be computed locally at each client how to route it's data, or centrally by the room?
+
+    Client:
+        - Easy to maximize returns
+        - Doesn't prioritize any traffic for others
+        - Allows the client to specify encoding servers and their relative cost
+        - Client knows best his own capabilities and resources
+        - Still requires consent from partner on bw usage and quality
+
+    Room:
+        - Centralized logic
+        - Knows the full state of the room
+        - Can take all parties into account
+
+Can it be modelled as a game, and an approach estimated from game theory?
 
 \section{Terminology}
 
