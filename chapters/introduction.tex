@@ -108,6 +108,12 @@ We assume that the backend networks are not saturated, and that each user is ban
     \caption{Example conversation ``business''}\label{fig:example-conv-business}
 \end{figure}
 
+
+\section{CPU limitations}
+
+The naïve approach to encoding the videostreams is to encode the raw stream from the web camera into several client-optimized streams for transmission. Using VP8, this is the only way to do it. However, H.264 can be encoded in a \gls{svc} manner, which makes it possible to extract different bandwidth-streams from a single stream. With VP8 this is sadly not possible, and the only alternative is to utilize \gls{simulcast}, a technique that sends several streams to the same endpoint, which can then select which of the streams to forward to the different endpoints. This is not as efficient as sending only a single stream however, and the encoding step is also costlier on the CPU.
+
+
 \section{Approaching a solution}
 
 We've now seen the problem domain, we've seen some of the current approaches to the problem and how they perform, and we have an inkling of thought that says that the there's lots of room for improvement. From the graphs we've drawn up of the example conversations, it's clear that we can find better topologies than what's currently available. My suggestion is to use the utility function we described earlier to calculate the utility gained from a given topology, and then use a modified shortest-path algorithm from each client to find the optimal routing to all the other clients.
