@@ -34,7 +34,35 @@ Now that we have established our example conversations, we can turn to see how t
 	\end{tabular}
 \end{center}
 
+Let's take a more detailed look at these services.
+
+\subsection{appear.in}
+
+\todo{Write appear.in background}
+
+
+\subsection{Google Hangouts}
+
+Google Hangouts is alongside appear.in the only other service based in the browser. Hangouts is a merge of several earlier Google communication solutions like Google Talk, Google+ Messenger and the Hangouts feature from Google+. The service uses a Google-provided \gls{mcu}, and VP8/9 over WebRTC as video transport\todo{Find a source to verify this}. A conversation is limited to 10 people.
+
+In our test scenarios, Google Hangouts performs like this:
+
+\todo[inline]{Get test data from hangouts}
+
+
+\subsection{Skype}
+
+Skype is probably the most well-known of the solutions we're looking at, being the first to offer free video conferencing for personal use. Skype was also among the first to provide a VoIP solution interoperating with \gls{pstn}, easing the barrier of entry for new users. The original Skype topology was peer-to-peer, routing streams through PCs with Skype installed that had the app running, using a proprietary closed-source protocol. After the Microsoft aquisition Skype ditched the peer-to-peer design to a Microsoft MCU-backed solution, justified as a means to improve performance and security for users. A Skype conversation has a soft limit on five people for the best user experience, hard limited to 10 users.
+
+Skype requires a standalone application to run, which is available on pretty much every platform out there, including Windows, Mac, Linux, Android, iOS, Windows Phone, BlackBerry, most tablets, TVs, gaming consoles and more. The benefit is close access to hardware and GPUs for more efficient video encoding, the downside is the lack of open protocols and standardization.
+
+Skype performance summarized:
+
+\todo[inline]{Add skype test data}
+
+
 \todo{Which providers do we have today and what sort of topologies do they use? What are their pros and cons?}
+
 
 
 \section{Where we want to be}
