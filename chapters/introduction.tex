@@ -113,6 +113,8 @@ We assume that the backend networks are not saturated, and that each user is ban
 
 The naïve approach to encoding the videostreams is to encode the raw stream from the web camera into several client-optimized streams for transmission. Using VP8, this is the only way to do it. However, H.264 can be encoded in a \gls{svc} manner, which makes it possible to extract different bandwidth-streams from a single stream. With VP8 this is sadly not possible, and the only alternative is to utilize \gls{simulcast}, a technique that sends several streams to the same endpoint, which can then select which of the streams to forward to the different endpoints. This is not as efficient as sending only a single stream however, and the encoding step is also costlier on the CPU.
 
+\todo{Write about the future of H.264/VP9, SVC, hardware acceleration, etc}
+
 
 \section{Approaching a solution}
 
