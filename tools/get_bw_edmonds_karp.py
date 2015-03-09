@@ -1,5 +1,14 @@
 #/usr/bin/env python
 
+# We define a topology as a matrix with (latency, upload bandwidth) between hosts in the conversation,
+# and each host also has a upper limit on upload and download.
+# First line is
+# <EOF 20/5 13/2 0.5/0.5
+# - 5/4,5 75/0.5
+# 4/1.7 - 80/0.4
+# 77/.5 85/.05 -
+# EOF
+
 import sys
 
 def main():
