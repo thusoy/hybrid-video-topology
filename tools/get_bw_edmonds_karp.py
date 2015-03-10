@@ -10,8 +10,15 @@
 # EOF
 
 import sys
+from collections import namedtuple
+
+Node = namedtuple('Node', ['down', 'up'])
+Link = namedtuple('Link', ['latency', 'bandwidth'])
 
 def main():
+    input = sys.stdin.readlines()
+    nodes = parse_nodes(input[0])
+    graph = parse_graph(input[1:])
     raw_hosts = sys.argv[1:]
 
     hosts = [tuple(map(int, host.split(':'))) for host in raw_hosts]
@@ -19,7 +26,7 @@ def main():
     matrix = [None]*(len(hosts)*2+2)
 
     print hosts
-#    print_matrix(matrix)
+    print_matrix(graph)
 
     supersource = len(matrix) - 2
     supersink = len(matrix) - 1
@@ -43,6 +50,30 @@ def main():
     print('Flow:')
     print_matrix(edmonds_karp(matrix, supersource, supersink))
     print 'Flow:', max_flow(matrix, supersource, supersink)
+
+def parse_nodes(node_line):
+    nodes = []
+    raw_nodes = node_line.split()
+    for raw_node in raw_nodes:
+        print('Parsing node %s' % raw_node)
+        down, up = raw_node.split('/')
+        nodes.append(Node(up, down))
+    return nodes
+
+
+def parse_graph(graph_lines):
+    num_nodes = len(graph_lines)
+    graph = []
+    for node_num, line in enumerate(graph_lines):
+        node_links = line.split()
+        graph.append([])
+        for other_node_num, node_link in enumerate(node_links):
+            if node_num == other_node_num:
+                graph[-1].append(0.0)
+                continue
+            latency, bandwidth = node_link.split('/')
+            graph[-1].append(Link(float(latency), float(bandwidth)))
+    return graph
 
 
 # Arguments are the hosts bandwidth
@@ -85,18 +116,12 @@ def bfs(C, F, source, sink):
 
 def print_matrix(m):
     print
-    print ' '*4  +  ' '.join('%sin %sou' % (n, n) for n in range(1, int(len(m)/2))) + '  s   t '
-    even = True
+#    print ' '*4  +  ' '.join('%sin %sou' % (n, n) for n in range(1, int(len(m)/2))) + '  s   t '
     for node_num, line in enumerate(m):
         print
-        node = node_num/2 + 1
-        node_text = '%d%s ' % (node, 'in' if even else 'ou')
-        if node_num == len(m) - 2:
-            node_text = ' s  '
-        elif node_num == len(m) -1:
-            node_text = ' t  '
+        node_text = ''
 
-        print node_text + ' '.join(str(s).center(3) for s in line)
+        print node_text + ' '.join(('%.1f/%.1f' % (n.down, n.up)).center(3) for n in line)
         even = not even
 
 
