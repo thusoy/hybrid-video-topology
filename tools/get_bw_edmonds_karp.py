@@ -9,47 +9,49 @@
 # 77/.5 85/.05 -
 # EOF
 
+one_mobile = """20/5 13/2 0.5/0.5
+- 5/4.5 75/0.5
+4/1.7 - 80/0.4
+77/.5 85/.5 -""".split('\n')
+
+scenario = one_mobile
+
 import sys
 from collections import namedtuple
 
 Node = namedtuple('Node', ['down', 'up'])
-Link = namedtuple('Link', ['latency', 'bandwidth'])
+#Link = namedtuple('Link', ['latency', 'bandwidth'])
+class Link(object):
+    slot_size = 250
+
+    def __init__(self, latency, bandwidth):
+        self.latency = latency
+        self.bandwidth = bandwidth
+        self.slots = (bandwidth*(2**10)) // Link.slot_size
+        print 'Link with bw=%.2f initialized with %d slots' % (self.bandwidth, self.slots)
+        self.utilized_slots = 0
+
+
+    def cost(self):
+        if self.slots:
+            return self.latency**(self.utilized_slots/self.slots + 1)
+        else:
+            return float('Inf')
+
+
+    def __repr__(self):
+        return 'Link(lat=%d, slots=%d)' % (self.latency, self.slots)
+
 
 def main():
-    input = sys.stdin.readlines()
-    nodes = parse_nodes(input[0])
-    graph = parse_graph(input[1:])
-    raw_hosts = sys.argv[1:]
-
-    hosts = [tuple(map(int, host.split(':'))) for host in raw_hosts]
-    # Allocate an in and an out node for each host, plus two rows for the supersink and the supersource
-    matrix = [None]*(len(hosts)*2+2)
-
-    print hosts
+    nodes = parse_nodes(scenario[0])
+    graph = parse_graph(scenario[1:])
     print_matrix(graph)
+    costs, predecessor = floyd_warshall(graph)
+    print costs
+    print
+    print predecessor
 
-    supersource = len(matrix) - 2
-    supersink = len(matrix) - 1
-    matrix[supersource] = [0]*len(matrix)
-
-    for node_num, (down, up) in enumerate(hosts):
-        n_in = node_num*2
-        n_out = node_num*2 + 1
-        matrix[n_in] = [0]*(len(matrix) - 1) + [up]
-        out_cap = [up, 0]*(len(matrix)/2)
-        out_cap[-2:] = [0]*2
-        out_cap[n_in] = 0
-        out_cap[n_out] = 0
-        matrix[n_out] = out_cap
-        matrix[supersource][n_out] = down
-    matrix[supersink] = [0] * len(matrix)
-
-    print('Capacities:')
-    print_matrix(matrix)
-
-    print('Flow:')
-    print_matrix(edmonds_karp(matrix, supersource, supersink))
-    print 'Flow:', max_flow(matrix, supersource, supersink)
 
 def parse_nodes(node_line):
     nodes = []
@@ -61,6 +63,43 @@ def parse_nodes(node_line):
     return nodes
 
 
+def floyd_warshall(graph):
+    costs = {}
+    predecessor = {}
+    # Initialize costs and predecessors
+    for i in range(len(graph)):
+        costs[i] = [float('Inf') for j in range(len(graph))]
+        predecessor[i] = [-1 for j in range(len(graph))]
+        costs[i][i] = 0
+        for neighbor in range(len(graph)):
+            if i == neighbor:
+                continue
+            link = graph[i][neighbor]
+            costs[i][neighbor] = link.cost()
+            predecessor[i][neighbor] = i
+
+
+    # Run the algorithm
+    for third_party in range(len(graph)):
+        for sender in range(len(graph)):
+            for receiver in range(len(graph)):
+                new_cost = costs[sender][third_party] + costs[third_party][receiver]
+                if new_cost < costs[sender][receiver]:
+                    first_link = graph[sender][third_party]
+                    first_link.utilized_slots += 1
+                    second_link = graph[third_party][receiver]
+                    second_link.utilized_slots += 1
+                    costs[sender][receiver] = new_cost
+
+                    # This will probably not work, as the assumption here is that the shortest
+                    # route seen so far between the third_party and the receiver will always
+                    # be the cheapest route, but as our routes change cost the more nodes use
+                    # it, this assumption won't hold
+                    predecessor[sender][receiver] = predecessor[third_party][receiver]
+
+    return costs, predecessor
+
+
 def parse_graph(graph_lines):
     num_nodes = len(graph_lines)
     graph = []
@@ -69,10 +108,10 @@ def parse_graph(graph_lines):
         graph.append([])
         for other_node_num, node_link in enumerate(node_links):
             if node_num == other_node_num:
-                graph[-1].append(0.0)
+                graph[-1].append(None)
                 continue
             latency, bandwidth = node_link.split('/')
-            graph[-1].append(Link(float(latency), float(bandwidth)))
+            graph[-1].append(Link(int(latency), float(bandwidth)))
     return graph
 
 
@@ -117,12 +156,11 @@ def bfs(C, F, source, sink):
 def print_matrix(m):
     print
 #    print ' '*4  +  ' '.join('%sin %sou' % (n, n) for n in range(1, int(len(m)/2))) + '  s   t '
+    print m
+    cell_width = 9
     for node_num, line in enumerate(m):
         print
-        node_text = ''
-
-        print node_text + ' '.join(('%.1f/%.1f' % (n.down, n.up)).center(3) for n in line)
-        even = not even
+        print ' '.join(('%d/%.1f' % (l.latency, l.bandwidth)).center(cell_width) if l else '-'.center(cell_width) for l in line)
 
 
 if __name__ == '__main__':
