@@ -28,13 +28,13 @@ class Link(object):
         self.latency = latency
         self.bandwidth = bandwidth
         self.slots = (bandwidth*(2**10)) // Link.slot_size
-        print 'Link with bw=%.2f initialized with %d slots' % (self.bandwidth, self.slots)
+      #  print 'Link with bw=%.2f initialized with %d slots' % (self.bandwidth, self.slots)
         self.utilized_slots = 0
 
 
     def cost(self):
         if self.slots:
-            return self.latency**(self.utilized_slots/self.slots + 1)
+            return self.latency**(float(self.utilized_slots)/self.slots + 1)
         else:
             return float('Inf')
 
@@ -46,18 +46,41 @@ class Link(object):
 def main():
     nodes = parse_nodes(scenario[0])
     graph = parse_graph(scenario[1:])
-    print_matrix(graph)
-    costs, predecessor = floyd_warshall(graph)
-    print costs
+    #print_matrix(graph)
+    costs, predecessors = floyd_warshall(graph)
+    print_paths(predecessors, costs)
     print
-    print predecessor
+    print_link_utilization(graph)
+
+def print_paths(predecessors, costs):
+    for source, targets in predecessors.items():
+        for target, predecessor in enumerate(targets):
+            if source == target:
+                continue
+            path = [source]
+            current_node = source
+            while current_node != predecessor:
+                current_node = predecessors[predecessor][target]
+                path.append(current_node)
+            path.append(target)
+            print 'Path from %d to %d (%3dms): %s' % (source, target, costs[source][target], ' -> '.join(str(n) for n in path))
+
+
+def print_link_utilization(graph):
+    for node, links in enumerate(graph):
+        for link in links:
+            if link:
+                print '%.2f' % (float(link.utilized_slots) / link.slots),
+            else:
+                print '----',
+        print
 
 
 def parse_nodes(node_line):
     nodes = []
     raw_nodes = node_line.split()
     for raw_node in raw_nodes:
-        print('Parsing node %s' % raw_node)
+     #   print('Parsing node %s' % raw_node)
         down, up = raw_node.split('/')
         nodes.append(Node(up, down))
     return nodes
@@ -80,22 +103,26 @@ def floyd_warshall(graph):
 
 
     # Run the algorithm
-    for third_party in range(len(graph)):
-        for sender in range(len(graph)):
-            for receiver in range(len(graph)):
-                new_cost = costs[sender][third_party] + costs[third_party][receiver]
-                if new_cost < costs[sender][receiver]:
-                    first_link = graph[sender][third_party]
-                    first_link.utilized_slots += 1
-                    second_link = graph[third_party][receiver]
-                    second_link.utilized_slots += 1
-                    costs[sender][receiver] = new_cost
+    found_new_path = True
+    while found_new_path:
+        found_new_path = False
+        for third_party in range(len(graph)):
+            for sender in range(len(graph)):
+                for receiver in range(len(graph)):
+                    new_cost = costs[sender][third_party] + costs[third_party][receiver]
+                    if new_cost < costs[sender][receiver]:
+                        found_new_path = True
+                        first_link = graph[sender][third_party]
+                        first_link.utilized_slots += 1
+                        second_link = graph[third_party][receiver]
+                        second_link.utilized_slots += 1
+                        costs[sender][receiver] = new_cost
 
-                    # This will probably not work, as the assumption here is that the shortest
-                    # route seen so far between the third_party and the receiver will always
-                    # be the cheapest route, but as our routes change cost the more nodes use
-                    # it, this assumption won't hold
-                    predecessor[sender][receiver] = predecessor[third_party][receiver]
+                        # This will probably not work, as the assumption here is that the shortest
+                        # route seen so far between the third_party and the receiver will always
+                        # be the cheapest route, but as our routes change cost the more nodes use
+                        # it, this assumption won't hold
+                        predecessor[sender][receiver] = predecessor[third_party][receiver]
 
     return costs, predecessor
 
@@ -119,38 +146,6 @@ def parse_graph(graph_lines):
 def max_flow(C, source, sink):
     F = edmonds_karp(C, source, sink)
     return sum(F[source][i] for i in xrange(len(C)))
-
-
-def edmonds_karp(C, source, sink):
-    n = len(C) # C is the capacity matrix
-    F = [[0] * n for i in xrange(n)]
-    # residual capacity from u to v is C[u][v] - F[u][v]
-
-    while True:
-        path = bfs(C, F, source, sink)
-        if not path:
-            break
-        # traverse path to find smallest capacity
-        flow = min(C[u][v] - F[u][v] for u,v in path)
-        # traverse path to update flow
-        for u,v in path:
-            F[u][v] += flow
-            F[v][u] -= flow
-    return F
-
-
-def bfs(C, F, source, sink):
-    queue = [source]
-    paths = {source: []}
-    while queue:
-        u = queue.pop(0)
-        for v in xrange(len(C)):
-            if C[u][v] - F[u][v] > 0 and v not in paths:
-                paths[v] = paths[u] + [(u,v)]
-                if v == sink:
-                    return paths[v]
-                queue.append(v)
-    return None
 
 
 def print_matrix(m):
