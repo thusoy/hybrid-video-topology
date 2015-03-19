@@ -42,6 +42,11 @@ class Link(object):
     def __repr__(self):
         return 'Link(lat=%d, slots=%d)' % (self.latency, self.slots)
 
+    def __add__(self, other):
+        new_latency = self.latency + other.latency
+        new_bandwidth = min(self.bandwidth, other.bandwidth)
+        return Link()
+
 
 def main():
     nodes = parse_nodes(scenario[0])
@@ -93,12 +98,12 @@ def floyd_warshall(graph):
     for i in range(len(graph)):
         costs[i] = [float('Inf') for j in range(len(graph))]
         predecessor[i] = [-1 for j in range(len(graph))]
-        costs[i][i] = 0
+        costs[i][i] = Link(0, 0)
         for neighbor in range(len(graph)):
             if i == neighbor:
                 continue
             link = graph[i][neighbor]
-            costs[i][neighbor] = link.cost()
+            costs[i][neighbor] = link
             predecessor[i][neighbor] = i
 
 
@@ -109,14 +114,14 @@ def floyd_warshall(graph):
         for third_party in range(len(graph)):
             for sender in range(len(graph)):
                 for receiver in range(len(graph)):
-                    new_cost = costs[sender][third_party] + costs[third_party][receiver]
-                    if new_cost < costs[sender][receiver]:
+                    new_cost = costs[sender][third_party].cost() + costs[third_party][receiver].cost()
+                    if new_cost < costs[sender][receiver].cost():
                         found_new_path = True
                         first_link = graph[sender][third_party]
                         first_link.utilized_slots += 1
                         second_link = graph[third_party][receiver]
                         second_link.utilized_slots += 1
-                        costs[sender][receiver] = new_cost
+                    #    costs[sender][receiver] = new_cost
 
                         # This will probably not work, as the assumption here is that the shortest
                         # route seen so far between the third_party and the receiver will always
