@@ -4,7 +4,7 @@ The web is becoming the primary platform for all communication, as people gradua
 
 There are lots of competing products on the market today, with different characteristics and performance levels. What they all have in common however, is that they've all chosen a fixed network topology, which dictates most of their expected performance. The goal of this thesis is to investigate the feasibility of designing a system which does not have a fixed topology, but choses one adaptively based upon properties of the user equipment and connection quality.
 
-\todo{Write stuff as introduction. Or not. Is it needed?}
+\todo[inline]{Write about what WebRTC is how that changes the playing field for real-time communication}
 
 The goal of this project is to maximize user utility in video conference solutions. To maximize utility, we need to have a well-defined sense of what that implies.
 
@@ -12,7 +12,7 @@ The goal of this project is to maximize user utility in video conference solutio
 
 \epigraph{If I have seen further, it is by standing on the shoulders of giants}{Isaac Newton}
 
-The problem we're facing is a derivation of several well-known problems in networking, and especially network flows. We'll thus borrow heavily from several flow algorithms.
+The problem we're facing is a derivation of several well-known problems in networking, and especially network flows. We'll thus borrow heavily from several flow algorithms in solving the routing problem.
 
 \todo{Linear programming solution? See wikipedia on minimum cost flow problems, minimum cost circulation problem, and check out Ahuja, Magnanti and Orlin: Network Flows, Theory, Algorithms and Applications, on Prentice-Hall. Also check out multi-commodity flow problems}
 
@@ -20,16 +20,16 @@ The problem we're facing is a derivation of several well-known problems in netwo
 
 \section{Context and utility}
 
-When defining user utility, context is everything. You have different expectations to audiovisual quality on a desktop computer with fiber connectivity compared to your phone on 3G. But how can this difference be quantized? Certainly it's not a question of screen resolution, as most smart phones today have the same 1080p resolution as most computer screens. Resolutions beyond 1080p like we can find on some "retina" screens are not that interesting for video conferencing, as the webcam producing the source video is unlikely to be able to match that.
+When defining user utility, context is everything. You have different expectations to audiovisual quality on a desktop computer with fiber connectivity compared to your phone on 3G. But how can this difference be quantized? Certainly it's not a question of screen resolution, as most smart phones today have the same 1080p resolution as most computer screens. Resolutions beyond 1080p, like we can find on some "retina" screens, are not that interesting for video conferencing, as the webcam producing the source video is unlikely to be able to keep pace.
 
-However, physical screen size matters. Viewing distance matters. Latency matters very much. Bandwidth matters. Packet loss matters. Most of these should be fairly easy to estimate, but then we have a new problem: which of these attributes do we prioritize? Finding the optimal balance is the key to optimizing user utility. There are of course also non-technical factors that affects the expected experience quite much that cannot be determined by the device itself. For example, even though the device is the same, you'll have different expectations sitting on the bus to work compared to sitting in a sofa in your living room, even though the device is the same. Environment matters. Mood matters. Time of day probably matters. We will however not take all of these factors into account, but limit our scope to the device itself, and since the intended application is to WebRTC, what we can relatively easy determine through the browser.
+However, physical screen size matters. Viewing distance matters. Latency matters very much. Bandwidth matters. Packet loss matters. Most of these should be fairly easy to estimate, but then we have a new problem: which of these attributes do we prioritize? Finding the optimal balance is the key to optimizing user utility. There are of course also non-technical factors that affects the expected experience quite much that cannot be determined by the device itself. For example, even though the device is the same, you'll have different expectations sitting on the bus to work compared to sitting in a sofa in your living room, even though the device and maybe even the connection is the same. Content matters. Environment matters. Mood matters. Time of day probably matters. We will however not take all of these factors into account, but limit our scope to the device and the connection, and since the intended application is to WebRTC, what we can relatively easy determine through the browser.
 
-There will also be diminishing returns on most of these metrics. If you have practically unlimited bandwidth available, there's little to gain from sending video with bitrates in excess of 3 Mbps, you'll just be wasting bandwidth, CPU and battery. If we define a quality threshold for a device as the "optimal" experience that can be attained as 1.0, there's no reason to try to push this as high as possible. We can though assume that all metrics that are lower than what's necessary for this optimal experience will subtract from this quality metric somehow. For example, if we say that the threshold for optimal latency for a device is \(20ms\), we can imagine a \gls{utility function} that behaves like \(arctan(c-x)\), like illustrated in \autoref{fig:utility-latency}.
+There will also be diminishing returns on most of these metrics. If you have practically unlimited bandwidth available, there's little to gain from sending video with bitrates in excess of 3 Mbps, you'll just be wasting bandwidth, CPU and battery. If we define a quality threshold for a device as the "optimal" experience that can be attained as 1.0, there's no reason to try to push this as high as possible. We can though assume that all metrics that are lower than what's necessary for this optimal experience will subtract from this quality metric somehow. For example, if we say that the threshold for optimal latency for a device is \(20ms\), we can imagine a \gls{utility function} that behaves like \(1 - x^t\), where t is a constant determining how fast this metric deteriorates. The general function is illustrated in \autoref{fig:utility-latency}.
 
 \begin{tikzpicture}
     \begin{axis}[
         xlabel={$t (ms)$},
-        ylabel={$f(t) = 1/2 + 0.4*arctan(20*0.7-0.2t)$},
+        ylabel={$f(x) = 1 - x^t)$},
         xmin=0,
         ymin=0,
         ymax=1,
@@ -40,11 +40,11 @@ There will also be diminishing returns on most of these metrics. If you have pra
     \end{axis}
 \end{tikzpicture}
 
-For now we'll assume that we have a function similar to the one illustrated in \autoref{fig:utility-latency}, returning a value approximately in the range \(1 -- 0\), for each of the metrics that comprise the user utility. Multiplying these together we'll get a user utility that lies in the same range.
+For now we'll assume that we have a function similar to the one illustrated in \autoref{fig:utility-latency}, returning a value approximately in the range \todo{Find the proper lower limit}\(1 -- 0\), for each of the metrics that comprise the user utility. Multiplying these together we'll get a user utility that lies in the same range.
 
-Assuming this user utility function, we have to figure out what to optimize in a conversation. If a single party in a conversation experiences high latencies and much packet loss, it's likely to negatively affect the experience of all the other parties as well. We'll thus focus on maximizing the minimum utility experienced in a conversation, and then gradually improve the utility for all users ordered by their current utility in ascending order.
+Assuming this user utility function, we have to figure out what to optimize in a conversation. If a single party in a conversation experiences high latencies and much packet loss, it's likely to negatively affect the experience of all the other parties as well, due to that person requesting people to repeat what they said and being hard to hear for other participants. We'll thus focus on maximizing the minimum utility experienced in a conversation, and then gradually improve the utility for all users ordered by their current utility in ascending order.
 
-But before we start trying to find a optimal solution to the problem, let's see what's the status quo. To do this, we define a couple of example conversation configurations, as given in \autoref{tab:example-conversations}.
+To narrow down the problem scope a little, let's define some example conversations to work it, and assume that if we can efficiently serve these setups, we can serve most others as well. The conversations we'll use are given in \autoref{tab:example-conversations}.
 
 \todo{Maybe graph these on a map to illustrate the latencies between them and the servers?}
 \begin{center}
@@ -120,34 +120,4 @@ We assume that the backend networks are not saturated, and that each user is ban
     \caption{Example conversation ``business''}\label{fig:example-conv-business}
 \end{figure}
 
-
-\section{CPU limitations}
-
-The naïve approach to encoding the videostreams is to encode the raw stream from the web camera into several client-optimized streams for transmission. Using VP8, this is the only way to do it. However, H.264 can be encoded in a \gls{svc} manner, which makes it possible to extract different bandwidth-streams from a single stream. With VP8 this is sadly not possible, and the only alternative is to utilize \gls{simulcast}, a technique that sends several streams to the same endpoint, which can then select which of the streams to forward to the different endpoints. This is not as efficient as sending only a single stream however, and the encoding step is also costlier on the CPU.
-
-\todo{Write about the future of H.264/VP9, SVC, hardware acceleration, etc}
-
-
-\section{Approaching a solution}
-
-We've now seen the problem domain, we've seen some of the current approaches to the problem and how they perform, and we have an inkling of thought that says that the there's lots of room for improvement. From the graphs we've drawn up of the example conversations, it's clear that we can find better topologies than what's currently available. My suggestion is to use the utility function we described earlier to calculate the utility gained from a given topology, and then use a modified shortest-path algorithm from each client to find the optimal routing to all the other clients.
-
-Should the solution be computed locally at each client how to route it's data, or centrally by the room?
-
-    Client:
-        - Easy to maximize returns
-        - Doesn't prioritize any traffic for others
-        - Allows the client to specify encoding servers and their relative cost
-        - Client knows best his own capabilities and resources
-        - Still requires consent from partner on bw usage and quality
-
-    Room:
-        - Centralized logic
-        - Knows the full state of the room
-        - Can take all parties into account
-
-Can it be modelled as a game, and an approach estimated from game theory?
-
-\section{Terminology}
-
-When we talk about topology in this thesis, a topology is intended as one given configuration of who sends data where. It's thus unrelated to devices or hardware network topologies. \todo{Better word needed?} This is thus purely a logical term, as the physical topology will be assumed constant for our experiements. However, it's in the logic the magic happens.
+Now that we've established the problem domain and have some grasp of the main challenges, let's see where we are today.

@@ -1,21 +1,26 @@
 \chapter{Background}
 \label{chp:background}
 
-\section{Video conferencing}
-
-\todo{What is video conferencing, really, and why do we need it? Relationship to WebRTC here?}
-
-\todo{Write about Contionus Presence (multiple parties on-screen at the same time), and how that limits the different topologies}
+In this chapter we'll first discuss some technical aspect of video conferencing that affect how we reason about solving the challenges, before performing we try to benchmark existing solutions to see how they perform in our example conversations.
 
 
-\section{Topologies}
+\section{A technical look at video conferencing}
 
-\todo{Compare the different topologies with pros and cons regarding performance, security, cost, etc.}
+\subsection{Codecs}
 
+\todo[inline]{Write about the future of H.264/VP9, SVC, hardware acceleration, etc}
 
-\section{WebRTC}
+\subsection{CPU limitations}
 
-\todo{What is WebRTC and how is it changing everything?}
+The naïve approach to encoding the videostreams is to encode the raw stream from the web camera into several client-optimized streams for transmissio
+n. Using VP8, this is the only way to do it. However, H.264 can be encoded in a \gls{svc} manner, which makes it possible to extract different bandwid
+th-streams from a single stream. With VP8 this is sadly not possible, and the only alternative is to utilize \gls{simulcast}, a technique that sends s
+everal streams to the same endpoint, which can then select which of the streams to forward to the different endpoints. This is not as efficient as sen
+ding only a single stream however, and the encoding step is also costlier on the CPU.
+
+\subsection{Continuous Presence}
+
+\todo[inline]{Write about Continuous Presence (multiple parties on-screen at the same time), and how that limits the different topologies}
 
 
 \section{The current providers}
@@ -35,6 +40,8 @@ Now that we have established our example conversations, we can turn to see how t
 \end{center}
 
 Notably absent here is FaceTime, Apple's own videochat service. FaceTime's absence in this thesis is due to the lack of support for more than two people in a conversation, which makes the optimal topology question embarassingly easy to answer, and the lack of support on non-Apple devices, which makes the service uninteresting.
+
+We also note that Mozilla just entered the market in collaboration with Telefonica with their Hello service, bundled with recent versions of Firefox\footnote{https://www.mozilla.org/en-US/firefox/hello/}. Hello however essentially provides the same service as appear.in, just bundled with the browser. Thus anything we say about appear.in applies to Firefox Hello as well, and we'll therefore not consider them separately. This author will however congratulate Mozilla and Telefonica on their endeavor to make communication more open and available to anyone.
 
 Let's take a more detailed look at these services.
 
