@@ -104,11 +104,23 @@
 
 \pagenumbering{arabic}
 \pagestyle{ruled}
+
+%% What's the problem, considerations that need to be taken, etc
 \include{chapters/introduction}
+
+%% Look at some technical aspects, introduce current providers
 \include{chapters/background}
-\include{chapters/current_practice}
-\include{chapters/simulation_results}
+
+%% Benchmark the existing providers to figure out where the bar lies
 \include{chapters/experiments}
+
+%% Solve it better
+\include{chapters/suggested_solution}
+
+%% How can the solution be deployed by companies, what considerations needs to be taken, tradeoffs, etc
+\include{chapters/discussion}
+
+%% What remains: Security analysis, cost analysis, implementation, deployment, analysis in the dynamic case, adaptability
 \include{chapters/conclusions_future_work}
 
 \renewcommand*{\bibname}{References}
