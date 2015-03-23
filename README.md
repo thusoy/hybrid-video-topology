@@ -18,3 +18,22 @@ By 20.05: Write the results and discussion chapters
 By 27.05: Finalize the rest
 
 By 04.06: Get feedback and incorporate changes
+
+Lab tc
+------
+
+Hosts med tc-tilgang: 02 04 06 08 09 10 13 14 15 16 17 19 21 22 27
+
+Labprosedyre:
+    * Kjør ntpdate -q no.pool.ntp.org for å finne lokalt offset
+    * Kjør clock.py som kontinuerlig printer lokal tid med ms
+    * På hver host, beregn inngående latency fra hva som blir sett på skjermen fra alle andre
+    * Kjør regelmessige dumps av sendte bytes på hver maskin, slik at deltaet utgjør brukt båndbredde.
+    * ???
+    * Profit!
+
+### Hangouts
+
+Trenger chrome, last ned .deb, pakk ut til en lokal mappe og kjør derfra (ligger nå som chrome.sh på shared root-boksene).
+Logg inn som en bruker, start samtale, del skjerm, kjør ntpdate -q no.pool.ntp.org og python clock.py
+Mål data
