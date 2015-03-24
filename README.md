@@ -27,7 +27,7 @@ Hosts med tc-tilgang: 02 04 06 08 09 10 13 14 15 16 17 19 21 22 27
 Labprosedyre:
     * Kjør ntpdate -q no.pool.ntp.org for å finne lokalt offset
     * Kjør clock.py som kontinuerlig printer lokal tid med ms
-    * På hver host, beregn inngående latency fra hva som blir sett på skjermen fra alle andre
+    * På hver host, beregn inngående latency fra hva som blir sett på skjermen fra alle andre (Fra graphicsmagick: import -window root screen.png)
     * Kjør regelmessige dumps av sendte bytes på hver maskin, slik at deltaet utgjør brukt båndbredde.
     * ???
     * Profit!
