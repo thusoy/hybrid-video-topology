@@ -8,6 +8,8 @@ Since much of the software to be tested is proprietary and very consumer-oriente
 
 To be able to test the different configurations, we used several computers in a lab running the software under testing, with a timer running on their screen
 
+It must be noted, our custom algorithm will not be unjustly favored since it can access the additional forwarding nodes. Google Hangouts and Skype both utilize similar nodes, but their architecture and inner working is hidden from us due to the proprietary nature of these products, and thus they can not be modelled accurately. Only pure peer-to-peer WebRTC products like appear.in and Firefox Hello rely only on the client nodes, but they're both free to add any helpers themselves.
+
 
 \section{Implementation}\label{sec:implementation}
 
