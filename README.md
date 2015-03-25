@@ -22,7 +22,7 @@ By 04.06: Get feedback and incorporate changes
 Lab tc
 ------
 
-Hosts med tc-tilgang: 02 04 06 08 09 10 13 14 15 16 17 19 21 22 27
+Hosts med tc-tilgang: 02 04 06 08 09 10 13 14 15 16 17 19 21 22 27 28 30
 
 Labprosedyre:
     * Kjør ntpdate -q no.pool.ntp.org for å finne lokalt offset
