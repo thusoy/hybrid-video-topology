@@ -32,8 +32,17 @@ Labprosedyre:
     * ???
     * Profit!
 
-### Hangouts
+### Chrome
 
 Trenger chrome, last ned .deb, pakk ut til en lokal mappe og kjør derfra (ligger nå som chrome.sh på shared root-boksene).
+
+Må settes opp fra "scratch" på hver PC siden de ikke kan kjøres samtidig med delt mappe, opprettes derfor en mappe i /tmp hvor innstillingene lagres.
+
+### Hangouts
+
 Logg inn som en bruker, start samtale, del skjerm, kjør ntpdate -q no.pool.ntp.org og python clock.py
 Mål data
+
+### appear.in
+
+Start chrome, gå til url, kjør capture.sh-skriptet.
