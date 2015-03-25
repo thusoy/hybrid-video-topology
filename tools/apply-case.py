@@ -5,10 +5,9 @@ import requests
 import socket
 import os
 import re
-from subprocess import call as _call
+from subprocess import call as _call, check_output
 
 
-DEV = 'eth0'
 TC=["sudo", "tc"]
 
 
@@ -92,6 +91,9 @@ cases = {
             '2': '8ms 2ms',
             '3': '10ms 2ms',
         }
+    },
+    'friends': {
+        # Add this later
     }
 }
 
@@ -102,14 +104,6 @@ default_rolemap = {
     '4': 'sahara22.item.ntnu.no',
 }
 
-def call(args, silent=False, **kwargs):
-    devnull = open(os.devnull, 'wb')
-    if silent:
-        kwargs['stdout'] = devnull
-        kwargs['stderr'] = devnull
-    else:
-        print 'Running cmd: %s' % ' '.join(args)
-    _call(args, **kwargs)
 
 def main():
     parser = argparse.ArgumentParser(prog='case-asia')
@@ -132,6 +126,12 @@ def main():
     activate_role(role, args.role_map, case)
 
 
+def clear_all_rules():
+    device = get_interface_device()
+    call(TC + ['qdisc', 'del', 'dev', device, 'ingress'], silent=True)
+    call(TC + ['qdisc', 'del', 'dev', device, 'root'], silent=True)
+
+
 def ipify_role_map(role_map):
     ip_regex = re.compile(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
     for role, hostname_or_ip in role_map.items():
@@ -151,6 +151,7 @@ def get_role_from_ip(rolemap):
 
 def get_my_ip():
     """ Get the IP of the box running this code. """
+    # This function is memoizable
     return requests.get('http://httpbin.org/ip').json()['origin']
 
 
@@ -163,22 +164,19 @@ def activate_role(role, role_map, case):
     add_role_rules(role, role_map, case)
 
 
-def clear_all_rules():
-    call(TC + ['qdisc', 'del', 'dev', DEV, 'ingress'], silent=True)
-    call(TC + ['qdisc', 'del', 'dev', DEV, 'root'], silent=True)
-
-
 def add_roots(downlink, uplink):
-    call(TC + ['qdisc', 'add', 'dev', DEV, 'root', 'handle', '1:', 'htb'])
-    call(TC + ['class', 'add', 'dev', DEV, 'parent', '1:', 'classid', '1:1', 'htb', 'rate', '100Mbit'])
-    call(TC + ['class', 'add', 'dev', DEV, 'parent', '1:1', 'classid', '1:2', 'htb', 'rate', uplink])
-    call(TC + ['qdisc', 'add', 'dev', DEV, 'handle', 'ffff:', 'ingress'])
+    device = get_interface_device()
+    call(TC + ['qdisc', 'add', 'dev', device, 'root', 'handle', '1:', 'htb'])
+    call(TC + ['class', 'add', 'dev', device, 'parent', '1:', 'classid', '1:1', 'htb', 'rate', '100Mbit'])
+    call(TC + ['class', 'add', 'dev', device, 'parent', '1:1', 'classid', '1:2', 'htb', 'rate', uplink])
+    call(TC + ['qdisc', 'add', 'dev', device, 'handle', 'ffff:', 'ingress'])
     # This effectively limits UDP to the given downlink bandwidth, but TCP will have lower performance, because of negative effects of the window
     # size and the large delays. This doesn't matter in this case, as our traffic is UDP-based, but it's worth to keep it mind.
-    call(TC + ['filter', 'add', 'dev', DEV, 'parent', 'ffff:', 'protocol', 'ip', 'prio', '50', 'u32', 'match', 'ip', 'src', '0.0.0.0/0', 'police', 'rate', downlink, 'burst', downlink, 'flowid', ':1'])
+    call(TC + ['filter', 'add', 'dev', device, 'parent', 'ffff:', 'protocol', 'ip', 'prio', '50', 'u32', 'match', 'ip', 'src', '0.0.0.0/0', 'police', 'rate', downlink, 'burst', downlink, 'flowid', ':1'])
 
 
 def add_role_rules(role, role_map, case):
+    device = get_interface_device()
     for other_role, delay_config in case[role].items():
         if other_role in ('uplink', 'downlink'):
             continue
@@ -187,9 +185,36 @@ def add_role_rules(role, role_map, case):
         delay_config_as_list = delay_config.split()
         if not other_role in role_map:
             raise ValueError('Role does not have a specified target in the role_map: %s' % other_role)
-        call(TC + ['class', 'add', 'dev', DEV, 'parent', '1:2', 'classid', '1:%d' % class_id, 'htb', 'rate', case[role]['uplink']])
-        call(TC + ['qdisc', 'add', 'dev', DEV, 'parent', '1:%d' % class_id, 'handle', '%s:' % handle_id, 'netem', 'delay'] + delay_config_as_list)
-        call(TC + ['filter', 'add', 'dev', DEV, 'protocol', 'ip', 'parent', '1:0', 'prio', '3', 'u32', 'match', 'ip', 'dst', role_map[other_role], 'flowid', '1:%d' % class_id])
+        call(TC + ['class', 'add', 'dev', device, 'parent', '1:2', 'classid', '1:%d' % class_id, 'htb', 'rate', case[role]['uplink']])
+        call(TC + ['qdisc', 'add', 'dev', device, 'parent', '1:%d' % class_id, 'handle', '%s:' % handle_id, 'netem', 'delay'] + delay_config_as_list)
+        call(TC + ['filter', 'add', 'dev', device, 'protocol', 'ip', 'parent', '1:0', 'prio', '3', 'u32', 'match', 'ip', 'dst', role_map[other_role], 'flowid', '1:%d' % class_id])
+
+
+def get_interface_device():
+    # This function is memoizable
+    my_ip = get_my_ip()
+    all_interfaces = []
+    ip_links_output = check_output(['ip', 'link', 'list'])
+    for line in ip_links_output.split('\n'):
+        if not line.startswith('%s:' % (len(all_interfaces) + 1)):
+            continue
+        interface = line.split(':')[1].strip()
+        all_interfaces.append(interface)
+    for interface in all_interfaces:
+        ip_addr_output = check_output(['ip', 'addr', 'show', 'dev', interface])
+        if my_ip in ip_addr_output:
+            return interface
+    raise ValueError('Failed to find correct interface to use!')
+
+
+def call(args, silent=False, **kwargs):
+    devnull = open(os.devnull, 'wb')
+    if silent:
+        kwargs['stdout'] = devnull
+        kwargs['stderr'] = devnull
+    else:
+        print 'Running cmd: %s' % ' '.join(args)
+    _call(args, **kwargs)
 
 
 if __name__ == '__main__':
