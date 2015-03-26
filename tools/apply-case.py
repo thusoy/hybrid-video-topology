@@ -101,7 +101,7 @@ default_rolemap = {
     '1': 'sahara27.item.ntnu.no',
     '2': 'sahara28.item.ntnu.no',
     '3': 'sahara30.item.ntnu.no',
-    '4': 'sahara22.item.ntnu.no',
+    '4': 'sahara25.item.ntnu.no',
 }
 
 
@@ -136,15 +136,27 @@ def ipify_role_map(role_map):
     ip_regex = re.compile(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
     for role, hostname_or_ip in role_map.items():
         if not ip_regex.match(hostname_or_ip):
+            ips = []
+            ipv4_addr_out = check_output([
+                'ssh',
+                '-o StrictHostKeyChecking=no',
+                'tarjeikl@%s' % hostname_or_ip,
+                "ifconfig | grep -o 'inet addr:[^ ]*' | cut -d: -f2 | grep -v 127.0.0.1"])
+            ips += ipv4_addr_out.strip().split('\n')
+            ipv6_out = check_output([
+                'ssh',
+                '-o StrictHostKeyChecking=no',
+                'tarjeikl@%s' % hostname_or_ip,
+                "ifconfig | grep -o \"inet6 addr: [^ ]*\" | cut -d' ' -f3 | grep -v '^fe80' | grep -v '^::1'"])
+            ips += ipv6_out.strip().split('\n')
             # Probably a hostname, resolve it and use the IP in the role map
-            ip = socket.gethostbyname(hostname_or_ip)
-            role_map[role] = ip
+            role_map[role] = ips
 
 
 def get_role_from_ip(rolemap):
     my_ip = get_my_ip()
-    for role, ip in rolemap.items():
-        if my_ip == ip:
+    for role, ips in rolemap.items():
+        if my_ip in ips:
             return role
     raise ValueError("Role not found for ip %s" % my_ip)
 
@@ -177,6 +189,7 @@ def add_roots(downlink, uplink):
 
 def add_role_rules(role, role_map, case):
     device = get_interface_device()
+    ipv4_regex = re.compile(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
     for other_role, delay_config in case[role].items():
         if other_role in ('uplink', 'downlink'):
             continue
@@ -187,7 +200,15 @@ def add_role_rules(role, role_map, case):
             raise ValueError('Role does not have a specified target in the role_map: %s' % other_role)
         call(TC + ['class', 'add', 'dev', device, 'parent', '1:2', 'classid', '1:%d' % class_id, 'htb', 'rate', case[role]['uplink']])
         call(TC + ['qdisc', 'add', 'dev', device, 'parent', '1:%d' % class_id, 'handle', '%s:' % handle_id, 'netem', 'delay'] + delay_config_as_list)
-        call(TC + ['filter', 'add', 'dev', device, 'protocol', 'ip', 'parent', '1:0', 'prio', '3', 'u32', 'match', 'ip', 'dst', role_map[other_role], 'flowid', '1:%d' % class_id])
+        for ip in role_map[other_role]:
+            if ipv4_regex.match(ip):
+                call(TC + ['filter', 'add', 'dev', device, 'protocol', 'ip',
+                    'parent', '1:0', 'prio', '3', 'u32', 'match', 'ip', 'dst',
+                    ip, 'flowid', '1:%d' % class_id])
+            else:
+                call(TC + ['filter', 'add', 'dev', device, 'protocol', 'ipv6',
+                    'parent', '1:0', 'prio', '4', 'u32', 'match', 'ip6',
+                    'dst', ip, 'flowid', '1:%d' % class_id])
 
 
 def get_interface_device():
