@@ -32,9 +32,43 @@ cases = {
             0: '3ms 1ms',
             1: '130ms 10ms',
         }
-    }
+    },
+    'standup': {
+        0: {
+            'downlink': '10Mbit',
+            'uplink': '10Mbit',
+            'gain': 4,
+            1: '5ms 2ms',
+            2: '7ms 2ms',
+            3: '47ms 3ms'
+        },
+        1: {
+            'downlink': '10Mbit',
+            'uplink': '10Mbit',
+            'gain': 4,
+            0: '5ms 1ms',
+            2: '7ms 2ms',
+            3: '50ms 5ms',
+        },
+        2: {
+            'downlink': '5Mbit',
+            'uplink': '2Mbit',
+            'gain': 3,
+            0: '7ms 2ms',
+            1: '7ms 1ms',
+            3: '40ms 5ms',
+        },
+        3: {
+            'downlink': '1Mbit',
+            'uplink': '1Mbit',
+            'gain': 2,
+            0: '50ms 3ms',
+            1: '50ms 5ms',
+            2: '40ms 5ms',
+        }
+    },
 }
-case = cases['asia']
+case = cases['standup']
 
 prob = LpProblem("interkontinental-asymmetric", LpMaximize)
 
@@ -44,7 +78,7 @@ def edges(include_self=False):
             if other_node != node or include_self:
                 yield (node, other_node)
 
-names = {0: 'EN', 1: 'TO', 2: 'TRE'}
+names = {0: 'EN', 1: 'TO', 2: 'TRE', 3: 'FI'}
 def nodes():
     for node in [names[n] for n in sorted(case.keys())] + ['%sproxy' % names[n] for n in case]:
         yield node
@@ -180,6 +214,9 @@ for commodity in commodities():
 #            variables[proxy][other_proxy][commodity] + variables[other_proxy][other_node][commodity])
 #        logger.info('Constraint: %s', constraint)
 #        prob += constraint
+
+    # Add relaying servers that do not need to be flow constrained (in some way, anyway) for 'standup'
+    # to be feasible
 
 
 GLPK().solve(prob)
