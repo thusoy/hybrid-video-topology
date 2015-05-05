@@ -68,7 +68,7 @@ cases = {
         }
     },
 }
-case = cases['standup']
+case = cases['asia']
 
 prob = LpProblem("interkontinental-asymmetric", LpMaximize)
 
@@ -221,9 +221,17 @@ for commodity in commodities():
 
 GLPK().solve(prob)
 
-# Solution
-for v in prob.variables():
-    print v.name, "=", v.varValue
+# Print the solution
+print
+for node, other_node in edges():
+    commodity = commodity_from_nodes(node, other_node)
+    path = [ variables[node][other_node][commodity] ]
+    other_proxy = other_node + num_nodes
+    while path[-1] != variables[other_proxy][other_node][commodity]:
+        for possible_next_edge in edges():
+            # keep searching...
+    var = variables[0][0][commodity]
+    print var.name, '=', var.varValue
 
 for commodity in commodities():
     name = commodity_from_number(commodity)
