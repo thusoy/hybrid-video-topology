@@ -1,4 +1,13 @@
 from pulp import *
+import argparse
+import logging
+
+logger = logging.getLogger('hytop')
+parser = argparse.ArgumentParser()
+parser.add_argument('-v', '--verbose', help='Logs all constraints added',
+    action='store_true', default=False)
+args = parser.parse_args()
+logging.basicConfig(level=logging.INFO if args.verbose else logging.WARNING)
 
 cases = {
     'asia': {
@@ -35,8 +44,8 @@ def edges(include_self=False):
             if other_node != node or include_self:
                 yield (node, other_node)
 
+names = {0: 'EN', 1: 'TO', 2: 'TRE'}
 def nodes():
-    names = {0: 'EN', 1: 'TO', 2: 'TRE'}
     for node in [names[n] for n in sorted(case.keys())] + ['%sproxy' % names[n] for n in case]:
         yield node
 
@@ -49,13 +58,22 @@ def commodities():
                 commodity_number += 1
 
 
-def commodity_name(commodity_number):
+def commodity_from_number(commodity_number):
     number = 0
     for node in sorted(case.keys()):
         for other_node in sorted(case.keys()):
             if node != other_node:
                 if number == commodity_number:
-                    return 'K(%s-%s)' % (node, other_node)
+                    return '%s->%s' % (names[node], names[other_node])
+                number += 1
+
+def commodity_from_nodes(sender, receiver):
+    number = 0
+    for node in sorted(case.keys()):
+        for other_node in sorted(case.keys()):
+            if node != other_node:
+                if node == sender and other_node == receiver:
+                    return number
                 number += 1
 
 
@@ -74,17 +92,22 @@ for node in nodes():
 
 
 objective = 0
+for node in case:
+    commodity_list = list(commodities())
+    for other_node in case:
+        if node != other_node:
+            commodity = commodity_from_nodes(node, other_node)
+            other_proxy = other_node + num_nodes
+            # Add bandwidth-gains to objective
+            objective += 10*case[node]['gain'] * variables[other_proxy][other_node][commodity]
+
+
 for commodity in commodities():
-    # Add bandwidth-gains to objective
-    for node, other_node in edges():
-        objective += 10*case[node]['gain'] * variables[other_node][node][commodity]
-
-
     # Subtract edge cost from objective
     for node, other_node in edges():
         objective -= int(case[node][other_node].split()[0].strip('ms')) * variables[node+num_nodes][other_node+num_nodes][commodity]
 
-print 'Objective: Maximize', objective
+logger.info('Objective: Maximize %s', objective)
 
 # Objective
 prob += objective
@@ -92,11 +115,26 @@ prob += objective
 # Stay below bandwidth
 for node in case:
     constraint = sum(variables[node+num_nodes][node]) <= int(case[node]['downlink'].strip('Mbit'))
-    print 'Constraint:', constraint
+    logger.info('Constraint: %s', constraint)
     prob += constraint
     constraint = sum(variables[node][node+num_nodes]) <= int(case[node]['uplink'].strip('Mbit'))
-    print 'Constraint:', constraint
+    logger.info('Constraint: %s', constraint)
     prob += constraint
+
+# All commodities must be sent and received by the correct parties
+for node in case:
+    for other_node in case:
+        if node != other_node:
+            commodity = commodity_from_nodes(node, other_node)
+            proxy = node + num_nodes
+            constraint = variables[node][proxy][commodity] >= 1
+            logger.info('Constraint: %s', constraint)
+            prob += constraint
+
+            other_proxy = other_node + num_nodes
+            constraint = variables[other_proxy][other_node][commodity] >= 1
+            logger.info('Constraint: %s', constraint)
+            prob += constraint
 
 for commodity in commodities():
 
@@ -104,22 +142,17 @@ for commodity in commodities():
     # Every edge must be positive
     for node, other_node in edges(include_self=True):
         constraint = variables[node][other_node][commodity] >= 0
-        print 'Constraint:', constraint
+        logger.info('Constraint: %s', constraint)
         prob += constraint
 
-    # All pairs must exchange traffic
-    for node, other_node in edges():
-        constraint = variables[node][other_node][commodity] >= 1
-        print 'Constraint:', constraint
-        prob += constraint
 
     # Any single commodity must not exceed bandwidth
     for node in case:
         constraint = variables[node+num_nodes][node][commodity] <= int(case[node]['downlink'].strip('Mbit'))
-        print 'Constraint:', constraint
+        logger.info('Constraint: %s', constraint)
         prob += constraint
         constraint = variables[node][node+num_nodes][commodity] <= int(case[node]['uplink'].strip('Mbit'))
-        print 'Constraint:', constraint
+        logger.info('Constraint: %s', constraint)
         prob += constraint
 
     # Add flow conservation, as per an all-to-all topology
@@ -133,18 +166,20 @@ for commodity in commodities():
             other_proxy = other_node + num_nodes
             in_to_proxy += variables[other_proxy][proxy][commodity]
             out_of_proxy += variables[proxy][other_proxy][commodity]
-        print 'Flow conservation: ', in_to_proxy, '==', variables[node][proxy][commodity]
-        print 'Flow conservation: ', out_of_proxy, '==', variables[proxy][node][commodity]
-        prob += in_to_proxy == variables[node][proxy][commodity]
-        prob += out_of_proxy == variables[proxy][node][commodity]
+        logger.info('Flow conservation: %s == %s', in_to_proxy, variables[proxy][node][commodity])
+        logger.info('Flow conservation: %s == %s', out_of_proxy, variables[node][proxy][commodity])
+        prob += in_to_proxy == variables[proxy][node][commodity]
+        prob += out_of_proxy == variables[node][proxy][commodity]
+
+        # Nodes can only be sinks to commodities destined for them
 
     # Add end-to-end sums
-    for node, other_node in edges():
-        proxy, other_proxy = node + num_nodes, other_node + num_nodes
-        constraint = variables[node][other_node][commodity] == (variables[node][proxy][commodity] +
-            variables[proxy][other_proxy][commodity] + variables[other_proxy][other_node][commodity])
-        print 'Constraint:', constraint
-        prob += constraint
+#    for node, other_node in edges():
+#        proxy, other_proxy = node + num_nodes, other_node + num_nodes
+#        constraint = variables[node][other_node][commodity] == (variables[node][proxy][commodity] +
+#            variables[proxy][other_proxy][commodity] + variables[other_proxy][other_node][commodity])
+#        logger.info('Constraint: %s', constraint)
+#        prob += constraint
 
 
 GLPK().solve(prob)
@@ -152,5 +187,9 @@ GLPK().solve(prob)
 # Solution
 for v in prob.variables():
     print v.name, "=", v.varValue
+
+for commodity in commodities():
+    name = commodity_from_number(commodity)
+    print 'K%d: %s' % (commodity, name)
 
 print "objective=", value(prob.objective)
