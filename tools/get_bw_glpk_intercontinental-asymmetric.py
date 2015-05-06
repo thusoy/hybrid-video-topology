@@ -6,6 +6,8 @@ logger = logging.getLogger('hytop')
 parser = argparse.ArgumentParser()
 parser.add_argument('-v', '--verbose', help='Logs all constraints added',
     action='store_true', default=False)
+parser.add_argument('-d', '--debug', help='Print debug information',
+    action='store_true', default=False)
 args = parser.parse_args()
 logging.basicConfig(level=logging.INFO if args.verbose else logging.WARNING)
 
@@ -116,6 +118,16 @@ def commodity_from_nodes(sender, receiver):
                     return number
                 number += 1
 
+_debug_vars = []
+_debug_index = 0
+def debug():
+    global _debug_index
+    if not args.debug:
+        return 0
+    _debug_index += 1
+    _debug_vars.append(LpVariable('x%d' % _debug_index, lowBound=0))
+    _debug_vars.append(LpVariable('y%d' % _debug_index, lowBound=0))
+    return _debug_vars[-1] - _debug_vars[-2]
 
 num_nodes = len(case['nodes'])
 
@@ -151,6 +163,7 @@ logger.info('Objective: Maximize %s', objective)
 
 # Objective
 prob += objective
+#prob += sum(_debug_vars) # ENABLE TO DEBUG
 
 # Stay below bandwidth
 for node in nodes():
@@ -224,11 +237,21 @@ for commodity in commodities():
     # Add relaying servers that do not need to be flow constrained (in some way, anyway) for 'standup'
     # to be feasible
 
+if args.debug:
+    for key in prob.constraints:
+        prob.constraints[key] += debug()
+
 
 res = GLPK().solve(prob)
 if res < 0:
     print 'Unsolvable!'
 else:
+    if args.debug:
+        print 'Problem constraints:'
+        for v in prob.variables():
+            if v.varValue != 0.0 and (v.name.startswith('x') or v.name.startswith('y')):
+                print '\n'.join('\t' + str(c) for c in prob.constraints.values() if ' %s ' % (v.name,) in str(c))
+
     # Print the solution
     for node, other_node in edges():
         commodity = commodity_from_nodes(node, other_node)
