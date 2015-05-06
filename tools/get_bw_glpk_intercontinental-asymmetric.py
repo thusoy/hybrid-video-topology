@@ -219,36 +219,36 @@ for commodity in commodities():
     # to be feasible
 
 
-GLPK().solve(prob)
+res = GLPK().solve(prob)
+if res < 0:
+    print 'Unsolvable!'
+else:
+    # Print the solution
+    for node, other_node in edges():
+        commodity = commodity_from_nodes(node, other_node)
+        proxy = node + num_nodes
+        path = [proxy]
+        other_proxy = other_node + num_nodes
+        while path[-1] != other_node:
+            for edge, variable in enumerate(variables[path[-1]]):
+                if variable[commodity].varValue:
+                    path.append(edge)
+        print '%s til %s (K%d):' % (names[node], names[other_node], commodity),
+        cost = 0
+        for index, edge in enumerate(path[1:], 1):
+            var = variables[path[index-1]][path[index]][commodity]
+            print var.name, '->',
+            if path[index] >= num_nodes and path[index-1] >= num_nodes:
+                # It's an edge between two proxies, ie. it has a latency cost
+                cost += int(case[path[index-1]-num_nodes][path[index]-num_nodes].split()[0].strip('ms'))
+        print 'Flow: %s, cost: %dms' % (var.varValue, cost)
 
-# Print the solution
-print
-for node, other_node in edges():
-    commodity = commodity_from_nodes(node, other_node)
-    proxy = node + num_nodes
-    path = [proxy]
-    other_proxy = other_node + num_nodes
-    while path[-1] != other_node:
-        for edge, variable in enumerate(variables[path[-1]]):
-            if variable[commodity].varValue:
-                path.append(edge)
-            # keep searching...
-    print '%s til %s (K%d):' % (names[node], names[other_node], commodity),
-    cost = 0
-    for index, edge in enumerate(path[1:], 1):
-        var = variables[path[index-1]][path[index]][commodity]
-        print var.name, '->',
-        if path[index] >= num_nodes and path[index-1] >= num_nodes:
-            # It's an edge between two proxies, ie. it has a latency cost
-            cost += int(case[path[index-1]-num_nodes][path[index]-num_nodes].split()[0].strip('ms'))
-    print 'Flow: %s, cost: %dms' % (var.varValue, cost)
+    for node in sorted(case.keys()):
+        downlink_total = int(case[node]['downlink'].strip('Mbit'))
+        uplink_total = int(case[node]['uplink'].strip('Mbit'))
+        proxy = node + num_nodes
+        downlink_usage = sum(v.varValue for v in variables[proxy][node])
+        uplink_usage = sum(v.varValue for v in variables[node][proxy])
+        print '%s downlink: %.1f, uplink: %.1f' % (names[node], float(downlink_usage)/downlink_total, float(uplink_usage)/uplink_total)
 
-for node in sorted(case.keys()):
-    downlink_total = int(case[node]['downlink'].strip('Mbit'))
-    uplink_total = int(case[node]['uplink'].strip('Mbit'))
-    proxy = node + num_nodes
-    downlink_usage = sum(v.varValue for v in variables[proxy][node])
-    uplink_usage = sum(v.varValue for v in variables[node][proxy])
-    print '%s downlink: %.1f, uplink: %.1f' % (names[node], float(downlink_usage)/downlink_total, float(uplink_usage)/uplink_total)
-
-print "Score =", value(prob.objective)
+    print "Score =", value(prob.objective)
