@@ -11,26 +11,28 @@ logging.basicConfig(level=logging.INFO if args.verbose else logging.WARNING)
 
 cases = {
     'asia': {
-        0: {
-            'gain': 4, # Max quality percievable by this unit. 4=big monitor desktop, 3=laptop, 2=phone
-            'downlink': '10Mbit',
-            'uplink': '5Mbit',
-            1: '125ms 7ms',  # netem-compatible delay spec
-            2: '3ms 1ms'
-        },
-        1: {
-            'gain': 2,
-            'downlink': '2Mbit',
-            'uplink': '2Mbit',
-            0: '125ms 7ms',
-            2: '130ms 10ms'
-        },
-        2: {
-            'gain': 3,
-            'downlink': '10Mbit',
-            'uplink': '8Mbit',
-            0: '3ms 1ms',
-            1: '130ms 10ms',
+        'nodes': {
+            0: {
+                'gain': 4, # Max quality percievable by this unit. 4=big monitor desktop, 3=laptop, 2=phone
+                'downlink': '10Mbit',
+                'uplink': '5Mbit',
+                1: '125ms 7ms',  # netem-compatible delay spec
+                2: '3ms 1ms'
+            },
+            1: {
+                'gain': 2,
+                'downlink': '2Mbit',
+                'uplink': '2Mbit',
+                0: '125ms 7ms',
+                2: '130ms 10ms'
+            },
+            2: {
+                'gain': 3,
+                'downlink': '10Mbit',
+                'uplink': '8Mbit',
+                0: '3ms 1ms',
+                1: '130ms 10ms',
+            }
         }
     },
     'standup': {
@@ -73,20 +75,24 @@ case = cases['asia']
 prob = LpProblem("interkontinental-asymmetric", LpMaximize)
 
 def edges(include_self=False):
-    for node in sorted(case.keys()):
-        for other_node in sorted(case.keys()):
+    for node in nodes():
+        for other_node in nodes():
             if other_node != node or include_self:
                 yield (node, other_node)
 
 names = {0: 'EN', 1: 'TO', 2: 'TRE', 3: 'FI'}
+def all_node_names():
+    for node in [names[n] for n in nodes()] + ['%sproxy' % names[n] for n in case['nodes']]:
+        yield node
+
 def nodes():
-    for node in [names[n] for n in sorted(case.keys())] + ['%sproxy' % names[n] for n in case]:
+    for node in sorted(case['nodes'].keys()):
         yield node
 
 def commodities():
     commodity_number = 0
-    for node in sorted(case.keys()):
-        for other_node in sorted(case.keys()):
+    for node in nodes():
+        for other_node in nodes():
             if node != other_node:
                 yield commodity_number
                 commodity_number += 1
@@ -94,8 +100,8 @@ def commodities():
 
 def commodity_from_number(commodity_number):
     number = 0
-    for node in sorted(case.keys()):
-        for other_node in sorted(case.keys()):
+    for node in nodes():
+        for other_node in nodes():
             if node != other_node:
                 if number == commodity_number:
                     return '%s->%s' % (names[node], names[other_node])
@@ -103,21 +109,21 @@ def commodity_from_number(commodity_number):
 
 def commodity_from_nodes(sender, receiver):
     number = 0
-    for node in sorted(case.keys()):
-        for other_node in sorted(case.keys()):
+    for node in nodes():
+        for other_node in nodes():
             if node != other_node:
                 if node == sender and other_node == receiver:
                     return number
                 number += 1
 
 
-num_nodes = len(case)
+num_nodes = len(case['nodes'])
 
 # Initialize variables
 variables = []
-for node in nodes():
+for node in all_node_names():
     variables.append([])
-    for other_node in nodes():
+    for other_node in all_node_names():
         variables[-1].append([])
         for commodity in commodities():
             # Assume nothing exceeds gigabit speeds, not even backbone links
@@ -126,20 +132,20 @@ for node in nodes():
 
 
 objective = 0
-for node in case:
+for node in nodes():
     commodity_list = list(commodities())
-    for other_node in case:
+    for other_node in nodes():
         if node != other_node:
             commodity = commodity_from_nodes(node, other_node)
             other_proxy = other_node + num_nodes
             # Add bandwidth-gains to objective
-            objective += 10*case[node]['gain'] * variables[other_proxy][other_node][commodity]
+            objective += 10*case['nodes'][node]['gain'] * variables[other_proxy][other_node][commodity]
 
 
 for commodity in commodities():
     # Subtract edge cost from objective
     for node, other_node in edges():
-        objective -= int(case[node][other_node].split()[0].strip('ms')) * variables[node+num_nodes][other_node+num_nodes][commodity]
+        objective -= int(case['nodes'][node][other_node].split()[0].strip('ms')) * variables[node+num_nodes][other_node+num_nodes][commodity]
 
 logger.info('Objective: Maximize %s', objective)
 
@@ -147,17 +153,17 @@ logger.info('Objective: Maximize %s', objective)
 prob += objective
 
 # Stay below bandwidth
-for node in case:
-    constraint = sum(variables[node+num_nodes][node]) <= int(case[node]['downlink'].strip('Mbit'))
+for node in nodes():
+    constraint = sum(variables[node+num_nodes][node]) <= int(case['nodes'][node]['downlink'].strip('Mbit'))
     logger.info('Constraint: %s', constraint)
     prob += constraint
-    constraint = sum(variables[node][node+num_nodes]) <= int(case[node]['uplink'].strip('Mbit'))
+    constraint = sum(variables[node][node+num_nodes]) <= int(case['nodes'][node]['uplink'].strip('Mbit'))
     logger.info('Constraint: %s', constraint)
     prob += constraint
 
 # All commodities must be sent and received by the correct parties
-for node in case:
-    for other_node in case:
+for node in nodes():
+    for other_node in nodes():
         if node != other_node:
             commodity = commodity_from_nodes(node, other_node)
             proxy = node + num_nodes
@@ -181,20 +187,20 @@ for commodity in commodities():
 
 
     # Any single commodity must not exceed bandwidth
-    for node in case:
-        constraint = variables[node+num_nodes][node][commodity] <= int(case[node]['downlink'].strip('Mbit'))
+    for node in nodes():
+        constraint = variables[node+num_nodes][node][commodity] <= int(case['nodes'][node]['downlink'].strip('Mbit'))
         logger.info('Constraint: %s', constraint)
         prob += constraint
-        constraint = variables[node][node+num_nodes][commodity] <= int(case[node]['uplink'].strip('Mbit'))
+        constraint = variables[node][node+num_nodes][commodity] <= int(case['nodes'][node]['uplink'].strip('Mbit'))
         logger.info('Constraint: %s', constraint)
         prob += constraint
 
     # Add flow conservation, as per an all-to-all topology
-    for node in case:
+    for node in nodes():
         proxy = node + num_nodes
         in_to_proxy = 0
         out_of_proxy = 0
-        for other_node in case:
+        for other_node in nodes():
             if node == other_node:
                 continue
             other_proxy = other_node + num_nodes
@@ -240,12 +246,12 @@ else:
             print var.name, '->',
             if path[index] >= num_nodes and path[index-1] >= num_nodes:
                 # It's an edge between two proxies, ie. it has a latency cost
-                cost += int(case[path[index-1]-num_nodes][path[index]-num_nodes].split()[0].strip('ms'))
+                cost += int(case['nodes'][path[index-1]-num_nodes][path[index]-num_nodes].split()[0].strip('ms'))
         print 'Flow: %s, cost: %dms' % (var.varValue, cost)
 
-    for node in sorted(case.keys()):
-        downlink_total = int(case[node]['downlink'].strip('Mbit'))
-        uplink_total = int(case[node]['uplink'].strip('Mbit'))
+    for node in nodes():
+        downlink_total = int(case['nodes'][node]['downlink'].strip('Mbit'))
+        uplink_total = int(case['nodes'][node]['uplink'].strip('Mbit'))
         proxy = node + num_nodes
         downlink_usage = sum(v.varValue for v in variables[proxy][node])
         uplink_usage = sum(v.varValue for v in variables[node][proxy])
