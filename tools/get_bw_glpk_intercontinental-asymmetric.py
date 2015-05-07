@@ -13,6 +13,12 @@ parser.add_argument('-d', '--debug', help='Print debug information',
 args = parser.parse_args()
 logging.basicConfig(level=logging.INFO if args.verbose else logging.WARNING, stream=sys.stdout)
 
+class Commodity(int):
+    def set_pair(self, sender, receiver):
+        self.sender = sender
+        self.receiver = receiver
+
+
 cases = {
     'asia': {
         'nodes': {
@@ -122,7 +128,9 @@ def commodities():
     for node in nodes():
         for other_node in nodes():
             if node != other_node:
-                yield commodity_number
+                commodity = Commodity(commodity_number)
+                commodity.set_pair(node, other_node)
+                yield commodity
                 commodity_number += 1
 
 
@@ -132,7 +140,9 @@ def commodity_from_nodes(sender, receiver):
         for other_node in nodes():
             if node != other_node:
                 if node == sender and other_node == receiver:
-                    return number
+                    commodity = Commodity(number)
+                    commodity.set_pair(node, other_node)
+                    return commodity
                 number += 1
 
 
@@ -241,7 +251,7 @@ for commodity in commodities():
         logger.info('Constraint: %s', constraint)
         prob += constraint
 
-    # Add flow conservation, as per an all-to-all topology
+    # Add flow conservation for proxies, as per an all-to-all topology
     for node in nodes():
         proxy = node + 'proxy'
         in_to_proxy = 0
@@ -255,6 +265,22 @@ for commodity in commodities():
         logger.info('Flow conservation: %s == %s', out_of_proxy, variables[node][proxy][commodity])
         prob += in_to_proxy == variables[proxy][node][commodity]
         prob += out_of_proxy == variables[node][proxy][commodity]
+
+    # Add flow conservation for nodes, make sure they can only be origin for their own commodity
+    # TODO: Does not allow nodes to re-encode data for now
+    # TODO: DOESNT WORK AS INTENDED YET
+    for node, other_node in node_pairs():
+        if node != commodity.sender:
+            proxy = node + 'proxy'
+            constraint = variables[node][proxy][commodity] == variables[proxy][node][commodity]
+            logger.info('Node constraint: %s', constraint)
+            prob += constraint
+        if other_node != commodity.receiver:
+            proxy = node + 'proxy'
+            constraint = variables[node][proxy][commodity] == variables[proxy][node][commodity]
+            logger.info('Node constraint: %s', constraint)
+            prob += constraint
+
 
     # Repeaters can repeat arbitrary many copies of input data
     # TODO: Make repeaters able to change commodity type, or somehow make it possible to exceed the bandwidth limitation to the proxy
