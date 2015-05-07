@@ -325,9 +325,8 @@ res = GLPK(echo_proc=args.verbose).solve(prob)
 def dump_variables(prob):
     print '\n'.join('%s = %s' % (v.name, v.varValue) for v in prob.variables())
 
-for node, other_node in node_pairs():
-    commodity = commodity_from_nodes(node, other_node)
-    print 'K%d: %s -> %s' % (commodity, node, other_node)
+for commodity in commodities():
+    print 'K%d: %s -> %s' % (commodity, commodity.sender, commodity.receiver)
 
 if res < 0:
     print 'Unsolvable!'
