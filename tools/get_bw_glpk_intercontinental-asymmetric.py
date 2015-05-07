@@ -327,12 +327,19 @@ else:
         path = [proxy]
         other_proxy = other_node + 'proxy'
         while path[-1] != other_node:
-            for edge, variable in variables[path[-1]].iteritems():
+            cycle = False
+            for search_node, variable in variables[path[-1]].iteritems():
                 if variable[commodity].varValue:
-                    path.append(edge)
-                    break
+                    if node in path:
+                        cycle = True
+                    else:
+                        path.append(search_node)
+                        break
             else:
-                print 'No path found from %s to %s' % (node, other_node)
+                if cycle:
+                    print 'Found cycle from %s to %s' % (node, other_node)
+                else:
+                    print 'No path found from %s to %s' % (node, other_node)
                 break
         else:
             # Found path between nodes
