@@ -135,9 +135,11 @@ def commodity_from_nodes(sender, receiver):
                     return number
                 number += 1
 
+
 def proxies():
     for node in nodes():
         yield node + 'proxy'
+
 
 def repeaters():
     for repeater in case.get('repeaters', {}):
@@ -167,14 +169,11 @@ for node, other_node in edges():
 
 
 objective = 0
-for node in nodes():
-    commodity_list = list(commodities())
-    for other_node in nodes():
-        if node != other_node:
-            commodity = commodity_from_nodes(node, other_node)
-            other_proxy = other_node + 'proxy'
-            # Add bandwidth-gains to objective
-            objective += 10*case['nodes'][node]['gain'] * variables[other_proxy][other_node][commodity]
+for node, other_node in node_pairs():
+    commodity = commodity_from_nodes(node, other_node)
+    other_proxy = other_node + 'proxy'
+    # Add bandwidth-gains to objective
+    objective += 10*case['nodes'][node]['gain'] * variables[other_proxy][other_node][commodity]
 
 
 for commodity in commodities():
@@ -201,8 +200,10 @@ logger.info('Objective: Maximize %s', objective)
 prob = LpProblem("interkontinental-asymmetric")
 
 # Objective
-#prob += objective
-prob += sum(_debug_vars)
+if args.debug:
+    prob += sum(_debug_vars)
+else:
+    prob += objective
 
 # Stay below bandwidth
 for node in nodes():
@@ -300,6 +301,9 @@ if args.debug:
 
 res = GLPK(echo_proc=args.verbose).solve(prob)
 
+def dump_variables(prob):
+    print '\n'.join('%s = %s' % (v.name, v.varValue) for v in prob.variables())
+
 for node, other_node in node_pairs():
     commodity = commodity_from_nodes(node, other_node)
     print 'K%d: %s -> %s' % (commodity, node, other_node)
@@ -312,6 +316,9 @@ else:
         for v in prob.variables():
             if v.varValue != 0.0 and (v.name.startswith('x') or v.name.startswith('y')):
                 print '\n'.join('\t' + str(c) for c in prob.constraints.values() if ' %s ' % (v.name,) in str(c))
+
+    if args.verbose:
+        dump_variables(prob)
 
     # Print the solution
     for node, other_node in node_pairs():
