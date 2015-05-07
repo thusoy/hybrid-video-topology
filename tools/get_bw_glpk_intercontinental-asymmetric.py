@@ -1,4 +1,5 @@
 from pulp import *
+import sys
 import argparse
 from itertools import chain
 import logging
@@ -10,7 +11,7 @@ parser.add_argument('-v', '--verbose', help='Logs all constraints added',
 parser.add_argument('-d', '--debug', help='Print debug information',
     action='store_true', default=False)
 args = parser.parse_args()
-logging.basicConfig(level=logging.INFO if args.verbose else logging.WARNING)
+logging.basicConfig(level=logging.INFO if args.verbose else logging.WARNING, stream=sys.stdout)
 
 cases = {
     'asia': {
