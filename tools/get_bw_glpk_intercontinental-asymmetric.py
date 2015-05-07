@@ -287,22 +287,28 @@ for commodity in commodities():
     # when sending through a repeater
     for repeater in repeaters():
         for proxy in proxies():
-            constraint = variables[proxy][repeater][commodity] <= sum(variables[repeater][p][commodity] for p in proxies() if proxy != p)
             logger.info('Repeater flow constraint: %s', constraint)
             prob += constraint
             M = 1001
             for other_proxy in proxies():
-                rep_binary = LpVariable('%s_%s_%s_K%d_bin' % (repeater, proxy, other_proxy, commodity), cat=LpBinary)
+                repeat_to_other_proxy = LpVariable('%s_%s_%s_K%d_use' % (repeater, proxy, other_proxy, commodity), cat=LpBinary)
                 if proxy != other_proxy:
-                    constraint = variables[proxy][repeater][commodity] - (1-rep_binary)*M == variables[repeater][other_proxy][commodity]
-                    #logger.info('Repeater flow constraint: %s', constraint)
-                    #prob += constraint
-                    constraint = variables[proxy][repeater][commodity] >= variables[repeater][other_proxy][commodity]
-                    #logger.info('Repeater flow constraint: %s', constraint)
-                    #prob += constraint
-                    constraint = variables[repeater][proxy][commodity] <= rep_binary*M
-                    #logger.info('Repeater flow constraint: %s', constraint)
-                    #prob += constraint
+                    # Limit out traffic to the same bandwidth as what comes in, but possibly as another commodity
+                    for other_commodity in commodities():
+                        constraint = variables[proxy][repeater][commodity] - (1-repeat_to_other_proxy)*M <= variables[repeater][other_proxy][other_commodity]
+                        logger.info('Repeater flow constraint: %s', constraint)
+                        prob += constraint
+                        constraint = variables[proxy][repeater][commodity] >= variables[repeater][other_proxy][other_commodity]
+                        logger.info('Repeater flow constraint: %s', constraint)
+                        prob += constraint
+                        # Restrict to zero traffic if not repeating
+                        constraint = variables[repeater][other_proxy][other_commodity] <= repeat_to_other_proxy*M
+                        logger.info('Repeater flow constraint: %s', constraint)
+                        prob += constraint
+                        # Make sure we don't repeat back to the source
+                        #constraint = variables[repeater][proxy][commodity] == 0
+                        #logger.info('Repeater flow constraint: %s', constraint)
+                        #prob += constraint
 
 
     # Add end-to-end sums
