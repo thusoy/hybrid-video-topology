@@ -327,7 +327,7 @@ if args.debug:
 res = GLPK(echo_proc=args.verbose).solve(prob)
 
 def dump_variables(prob):
-    print '\n'.join('%s = %s' % (v.name, v.varValue) for v in prob.variables())
+    print '\n'.join('%s = %s' % (v.name, v.varValue) for v in prob.variables() if v.varValue)
 
 for commodity in commodities():
     print 'K%d: %s -> %s' % (commodity, commodity.sender, commodity.receiver)
@@ -342,8 +342,9 @@ else:
             if v.varValue != 0.0 and (v.name.startswith('x') or v.name.startswith('y')):
                 print '\n'.join('\t' + str(c) for c in prob.constraints.values() if ' %s ' % (v.name,) in str(c))
 
-    if args.verbose:
-        dump_variables(prob)
+
+    dump_variables(prob)
+    print
 
     # Print the solution
     for node, other_node in node_pairs():
