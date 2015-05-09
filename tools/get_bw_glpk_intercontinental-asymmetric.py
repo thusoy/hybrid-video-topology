@@ -345,6 +345,7 @@ for commodity in commodities():
 
 if res < 0:
     print 'Unsolvable!'
+    sys.exit(1)
 else:
     if args.debug:
         print 'Problem constraints:'
