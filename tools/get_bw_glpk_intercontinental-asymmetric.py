@@ -1,4 +1,5 @@
 from pulp import *
+from pdb import set_trace as trace
 import sys
 import argparse
 from itertools import chain
