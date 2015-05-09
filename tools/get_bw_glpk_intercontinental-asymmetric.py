@@ -275,45 +275,50 @@ for commodity in commodities():
             prob += constraint
 
 
-    # Repeaters can repeat arbitrary many copies of input data
-    # TODO: Make repeaters able to change commodity type, or somehow make it possible to exceed the bandwidth limitation to the proxy
-    # when sending through a repeater
-    for repeater in repeaters():
-        for proxy in proxies():
-            logger.info('Repeater flow constraint: %s', constraint)
+# Repeaters repeat incoming commodities out to all proxies, converted to their desired commodity
+for repeater in repeaters():
+    for node in nodes():
+        proxy = node + 'proxy'
+        left_side = 0
+        right_side = []
+        for commodity in commodities():
+            if commodity.sender == node:
+                left_side += variables[proxy][repeater][commodity]
+            else:
+                right_side.append(variables[repeater][commodity.receiver + 'proxy'][commodity])
+        for outgoing in right_side:
+            constraint = left_side == outgoing
+            logger.info('Repeaterflow constraint: %s', constraint)
             prob += constraint
-            M = 1001
-            for other_proxy in proxies():
-                repeat_to_other_proxy = LpVariable('%s_%s_%s_K%d_use' % (repeater, proxy, other_proxy, commodity), cat=LpBinary)
-                if proxy != other_proxy:
-                    # Limit out traffic to the same bandwidth as what comes in, but possibly as another commodity
-                    for other_commodity in commodities():
-                        constraint = variables[proxy][repeater][commodity] - (1-repeat_to_other_proxy)*M <= variables[repeater][other_proxy][other_commodity]
-                        logger.info('Repeater flow constraint: %s', constraint)
-                        prob += constraint
-                        constraint = variables[proxy][repeater][commodity] >= variables[repeater][other_proxy][other_commodity]
-                        logger.info('Repeater flow constraint: %s', constraint)
-                        prob += constraint
-                        # Restrict to zero traffic if not repeating
-                        constraint = variables[repeater][other_proxy][other_commodity] <= repeat_to_other_proxy*M
-                        logger.info('Repeater flow constraint: %s', constraint)
-                        prob += constraint
-                        # Make sure we don't repeat back to the source
-                        #constraint = variables[repeater][proxy][commodity] == 0
-                        #logger.info('Repeater flow constraint: %s', constraint)
-                        #prob += constraint
+
+    # Never send traffic back to source (hopefully not needed)
+    proxy_of_sending_node = commodity.sender + 'proxy'
+    constraint = variables[repeater][proxy_of_sending_node][commodity] == 0
+    logger.info('Repeater flow constraint: %s', constraint)
+    prob += constraint
+
+    # for proxy in proxies():
+    #     if proxy != proxy_of_sending_node:
+    #         # Send as much to each other proxy as you receive from the sender
+    #         target_commodity = commodity_from_nodes(commodity.sender, proxy[0])
+    #         constraint = variables[proxy_of_sending_node][repeater][commodity] == variables[repeater][proxy][target_commodity]
+    #         logger.info('Repeater flow constraint: %s', constraint)
+    #         prob += constraint
+
+    #         # Don't send any of the other commodities from that node through this link.
+    #         # This prevents stuff from going B -> repeater -> C -> A, but that shouldn't be necessary,
+    #         # as the provider should have a backbone capable of B -> repeater -> A without the extra cost through C
+    #         for other_commodity in commodities():
+    #             if commodity != other_commodity and other_commodity.receiver != proxy[0]:
+    #                 constraint = variables[repeater][proxy][other_commodity] == 0
+    #                 logger.info('Repeater flow constraint: %s', constraint)
+    #                 prob += constraint
+
+    #                 # Make sure something is sent if something is received from a node
+
+    #                 # Send on all edges if a commodity is received?
 
 
-    # Add end-to-end sums
-#    for node, other_node in edges():
-#        proxy, other_proxy = node +'proxy', other_node +'proxy'
-#        constraint = variables[node][other_node][commodity] == (variables[node][proxy][commodity] +
-#            variables[proxy][other_proxy][commodity] + variables[other_proxy][other_node][commodity])
-#        logger.info('Constraint: %s', constraint)
-#        prob += constraint
-
-    # Add relaying servers that do not need to be flow constrained (in some way, anyway) for 'standup'
-    # to be feasible
 
 if args.debug:
     for key in prob.constraints:
