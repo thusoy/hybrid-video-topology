@@ -183,7 +183,8 @@ for node, other_node in node_pairs():
     commodity = commodity_from_nodes(node, other_node)
     other_proxy = other_node + 'proxy'
     # Add bandwidth-gains to objective
-    objective += 10*case['nodes'][node]['gain'] * variables[other_proxy][other_node][commodity]
+    objective += 10*case['nodes'][other_node]['gain'] * variables[other_proxy][other_node][commodity]
+    # TODO: Subtract incoming flow to the source node from objective?
 
 
 for commodity in commodities():
