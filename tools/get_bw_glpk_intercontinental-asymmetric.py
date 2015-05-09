@@ -245,22 +245,6 @@ for commodity in commodities():
 for commodity in commodities():
 
     # Constraints
-    # Every edge must be positive
-    for node, other_node in edges():
-        constraint = variables[node][other_node][commodity] >= 0
-        logger.info('Constraint: %s', constraint)
-        prob += constraint
-
-
-    # Any single commodity must not exceed bandwidth
-    for node in nodes():
-        constraint = variables[node+'proxy'][node][commodity] <= int(case['nodes'][node]['downlink'].strip('Mbit'))
-        logger.info('Constraint: %s', constraint)
-        prob += constraint
-        constraint = variables[node][node+'proxy'][commodity] <= int(case['nodes'][node]['uplink'].strip('Mbit'))
-        logger.info('Constraint: %s', constraint)
-        prob += constraint
-
     # Add flow conservation for proxies, as per an all-to-all topology
     for node in nodes():
         proxy = node + 'proxy'
