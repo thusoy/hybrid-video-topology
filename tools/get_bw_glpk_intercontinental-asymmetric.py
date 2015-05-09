@@ -260,18 +260,17 @@ for commodity in commodities():
         prob += in_to_proxy == variables[proxy][node][commodity]
         prob += out_of_proxy == variables[node][proxy][commodity]
 
-    # Add flow conservation for nodes, make sure they can only be origin for their own commodity
+    # Add flow conservation for nodes, make sure they can only be origin for their own commodity,
+    # and does not terminate their own commodities
     # TODO: Does not allow nodes to re-encode data for now
-    # TODO: DOESNT WORK AS INTENDED YET
-    for node, other_node in node_pairs():
-        if node != commodity.sender:
-            proxy = node + 'proxy'
+    for node in nodes():
+        proxy = node + 'proxy'
+        if node != commodity.sender and node != commodity.receiver:
             constraint = variables[node][proxy][commodity] == variables[proxy][node][commodity]
             logger.info('Node constraint: %s', constraint)
             prob += constraint
-        if other_node != commodity.receiver:
-            proxy = node + 'proxy'
-            constraint = variables[node][proxy][commodity] == variables[proxy][node][commodity]
+        elif node == commodity.sender:
+            constraint = variables[proxy][node][commodity] == 0
             logger.info('Node constraint: %s', constraint)
             prob += constraint
 
