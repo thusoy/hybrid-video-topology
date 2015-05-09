@@ -228,11 +228,16 @@ for node in nodes():
     logger.info('Constraint: %s', constraint)
     prob += constraint
 
-# All commodities must be received by the correct parties
-for node, other_node in node_pairs():
-    commodity = commodity_from_nodes(node, other_node)
-    other_proxy = other_node + 'proxy'
-    constraint = variables[other_proxy][other_node][commodity] >= 1
+# All commodities must be sent by the correct parties
+# Note: Node should not need to send a commodity if a repeater does, and the
+# repeater receives another commodity from this node
+for commodity in commodities():
+    proxy = commodity.sender + 'proxy'
+    commodity_sources = variables[commodity.sender][proxy][commodity]
+    for repeater in repeaters():
+        for proxy in proxies():
+            commodity_sources += variables[repeater][proxy][commodity]
+    constraint = commodity_sources >= 1
     logger.info('Constraint: %s', constraint)
     prob += constraint
 
