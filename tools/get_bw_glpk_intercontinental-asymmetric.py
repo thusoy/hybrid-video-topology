@@ -217,12 +217,14 @@ else:
     prob += objective
 logger.info('Objective: %s %s', LpSenses[prob.sense], objective)
 
-# Stay below bandwidth
+# Stay below bandwidth (capacities)
 for node in nodes():
-    constraint = sum(variables[node+'proxy'][node]) <= int(case['nodes'][node]['downlink'].strip('Mbit'))
+    downlink_capacity = int(case['nodes'][node]['downlink'].strip('Mbit'))
+    constraint = sum(variables[node+'proxy'][node]) <= downlink_capacity
     logger.info('Constraint: %s', constraint)
     prob += constraint
-    constraint = sum(variables[node][node+'proxy']) <= int(case['nodes'][node]['uplink'].strip('Mbit'))
+    uplink_capacity = int(case['nodes'][node]['uplink'].strip('Mbit'))
+    constraint = sum(variables[node][node+'proxy']) <= uplink_capacity
     logger.info('Constraint: %s', constraint)
     prob += constraint
 
