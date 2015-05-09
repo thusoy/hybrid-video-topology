@@ -206,15 +206,16 @@ for commodity in commodities():
 # TODO: Subtract repeater/re-encoder costs
 # TODO: Subtract CPU costs
 
-logger.info('Objective: Maximize %s', objective)
 
-prob = LpProblem("interkontinental-asymmetric")
+prob_type = LpMinimize if args.debug else LpMaximize
+prob = LpProblem("interkontinental-asymmetric", prob_type)
 
 # Objective
 if args.debug:
     prob += sum(_debug_vars)
 else:
     prob += objective
+logger.info('Objective: %s %s', LpSenses[prob.sense], objective)
 
 # Stay below bandwidth
 for node in nodes():
