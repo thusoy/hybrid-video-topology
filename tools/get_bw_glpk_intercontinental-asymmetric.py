@@ -398,6 +398,10 @@ else:
                     # It's an edge between two proxies, ie. it has a latency cost
                     # which can be found from the case
                     cost += int(case['nodes'][path[index-1][0]][path[index][0]].split()[0].strip('ms'))
+                elif 'rep' in path[index] and 'proxy' in path[index-1]:
+                    cost += int(case['repeaters'][path[index]][path[index-1][0]].split()[0].strip('ms'))
+                elif 'proxy' in path[index] and 'rep' in path[index-1]:
+                    cost += int(case['repeaters'][path[index-1]][path[index][0]].split()[0].strip('ms'))
             print 'Flow: %s, cost: %dms' % (var.varValue, cost)
 
     for node in nodes():
