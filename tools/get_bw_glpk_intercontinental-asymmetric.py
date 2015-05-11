@@ -156,6 +156,12 @@ def repeaters():
     for repeater in case.get('repeaters', {}):
         yield repeater
 
+def add_constraint(constraint, label=None):
+    global prob
+    text = '%s constraint' % label if label else 'Constraint'
+    logger.info('%s: %s', text, constraint)
+    prob += constraint
+
 
 _debug_vars = []
 _debug_index = 0
@@ -238,9 +244,7 @@ for commodity in commodities():
     for repeater in repeaters():
         for proxy in proxies():
             commodity_sources += variables[repeater][proxy][commodity]
-    constraint = commodity_sources >= 1
-    logger.info('Constraint: %s', constraint)
-    prob += constraint
+    add_constraint(commodity_sources >= 1)
 
 for commodity in commodities():
 
@@ -266,14 +270,9 @@ for commodity in commodities():
     for node in nodes():
         proxy = node + 'proxy'
         if node != commodity.sender and node != commodity.receiver:
-            constraint = variables[node][proxy][commodity] == variables[proxy][node][commodity]
-            logger.info('Node constraint: %s', constraint)
-            prob += constraint
+            add_constraint(variables[node][proxy][commodity] == variables[proxy][node][commodity], 'Node')
         elif node == commodity.sender:
-            constraint = variables[proxy][node][commodity] == 0
-            logger.info('Node constraint: %s', constraint)
-            prob += constraint
-
+            add_constraint(variables[proxy][node][commodity] == 0, 'Node')
 
 # Repeaters repeat incoming commodities out to all proxies, converted to their desired commodity
 for repeater in repeaters():
@@ -287,15 +286,11 @@ for repeater in repeaters():
             else:
                 right_side.append(variables[repeater][commodity.receiver + 'proxy'][commodity])
         for outgoing in right_side:
-            constraint = left_side == outgoing
-            logger.info('Repeaterflow constraint: %s', constraint)
-            prob += constraint
+            add_constraint(left_side == outgoing, 'Repeaterflow')
 
     # Never send traffic back to source (hopefully not needed)
     proxy_of_sending_node = commodity.sender + 'proxy'
-    constraint = variables[repeater][proxy_of_sending_node][commodity] == 0
-    logger.info('Repeater flow constraint: %s', constraint)
-    prob += constraint
+    add_constraint(variables[repeater][proxy_of_sending_node][commodity] == 0, 'Repeater flow')
 
     # for proxy in proxies():
     #     if proxy != proxy_of_sending_node:
