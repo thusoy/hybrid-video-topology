@@ -283,7 +283,6 @@ for repeater in repeaters():
         for commodity in commodities():
             if commodity.sender == node:
                 left_side += variables[proxy][repeater][commodity]
-            else:
                 right_side.append(variables[repeater][commodity.receiver + 'proxy'][commodity])
         for outgoing in right_side:
             add_constraint(left_side == outgoing, 'Repeaterflow')
