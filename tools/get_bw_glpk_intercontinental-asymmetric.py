@@ -62,41 +62,53 @@ cases = {
         }
     },
     'standup': {
-        0: {
-            'downlink': '10Mbit',
-            'uplink': '10Mbit',
-            'gain': 4,
-            1: '5ms 2ms',
-            2: '7ms 2ms',
-            3: '47ms 3ms'
+        'nodes': {
+            'A': {
+                'downlink': '10Mbit',
+                'uplink': '10Mbit',
+                'gain': 4,
+                'B': '5ms 2ms',
+                'C': '7ms 2ms',
+                'D': '47ms 3ms'
+            },
+            'B': {
+                'downlink': '10Mbit',
+                'uplink': '10Mbit',
+                'gain': 4,
+                'A': '5ms 1ms',
+                'C': '7ms 2ms',
+                'D': '50ms 5ms',
+            },
+            'C': {
+                'downlink': '5Mbit',
+                'uplink': '2Mbit',
+                'gain': 3,
+                'A': '7ms 2ms',
+                'B': '7ms 1ms',
+                'D': '40ms 5ms',
+            },
+            'D': {
+                'downlink': '1Mbit',
+                'uplink': '1Mbit',
+                'gain': 2,
+                'A': '50ms 3ms',
+                'B': '50ms 5ms',
+                'C': '40ms 5ms',
+            }
         },
-        1: {
-            'downlink': '10Mbit',
-            'uplink': '10Mbit',
-            'gain': 4,
-            0: '5ms 1ms',
-            2: '7ms 2ms',
-            3: '50ms 5ms',
-        },
-        2: {
-            'downlink': '5Mbit',
-            'uplink': '2Mbit',
-            'gain': 3,
-            0: '7ms 2ms',
-            1: '7ms 1ms',
-            3: '40ms 5ms',
-        },
-        3: {
-            'downlink': '1Mbit',
-            'uplink': '1Mbit',
-            'gain': 2,
-            0: '50ms 3ms',
-            1: '50ms 5ms',
-            2: '40ms 5ms',
+        'repeaters': {
+            'rep_eu': {
+                'A': '25ms 2ms',
+                'B': '20ms 1ms',
+                'C': '40ms 2ms',
+                'D': '60ms 4ms',
+                #'rep_eu': '130ms 2ms', # High-quality SLA-backed connection, how to specify?
+                #'cost': '$.01/GB', # Roughly the cost pr GB at DigitalOcean
+            },
         }
     },
 }
-case = cases['asia']
+case = cases['standup']
 
 
 def edges(include_self=False):
@@ -375,6 +387,8 @@ else:
                         if path[-1] in variable and variable[path[-1]][c].varValue:
                             origin_commodity = c
                             break
+                if origin_commodity is None:
+                    print path
                 assert origin_commodity is not None, "Didn't find mangled commodity"
                 while path[-1] != proxy:
                     for search_node, variable in variables.iteritems():
