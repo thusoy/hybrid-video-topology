@@ -348,45 +348,44 @@ else:
         path = [other_proxy]
         other_proxy = other_node + 'proxy'
         while path[-1] != proxy:
-            cycle = 0 # We allow visiting each node twice, as the proxies will be hit twice every time traffic flows through a node
+            incoming_paths = []
             for search_node, variable in variables.iteritems():
                 if path[-1] in variable and variable[path[-1]][commodity].varValue:
                     # search_node has a path to the last node we found
-                    path.append(search_node)
-                    if search_node in path:
-                        # TODO: Will keep cycling forever if the cycle is the first option found
-                        cycle += 1
-                    break
-            else:
-                if cycle == 2:
-                    print 'Found cycle from %s to %s' % (node, other_node)
-                else:
-                    print 'No complete path found from %s to %s, got here: %s' % (node, other_node, path)
-                    # import pdb; pdb.set_trace()
+                    incoming_paths.append(search_node)
+            # Check for cycle
+            for incoming_path in incoming_paths:
+                # Do we send to that node as well as receive -> cycle.
+                if variables[path[-1]][incoming_path][commodity].varValue:
+                    path.append(incoming_path)
+                    path.append(path[-2])
+
+            # Add non-cycle path
+            for incoming_path in incoming_paths:
+                if incoming_path not in path:
+                    # The other non-cycle path
+                    path.append(incoming_path)
+
+            if not incoming_paths:
                 # Trace a repeater changing commodity type
                 all_node_commodities = [c for c in commodities() if c.sender == node and c != commodity]
-                found_change = False
+                origin_commodity = None
                 for c in all_node_commodities:
-                    while path[-1] != proxy:
-                        cycle = 0
-                        for search_node, variable in variables.iteritems():
-                            if path[-1] in variable and variable[path[-1]][c].varValue:
-                                path.append(search_node)
-                                found_change = True
-                                if search_node in path:
-                                    cycle += 1
-                                else:
-                                    break
-                        else:
-                            if cycle == 2:
-                                print 'Cycle found after repeater change, path: %s' % path
-                            else:
-                                print 'No path found after repeater change, path: %s' % path
-                                #trace()
+                    for sending_node, variable in variables.iteritems():
+                        if path[-1] in variable and variable[path[-1]][c].varValue:
+                            origin_commodity = c
+                            break
+                assert origin_commodity is not None, "Didn't find mangled commodity"
+                while path[-1] != proxy:
+                    for search_node, variable in variables.iteritems():
+                        if path[-1] in variable and variable[path[-1]][origin_commodity].varValue:
+                            path.append(search_node)
+                            break
+                    else:
+                        print 'No path found after repeater change, path: %s' % path
                         break
-                    if found_change:
-                        break
-                print path
+                else:
+                    break
         else:
             # Found path between nodes
             print '%s til %s (K%d):' % (node, other_node, commodity),
