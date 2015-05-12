@@ -6,13 +6,10 @@ from itertools import chain
 import logging
 
 logger = logging.getLogger('hytop')
-parser = argparse.ArgumentParser()
-parser.add_argument('-v', '--verbose', help='Logs all constraints added',
-    action='store_true', default=False)
-parser.add_argument('-d', '--debug', help='Print debug information',
-    action='store_true', default=False)
-args = parser.parse_args()
-logging.basicConfig(level=logging.INFO if args.verbose else logging.WARNING, stream=sys.stdout)
+case = None
+prob = None
+
+
 
 class Commodity(int):
     def set_pair(self, sender, receiver):
@@ -108,7 +105,20 @@ cases = {
         }
     },
 }
-case = cases['standup']
+
+
+def main():
+    global case
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-v', '--verbose', help='Logs all constraints added',
+        action='store_true', default=False)
+    parser.add_argument('-d', '--debug', help='Print debug information',
+        action='store_true', default=False)
+    parser.add_argument('-c', '--case', choices=cases.keys(), default='asia')
+    args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO if args.verbose else logging.WARNING, stream=sys.stdout)
+    case = cases[args.case]
+    solve_case(args)
 
 
 def edges(include_self=False):
@@ -187,243 +197,249 @@ def debug():
     return _debug_vars[-1] - _debug_vars[-2]
 
 
-# Initialize variables
-variables = {}
-# Initialize all edge variables
-for node, other_node in edges():
-    for commodity in commodities():
-        # Assume nothing exceeds gigabit speeds, not even backbone links
-        variables.setdefault(node, {}).setdefault(other_node, []).append(LpVariable('%sto%sK%d' % (node, other_node, commodity),
-            lowBound=0, upBound=1000, cat=LpInteger))
-
-
-objective = 0
-for node, other_node in node_pairs():
-    commodity = commodity_from_nodes(node, other_node)
-    other_proxy = other_node + 'proxy'
-    # Add bandwidth-gains to objective
-    objective += 10*case['nodes'][other_node]['gain'] * variables[other_proxy][other_node][commodity]
-    # TODO: Subtract incoming flow to the source node from objective?
-
-
-for commodity in commodities():
-    # Subtract edge cost from objective
+def solve_case(args):
+    global prob
+    # Initialize variables
+    variables = {}
+    # Initialize all edge variables
     for node, other_node in edges():
-        if node.startswith('rep') or other_node.startswith('rep'):
-            if node.startswith('rep'):
-                other_actual_node = other_node[0]
-                edge_latency = int(case['repeaters'][node][other_actual_node].split()[0].strip('ms'))
-            else:
-                other_actual_node = node[0]
-                edge_latency = int(case['repeaters'][other_node][other_actual_node].split()[0].strip('ms'))
-        elif 'proxy' in node and 'proxy' in other_node:
-            edge_latency = int(case['nodes'][node[0]][other_node[0]].split()[0].strip('ms'))
-        else:
-            edge_latency = 0
-        objective -= edge_latency * variables[node][other_node][commodity]
-
-# TODO: Subtract repeater/re-encoder costs
-# TODO: Subtract CPU costs
-
-
-prob_type = LpMinimize if args.debug else LpMaximize
-prob = LpProblem("interkontinental-asymmetric", prob_type)
-
-# Objective
-if args.debug:
-    prob += sum(_debug_vars)
-else:
-    prob += objective
-logger.info('Objective: %s %s', LpSenses[prob.sense], objective)
-
-# Stay below bandwidth (capacities)
-for node in nodes():
-    downlink_capacity = int(case['nodes'][node]['downlink'].strip('Mbit'))
-    constraint = sum(variables[node+'proxy'][node]) <= downlink_capacity
-    logger.info('Constraint: %s', constraint)
-    prob += constraint
-    uplink_capacity = int(case['nodes'][node]['uplink'].strip('Mbit'))
-    constraint = sum(variables[node][node+'proxy']) <= uplink_capacity
-    logger.info('Constraint: %s', constraint)
-    prob += constraint
-
-# All commodities must be sent by the correct parties
-# Note: Node should not need to send a commodity if a repeater does, and the
-# repeater receives another commodity from this node
-for commodity in commodities():
-    proxy = commodity.sender + 'proxy'
-    commodity_sources = variables[commodity.sender][proxy][commodity]
-    for repeater in repeaters():
-        for proxy in proxies():
-            commodity_sources += variables[repeater][proxy][commodity]
-    add_constraint(commodity_sources >= 1)
-
-for commodity in commodities():
-
-    # Constraints
-    # Add flow conservation for proxies, as per an all-to-all topology
-    for node in nodes():
-        proxy = node + 'proxy'
-        in_to_proxy = 0
-        out_of_proxy = 0
-        for other_node in chain(proxies(), repeaters()):
-            if proxy == other_node:
-                continue
-            in_to_proxy += variables[other_node][proxy][commodity]
-            out_of_proxy += variables[proxy][other_node][commodity]
-        logger.info('Flow conservation: %s == %s', in_to_proxy, variables[proxy][node][commodity])
-        logger.info('Flow conservation: %s == %s', out_of_proxy, variables[node][proxy][commodity])
-        prob += in_to_proxy == variables[proxy][node][commodity]
-        prob += out_of_proxy == variables[node][proxy][commodity]
-
-    # Add flow conservation for nodes, make sure they can only be origin for their own commodity,
-    # and does not terminate their own commodities
-    # TODO: Does not allow nodes to re-encode data for now
-    for node in nodes():
-        proxy = node + 'proxy'
-        if node != commodity.sender and node != commodity.receiver:
-            add_constraint(variables[node][proxy][commodity] == variables[proxy][node][commodity], 'Node')
-        elif node == commodity.sender:
-            add_constraint(variables[proxy][node][commodity] == 0, 'Node')
-
-# Repeaters repeat incoming commodities out to all proxies, converted to their desired commodity
-for repeater in repeaters():
-    for node in nodes():
-        proxy = node + 'proxy'
-        left_side = 0
-        right_side = []
         for commodity in commodities():
-            if commodity.sender == node:
-                left_side += variables[proxy][repeater][commodity]
-                right_side.append(variables[repeater][commodity.receiver + 'proxy'][commodity])
-        for outgoing in right_side:
-            add_constraint(left_side == outgoing, 'Repeaterflow')
-
-    # Never send traffic back to source (hopefully not needed)
-    proxy_of_sending_node = commodity.sender + 'proxy'
-    add_constraint(variables[repeater][proxy_of_sending_node][commodity] == 0, 'Repeater flow')
-
-    # for proxy in proxies():
-    #     if proxy != proxy_of_sending_node:
-    #         # Send as much to each other proxy as you receive from the sender
-    #         target_commodity = commodity_from_nodes(commodity.sender, proxy[0])
-    #         constraint = variables[proxy_of_sending_node][repeater][commodity] == variables[repeater][proxy][target_commodity]
-    #         logger.info('Repeater flow constraint: %s', constraint)
-    #         prob += constraint
-
-    #         # Don't send any of the other commodities from that node through this link.
-    #         # This prevents stuff from going B -> repeater -> C -> A, but that shouldn't be necessary,
-    #         # as the provider should have a backbone capable of B -> repeater -> A without the extra cost through C
-    #         for other_commodity in commodities():
-    #             if commodity != other_commodity and other_commodity.receiver != proxy[0]:
-    #                 constraint = variables[repeater][proxy][other_commodity] == 0
-    #                 logger.info('Repeater flow constraint: %s', constraint)
-    #                 prob += constraint
-
-    #                 # Make sure something is sent if something is received from a node
-
-    #                 # Send on all edges if a commodity is received?
+            # Assume nothing exceeds gigabit speeds, not even backbone links
+            variables.setdefault(node, {}).setdefault(other_node, []).append(LpVariable('%sto%sK%d' % (node, other_node, commodity),
+                lowBound=0, upBound=1000, cat=LpInteger))
 
 
-
-if args.debug:
-    for key in prob.constraints:
-        prob.constraints[key] += debug()
-
-res = GLPK(echo_proc=args.verbose).solve(prob)
-
-def dump_variables(prob):
-    print '\n'.join('%s = %s' % (v.name, v.varValue) for v in prob.variables() if v.varValue)
-
-for commodity in commodities():
-    print 'K%d: %s -> %s' % (commodity, commodity.sender, commodity.receiver)
-
-if res < 0:
-    print 'Unsolvable!'
-    sys.exit(1)
-else:
-    if args.debug:
-        print 'Problem constraints:'
-        for v in prob.variables():
-            if v.varValue != 0.0 and (v.name.startswith('x') or v.name.startswith('y')):
-                print '\n'.join('\t' + str(c) for c in prob.constraints.values() if ' %s ' % (v.name,) in str(c))
-
-
-    dump_variables(prob)
-    print
-
-    # Print the solution
+    objective = 0
     for node, other_node in node_pairs():
         commodity = commodity_from_nodes(node, other_node)
-        proxy = node + 'proxy'
         other_proxy = other_node + 'proxy'
-        path = [other_proxy]
-        other_proxy = other_node + 'proxy'
-        while path[-1] != proxy:
-            incoming_paths = []
-            for search_node, variable in variables.iteritems():
-                if path[-1] in variable and variable[path[-1]][commodity].varValue:
-                    # search_node has a path to the last node we found
-                    incoming_paths.append(search_node)
-            # Check for cycle
-            for incoming_path in incoming_paths:
-                # Do we send to that node as well as receive -> cycle.
-                if variables[path[-1]][incoming_path][commodity].varValue:
-                    path.append(incoming_path)
-                    path.append(path[-2])
+        # Add bandwidth-gains to objective
+        objective += 10*case['nodes'][other_node]['gain'] * variables[other_proxy][other_node][commodity]
+        # TODO: Subtract incoming flow to the source node from objective?
 
-            # Add non-cycle path
-            for incoming_path in incoming_paths:
-                if incoming_path not in path:
-                    # The other non-cycle path
-                    path.append(incoming_path)
 
-            if not incoming_paths:
-                # Trace a repeater changing commodity type
-                all_node_commodities = [c for c in commodities() if c.sender == node and c != commodity]
-                origin_commodity = None
-                for c in all_node_commodities:
-                    for sending_node, variable in variables.iteritems():
-                        if path[-1] in variable and variable[path[-1]][c].varValue:
-                            origin_commodity = c
-                            break
-                if origin_commodity is None:
-                    print path
-                assert origin_commodity is not None, "Didn't find mangled commodity"
-                while path[-1] != proxy:
-                    for search_node, variable in variables.iteritems():
-                        if path[-1] in variable and variable[path[-1]][origin_commodity].varValue:
-                            path.append(search_node)
+    for commodity in commodities():
+        # Subtract edge cost from objective
+        for node, other_node in edges():
+            if node.startswith('rep') or other_node.startswith('rep'):
+                if node.startswith('rep'):
+                    other_actual_node = other_node[0]
+                    edge_latency = int(case['repeaters'][node][other_actual_node].split()[0].strip('ms'))
+                else:
+                    other_actual_node = node[0]
+                    edge_latency = int(case['repeaters'][other_node][other_actual_node].split()[0].strip('ms'))
+            elif 'proxy' in node and 'proxy' in other_node:
+                edge_latency = int(case['nodes'][node[0]][other_node[0]].split()[0].strip('ms'))
+            else:
+                edge_latency = 0
+            objective -= edge_latency * variables[node][other_node][commodity]
+
+    # TODO: Subtract repeater/re-encoder costs
+    # TODO: Subtract CPU costs
+
+
+    prob_type = LpMinimize if args.debug else LpMaximize
+    prob = LpProblem("interkontinental-asymmetric", prob_type)
+
+    # Objective
+    if args.debug:
+        prob += sum(_debug_vars)
+    else:
+        prob += objective
+    logger.info('Objective: %s %s', LpSenses[prob.sense], objective)
+
+    # Stay below bandwidth (capacities)
+    for node in nodes():
+        downlink_capacity = int(case['nodes'][node]['downlink'].strip('Mbit'))
+        constraint = sum(variables[node+'proxy'][node]) <= downlink_capacity
+        logger.info('Constraint: %s', constraint)
+        prob += constraint
+        uplink_capacity = int(case['nodes'][node]['uplink'].strip('Mbit'))
+        constraint = sum(variables[node][node+'proxy']) <= uplink_capacity
+        logger.info('Constraint: %s', constraint)
+        prob += constraint
+
+    # All commodities must be sent by the correct parties
+    # Note: Node should not need to send a commodity if a repeater does, and the
+    # repeater receives another commodity from this node
+    for commodity in commodities():
+        proxy = commodity.sender + 'proxy'
+        commodity_sources = variables[commodity.sender][proxy][commodity]
+        for repeater in repeaters():
+            for proxy in proxies():
+                commodity_sources += variables[repeater][proxy][commodity]
+        add_constraint(commodity_sources >= 1)
+
+    for commodity in commodities():
+
+        # Constraints
+        # Add flow conservation for proxies, as per an all-to-all topology
+        for node in nodes():
+            proxy = node + 'proxy'
+            in_to_proxy = 0
+            out_of_proxy = 0
+            for other_node in chain(proxies(), repeaters()):
+                if proxy == other_node:
+                    continue
+                in_to_proxy += variables[other_node][proxy][commodity]
+                out_of_proxy += variables[proxy][other_node][commodity]
+            logger.info('Flow conservation: %s == %s', in_to_proxy, variables[proxy][node][commodity])
+            logger.info('Flow conservation: %s == %s', out_of_proxy, variables[node][proxy][commodity])
+            prob += in_to_proxy == variables[proxy][node][commodity]
+            prob += out_of_proxy == variables[node][proxy][commodity]
+
+        # Add flow conservation for nodes, make sure they can only be origin for their own commodity,
+        # and does not terminate their own commodities
+        # TODO: Does not allow nodes to re-encode data for now
+        for node in nodes():
+            proxy = node + 'proxy'
+            if node != commodity.sender and node != commodity.receiver:
+                add_constraint(variables[node][proxy][commodity] == variables[proxy][node][commodity], 'Node')
+            elif node == commodity.sender:
+                add_constraint(variables[proxy][node][commodity] == 0, 'Node')
+
+    # Repeaters repeat incoming commodities out to all proxies, converted to their desired commodity
+    for repeater in repeaters():
+        for node in nodes():
+            proxy = node + 'proxy'
+            left_side = 0
+            right_side = []
+            for commodity in commodities():
+                if commodity.sender == node:
+                    left_side += variables[proxy][repeater][commodity]
+                    right_side.append(variables[repeater][commodity.receiver + 'proxy'][commodity])
+            for outgoing in right_side:
+                add_constraint(left_side == outgoing, 'Repeaterflow')
+
+        # Never send traffic back to source (hopefully not needed)
+        proxy_of_sending_node = commodity.sender + 'proxy'
+        add_constraint(variables[repeater][proxy_of_sending_node][commodity] == 0, 'Repeater flow')
+
+        # for proxy in proxies():
+        #     if proxy != proxy_of_sending_node:
+        #         # Send as much to each other proxy as you receive from the sender
+        #         target_commodity = commodity_from_nodes(commodity.sender, proxy[0])
+        #         constraint = variables[proxy_of_sending_node][repeater][commodity] == variables[repeater][proxy][target_commodity]
+        #         logger.info('Repeater flow constraint: %s', constraint)
+        #         prob += constraint
+
+        #         # Don't send any of the other commodities from that node through this link.
+        #         # This prevents stuff from going B -> repeater -> C -> A, but that shouldn't be necessary,
+        #         # as the provider should have a backbone capable of B -> repeater -> A without the extra cost through C
+        #         for other_commodity in commodities():
+        #             if commodity != other_commodity and other_commodity.receiver != proxy[0]:
+        #                 constraint = variables[repeater][proxy][other_commodity] == 0
+        #                 logger.info('Repeater flow constraint: %s', constraint)
+        #                 prob += constraint
+
+        #                 # Make sure something is sent if something is received from a node
+
+        #                 # Send on all edges if a commodity is received?
+
+
+
+    if args.debug:
+        for key in prob.constraints:
+            prob.constraints[key] += debug()
+
+    res = GLPK(echo_proc=args.verbose).solve(prob)
+
+    def dump_variables(prob):
+        print '\n'.join('%s = %s' % (v.name, v.varValue) for v in prob.variables() if v.varValue)
+
+    for commodity in commodities():
+        print 'K%d: %s -> %s' % (commodity, commodity.sender, commodity.receiver)
+
+    if res < 0:
+        print 'Unsolvable!'
+        sys.exit(1)
+    else:
+        if args.debug:
+            print 'Problem constraints:'
+            for v in prob.variables():
+                if v.varValue != 0.0 and (v.name.startswith('x') or v.name.startswith('y')):
+                    print '\n'.join('\t' + str(c) for c in prob.constraints.values() if ' %s ' % (v.name,) in str(c))
+
+
+        dump_variables(prob)
+        print
+
+        # Print the solution
+        for node, other_node in node_pairs():
+            commodity = commodity_from_nodes(node, other_node)
+            proxy = node + 'proxy'
+            other_proxy = other_node + 'proxy'
+            path = [other_proxy]
+            other_proxy = other_node + 'proxy'
+            while path[-1] != proxy:
+                incoming_paths = []
+                for search_node, variable in variables.iteritems():
+                    if path[-1] in variable and variable[path[-1]][commodity].varValue:
+                        # search_node has a path to the last node we found
+                        incoming_paths.append(search_node)
+                # Check for cycle
+                for incoming_path in incoming_paths:
+                    # Do we send to that node as well as receive -> cycle.
+                    if variables[path[-1]][incoming_path][commodity].varValue:
+                        path.append(incoming_path)
+                        path.append(path[-2])
+
+                # Add non-cycle path
+                for incoming_path in incoming_paths:
+                    if incoming_path not in path:
+                        # The other non-cycle path
+                        path.append(incoming_path)
+
+                if not incoming_paths:
+                    # Trace a repeater changing commodity type
+                    all_node_commodities = [c for c in commodities() if c.sender == node and c != commodity]
+                    origin_commodity = None
+                    for c in all_node_commodities:
+                        for sending_node, variable in variables.iteritems():
+                            if path[-1] in variable and variable[path[-1]][c].varValue:
+                                origin_commodity = c
+                                break
+                    if origin_commodity is None:
+                        print path
+                    assert origin_commodity is not None, "Didn't find mangled commodity"
+                    while path[-1] != proxy:
+                        for search_node, variable in variables.iteritems():
+                            if path[-1] in variable and variable[path[-1]][origin_commodity].varValue:
+                                path.append(search_node)
+                                break
+                        else:
+                            print 'No path found after repeater change, path: %s' % path
                             break
                     else:
-                        print 'No path found after repeater change, path: %s' % path
                         break
-                else:
-                    break
-        else:
-            # Found path between nodes
-            print '%s til %s (K%d):' % (node, other_node, commodity),
-            cost = 0
-            path = list(reversed(path))
-            for index, edge in enumerate(path[1:], 1):
-                var = variables[path[index-1]][path[index]][commodity]
-                print var.name, '->',
-                if 'proxy' in path[index] and 'proxy' in path[index-1]:
-                    # It's an edge between two proxies, ie. it has a latency cost
-                    # which can be found from the case
-                    cost += int(case['nodes'][path[index-1][0]][path[index][0]].split()[0].strip('ms'))
-                elif 'rep' in path[index] and 'proxy' in path[index-1]:
-                    cost += int(case['repeaters'][path[index]][path[index-1][0]].split()[0].strip('ms'))
-                elif 'proxy' in path[index] and 'rep' in path[index-1]:
-                    cost += int(case['repeaters'][path[index-1]][path[index][0]].split()[0].strip('ms'))
-            print 'Flow: %s, cost: %dms' % (var.varValue, cost)
+            else:
+                # Found path between nodes
+                print '%s til %s (K%d):' % (node, other_node, commodity),
+                cost = 0
+                path = list(reversed(path))
+                for index, edge in enumerate(path[1:], 1):
+                    var = variables[path[index-1]][path[index]][commodity]
+                    print var.name, '->',
+                    if 'proxy' in path[index] and 'proxy' in path[index-1]:
+                        # It's an edge between two proxies, ie. it has a latency cost
+                        # which can be found from the case
+                        cost += int(case['nodes'][path[index-1][0]][path[index][0]].split()[0].strip('ms'))
+                    elif 'rep' in path[index] and 'proxy' in path[index-1]:
+                        cost += int(case['repeaters'][path[index]][path[index-1][0]].split()[0].strip('ms'))
+                    elif 'proxy' in path[index] and 'rep' in path[index-1]:
+                        cost += int(case['repeaters'][path[index-1]][path[index][0]].split()[0].strip('ms'))
+                print 'Flow: %s, cost: %dms' % (var.varValue, cost)
 
-    for node in nodes():
-        downlink_total = int(case['nodes'][node]['downlink'].strip('Mbit'))
-        uplink_total = int(case['nodes'][node]['uplink'].strip('Mbit'))
-        proxy = node + 'proxy'
-        downlink_usage = sum(v.varValue for v in variables[proxy][node])
-        uplink_usage = sum(v.varValue for v in variables[node][proxy])
-        print '%s downlink: %.1f, uplink: %.1f' % (node, float(downlink_usage)/downlink_total, float(uplink_usage)/uplink_total)
+        for node in nodes():
+            downlink_total = int(case['nodes'][node]['downlink'].strip('Mbit'))
+            uplink_total = int(case['nodes'][node]['uplink'].strip('Mbit'))
+            proxy = node + 'proxy'
+            downlink_usage = sum(v.varValue for v in variables[proxy][node])
+            uplink_usage = sum(v.varValue for v in variables[node][proxy])
+            print '%s downlink: %.1f, uplink: %.1f' % (node, float(downlink_usage)/downlink_total, float(uplink_usage)/uplink_total)
 
-    print "Score =", value(prob.objective)
+        print "Score =", value(prob.objective)
+
+
+if __name__ == '__main__':
+    main()
