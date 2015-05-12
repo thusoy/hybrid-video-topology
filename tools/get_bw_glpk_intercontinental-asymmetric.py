@@ -196,6 +196,8 @@ def debug():
     _debug_vars.append(LpVariable('y%d' % _debug_index, lowBound=0))
     return _debug_vars[-1] - _debug_vars[-2]
 
+def dump_variables(prob):
+    print '\n'.join('%s = %s' % (v.name, v.varValue) for v in prob.variables() if v.varValue)
 
 def solve_case(args):
     global prob
@@ -344,8 +346,6 @@ def solve_case(args):
 
     res = GLPK(echo_proc=args.verbose).solve(prob)
 
-    def dump_variables(prob):
-        print '\n'.join('%s = %s' % (v.name, v.varValue) for v in prob.variables() if v.varValue)
 
     for commodity in commodities():
         print 'K%d: %s -> %s' % (commodity, commodity.sender, commodity.receiver)
