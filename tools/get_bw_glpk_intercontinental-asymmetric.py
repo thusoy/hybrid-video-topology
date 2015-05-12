@@ -271,6 +271,7 @@ def solve_case(args):
             for proxy in proxies():
                 commodity_sources += variables[repeater][proxy][commodity]
         add_constraint(commodity_sources >= 1)
+        add_constraint(variables[commodity.receiver + 'proxy'][commodity.receiver][commodity] >= 1)
 
     for commodity in commodities():
 
