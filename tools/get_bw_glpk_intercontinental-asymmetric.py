@@ -418,9 +418,9 @@ def solve_case(args):
                 print '%s til %s (K%d):' % (node, other_node, commodity),
                 cost = 0
                 path = list(reversed(path))
+                print ' -> '.join(variables[path[index-1]][path[index]][commodity].name for index, _ in enumerate(path[1:], 1)), ',',
                 for index, edge in enumerate(path[1:], 1):
                     var = variables[path[index-1]][path[index]][commodity]
-                    print var.name, '->',
                     if 'proxy' in path[index] and 'proxy' in path[index-1]:
                         # It's an edge between two proxies, ie. it has a latency cost
                         # which can be found from the case
