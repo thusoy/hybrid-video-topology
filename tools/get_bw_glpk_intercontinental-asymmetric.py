@@ -392,6 +392,9 @@ def solve_case(args):
                         path.append(incoming_path)
 
                 if not incoming_paths:
+                    if not path[-1].startswith('rep'):
+                        print 'Commodity K%d not found in to %s' % (commodity, path[-1])
+                        break
                     # Trace a repeater changing commodity type
                     all_node_commodities = [c for c in commodities() if c.sender == node and c != commodity]
                     origin_commodity = None
