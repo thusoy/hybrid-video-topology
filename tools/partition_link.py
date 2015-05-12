@@ -1,26 +1,26 @@
 import argparse
 
-def main(slots=None):
+def main(slots=None, number_of_edges=4):
     if slots is None:
         for slot in range(1, 31):
-            get_edges(slot)
+            get_edges(slot, number_of_edges)
     else:
-        get_edges(slots)
+        get_edges(slots, number_of_edges)
 
-def get_edges(slots):
-    cutoffs = (0.933, 0.8, 0.533)
+def get_edges(slots, number_of_edges=4):
+    cutoffs = get_cutoffs(number_of_edges)
     print '%d slots:' % slots,
     edges = [(0, 0.0, 0.0)] # (slots, treshold, cost) tuples
     utilization = 0.0
     utilization_step = 1.0/slots
     slots_in_edge = 0
-    for slot in range(1, slots + 1):
+    for slot in range(slots):
         utilization += utilization_step
         slots_in_edge += 1
         edges[-1] = (slots_in_edge, utilization, cost(utilization))
         for cutoff_number, cutoff in enumerate(cutoffs):
             if utilization + utilization_step > cutoff:
-                if len(edges) < len(cutoffs) + 1 - cutoff_number:
+                if len(edges) < number_of_edges - cutoff_number:
                     edges.append((0, 0.0, 0.0))
                     slots_in_edge = 0
                     break
@@ -31,8 +31,17 @@ def cost(utilization):
     return 1.0/(1-0.9*utilization)
 
 
+def get_cutoffs(partitions=4):
+    segments = sum(2**i for i in range(partitions)) # Exponentially smaller
+    segment_size = 1.0/segments
+    segs = [segment_size*2**i for i in range(partitions)]
+    cutoffs = [sum(segs[-1:-1-i:-1]) for i in range(1, partitions)]
+    return list(reversed(cutoffs))
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--slots', type=int)
+    parser.add_argument('-e', '--edges', type=int, default=4)
     args = parser.parse_args()
-    main(args.slots)
+    main(slots=args.slots, number_of_edges=args.edges)
