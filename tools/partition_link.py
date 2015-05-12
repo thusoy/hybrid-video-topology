@@ -14,6 +14,7 @@ def get_edges(slots, number_of_edges=4):
     utilization = 0.0
     utilization_step = 1.0/slots
     slots_in_edge = 0
+    # TODO: Instead of iterating up, simply find the number of slots in each edge by size_of_segment/step_size
     for slot in range(slots):
         utilization += utilization_step
         slots_in_edge += 1
