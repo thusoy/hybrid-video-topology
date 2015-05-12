@@ -410,7 +410,8 @@ def solve_case(args):
                         else:
                             print 'No path found after repeater change, path: %s' % path
                             break
-                    else:
+
+                    if path[-1] != proxy:
                         break
             else:
                 # Found path between nodes
