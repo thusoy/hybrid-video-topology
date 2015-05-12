@@ -10,21 +10,22 @@ def main(slots=None, number_of_edges=4):
 def get_edges(slots, number_of_edges=4):
     cutoffs = get_cutoffs(number_of_edges)
     print '%d slots:' % slots,
-    edges = [(0, 0.0, 0.0)] # (slots, treshold, cost) tuples
+    edges = [] # (slots, treshold, cost) tuples
     utilization = 0.0
     utilization_step = 1.0/slots
     slots_in_edge = 0
     for slot in range(slots):
         utilization += utilization_step
         slots_in_edge += 1
-        edges[-1] = (slots_in_edge, utilization, cost(utilization))
         for cutoff_number, cutoff in enumerate(cutoffs):
             if utilization + utilization_step > cutoff:
-                if len(edges) < number_of_edges - cutoff_number:
-                    edges.append((0, 0.0, 0.0))
+                if len(edges) + 1 < number_of_edges - cutoff_number:
+                    edges.append((slots_in_edge, utilization, cost(utilization)))
                     slots_in_edge = 0
                     break
-    print ', '.join('(s=%d, u=%.3f, c=%.3f)' % (s, u, c) for s, u, c in edges if (s, u, c) != (0, 0, 0))
+    if edges[-1][1] < 1:
+        edges.append((slots_in_edge, utilization, cost(utilization)))
+    print ', '.join('(s=%d, u=%.3f, c=%.3f)' % (s, u, c) for s, u, c in edges)
     # print ', '.join(str(k[0]) for k in edges if k != (0, 0, 0))
 
 def cost(utilization):
