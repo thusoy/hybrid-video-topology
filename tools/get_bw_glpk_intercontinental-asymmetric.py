@@ -123,7 +123,7 @@ def main():
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO if args.verbose else logging.WARNING, stream=sys.stdout)
     case = cases[args.case]
-    solve_case(args)
+    solve_case(args, number_of_edges=args.edges)
 
 
 def edges(include_self=False):
@@ -229,25 +229,31 @@ def debug():
 def dump_variables(prob):
     print '\n'.join('%s = %s' % (v.name, v.varValue) for v in prob.variables() if v.varValue)
 
-def solve_case(args):
+def solve_case(args, number_of_edges):
     global prob
     # Initialize variables
     variables = {}
     # Initialize all edge variables
     for node, other_node in edges():
         for commodity in commodities():
-            # Assume nothing exceeds gigabit speeds, not even backbone links
-            variables.setdefault(node, {}).setdefault(other_node, []).append(LpVariable('%sto%sK%d' % (node, other_node, commodity),
-                lowBound=0, upBound=1000, cat=LpInteger))
+            bandwidth_limited = ('proxy' in node and node[0] == other_node) or ('proxy' in other_node and other_node[0] == node)
+            parallell_edges = number_of_edges if bandwidth_limited else 1
+            for edge in range(parallell_edges):
+                # Assume nothing exceeds gigabit speeds, not even backbone links
+                if edge == 0:
+                    variables.setdefault(node, {}).setdefault(other_node, []).append([])
+                variables.setdefault(node, {}).setdefault(other_node, [])[-1].append(LpVariable('%sto%sK%dC%d' % (node, other_node, commodity, edge),
+                    lowBound=0, upBound=1000, cat=LpInteger))
 
 
     objective = 0
     for node, other_node in node_pairs():
         commodity = commodity_from_nodes(node, other_node)
         other_proxy = other_node + 'proxy'
-        # Add bandwidth-gains to objective
-        objective += 10*case['nodes'][other_node]['gain'] * variables[other_proxy][other_node][commodity]
-        # TODO: Subtract incoming flow to the source node from objective?
+        for edge in range(number_of_edges):
+            # Add bandwidth-gains to objective
+            objective += 10*case['nodes'][other_node]['gain'] * variables[other_proxy][other_node][commodity][edge]
+            # TODO: Subtract incoming flow to the source node from objective?
 
 
     for commodity in commodities():
@@ -263,8 +269,10 @@ def solve_case(args):
             elif 'proxy' in node and 'proxy' in other_node:
                 edge_latency = int(case['nodes'][node[0]][other_node[0]].split()[0].strip('ms'))
             else:
+                # TODO: Add edge cost for parallell edges between proxies and their nodes
                 edge_latency = 0
-            objective -= edge_latency * variables[node][other_node][commodity]
+            for edge in variables[node][other_node][commodity]:
+                objective -= edge_latency*edge
 
     # TODO: Subtract repeater/re-encoder costs
     # TODO: Subtract CPU costs
@@ -283,25 +291,21 @@ def solve_case(args):
     # Stay below bandwidth (capacities)
     for node in nodes():
         downlink_capacity = int(case['nodes'][node]['downlink'].strip('Mbit'))
-        constraint = sum(variables[node+'proxy'][node]) <= downlink_capacity
-        logger.info('Constraint: %s', constraint)
-        prob += constraint
+        add_constraint(sum(sum(variables[node+'proxy'][node][commodity]) for commodity in commodities()) <= downlink_capacity)
         uplink_capacity = int(case['nodes'][node]['uplink'].strip('Mbit'))
-        constraint = sum(variables[node][node+'proxy']) <= uplink_capacity
-        logger.info('Constraint: %s', constraint)
-        prob += constraint
+        add_constraint(sum(sum(variables[node][node+'proxy'][commodity]) for commodity in commodities()) <= uplink_capacity)
 
     # All commodities must be sent by the correct parties
     # Note: Node should not need to send a commodity if a repeater does, and the
     # repeater receives another commodity from this node
     for commodity in commodities():
         proxy = commodity.sender + 'proxy'
-        commodity_sources = variables[commodity.sender][proxy][commodity]
+        commodity_sources = sum(variables[commodity.sender][proxy][commodity])
         for repeater in repeaters():
             for proxy in proxies():
-                commodity_sources += variables[repeater][proxy][commodity]
+                commodity_sources += sum(variables[repeater][proxy][commodity])
         add_constraint(commodity_sources >= 1)
-        add_constraint(variables[commodity.receiver + 'proxy'][commodity.receiver][commodity] >= 1)
+        add_constraint(sum(variables[commodity.receiver + 'proxy'][commodity.receiver][commodity]) >= 1)
 
     for commodity in commodities():
 
@@ -314,8 +318,8 @@ def solve_case(args):
             for other_node in chain(proxies(), repeaters()):
                 if proxy == other_node:
                     continue
-                in_to_proxy += variables[other_node][proxy][commodity]
-                out_of_proxy += variables[proxy][other_node][commodity]
+                in_to_proxy += sum(variables[other_node][proxy][commodity])
+                out_of_proxy += sum(variables[proxy][other_node][commodity])
             logger.info('Flow conservation: %s == %s', in_to_proxy, variables[proxy][node][commodity])
             logger.info('Flow conservation: %s == %s', out_of_proxy, variables[node][proxy][commodity])
             prob += in_to_proxy == variables[proxy][node][commodity]
@@ -327,9 +331,9 @@ def solve_case(args):
         for node in nodes():
             proxy = node + 'proxy'
             if node != commodity.sender and node != commodity.receiver:
-                add_constraint(variables[node][proxy][commodity] == variables[proxy][node][commodity], 'Node')
+                add_constraint(sum(variables[node][proxy][commodity]) == sum(variables[proxy][node][commodity]), 'Node')
             elif node == commodity.sender:
-                add_constraint(variables[proxy][node][commodity] == 0, 'Node')
+                add_constraint(sum(variables[proxy][node][commodity]) == 0, 'Node')
 
     # Repeaters repeat incoming commodities out to all proxies, converted to their desired commodity
     for repeater in repeaters():
@@ -339,14 +343,14 @@ def solve_case(args):
             right_side = []
             for commodity in commodities():
                 if commodity.sender == node:
-                    left_side += variables[proxy][repeater][commodity]
-                    right_side.append(variables[repeater][commodity.receiver + 'proxy'][commodity])
+                    left_side += variables[proxy][repeater][commodity][0]
+                    right_side.append(variables[repeater][commodity.receiver + 'proxy'][commodity][0])
             for outgoing in right_side:
                 add_constraint(left_side == outgoing, 'Repeaterflow')
 
         # Never send traffic back to source (hopefully not needed)
         proxy_of_sending_node = commodity.sender + 'proxy'
-        add_constraint(variables[repeater][proxy_of_sending_node][commodity] == 0, 'Repeater flow')
+        add_constraint(variables[repeater][proxy_of_sending_node][commodity][0] == 0, 'Repeater flow')
 
         # for proxy in proxies():
         #     if proxy != proxy_of_sending_node:
@@ -405,13 +409,13 @@ def solve_case(args):
             while path[-1] != proxy:
                 incoming_paths = []
                 for search_node, variable in variables.iteritems():
-                    if path[-1] in variable and variable[path[-1]][commodity].varValue:
+                    if path[-1] in variable and any(edge.varValue for edge in variable[path[-1]][commodity]):
                         # search_node has a path to the last node we found
                         incoming_paths.append(search_node)
                 # Check for cycle
                 for incoming_path in incoming_paths:
                     # Do we send to that node as well as receive -> cycle.
-                    if variables[path[-1]][incoming_path][commodity].varValue:
+                    if any(edge.varValue for edge in variables[path[-1]][incoming_path][commodity]):
                         path.append(incoming_path)
                         path.append(path[-2])
 
@@ -430,7 +434,7 @@ def solve_case(args):
                     origin_commodity = None
                     for c in all_node_commodities:
                         for sending_node, variable in variables.iteritems():
-                            if path[-1] in variable and variable[path[-1]][c].varValue:
+                            if path[-1] in variable and any(edge.varValue for edge in variable[path[-1]][c]):
                                 origin_commodity = c
                                 break
                     if origin_commodity is None:
@@ -438,7 +442,7 @@ def solve_case(args):
                     assert origin_commodity is not None, "Didn't find mangled commodity"
                     while path[-1] != proxy:
                         for search_node, variable in variables.iteritems():
-                            if path[-1] in variable and variable[path[-1]][origin_commodity].varValue:
+                            if path[-1] in variable and any(edge.varValue for edge in variable[path[-1]][origin_commodity]):
                                 path.append(search_node)
                                 break
                         else:
@@ -452,9 +456,9 @@ def solve_case(args):
                 print '%s til %s (K%d):' % (node, other_node, commodity),
                 cost = 0
                 path = list(reversed(path))
-                print ' -> '.join(variables[path[index-1]][path[index]][commodity].name for index, _ in enumerate(path[1:], 1)), ',',
+                print ' -> '.join(p for p  in path), ',',
                 for index, edge in enumerate(path[1:], 1):
-                    var = variables[path[index-1]][path[index]][commodity]
+                    flow = sum(edge.varValue for edge in variables[path[index-1]][path[index]][commodity])
                     if 'proxy' in path[index] and 'proxy' in path[index-1]:
                         # It's an edge between two proxies, ie. it has a latency cost
                         # which can be found from the case
@@ -463,14 +467,14 @@ def solve_case(args):
                         cost += int(case['repeaters'][path[index]][path[index-1][0]].split()[0].strip('ms'))
                     elif 'proxy' in path[index] and 'rep' in path[index-1]:
                         cost += int(case['repeaters'][path[index-1]][path[index][0]].split()[0].strip('ms'))
-                print 'Flow: %s, cost: %dms' % (var.varValue, cost)
+                print 'Flow: %s, cost: %dms' % (flow, cost)
 
         for node in nodes():
             downlink_total = int(case['nodes'][node]['downlink'].strip('Mbit'))
             uplink_total = int(case['nodes'][node]['uplink'].strip('Mbit'))
             proxy = node + 'proxy'
-            downlink_usage = sum(v.varValue for v in variables[proxy][node])
-            uplink_usage = sum(v.varValue for v in variables[node][proxy])
+            downlink_usage = sum(sum(edge.varValue for edge in variables[proxy][node][commodity]) for commodity in commodities())
+            uplink_usage = sum(sum(edge.varValue for edge in variables[node][proxy][commodity]) for commodity in commodities())
             print '%s downlink: %.1f, uplink: %.1f' % (node, float(downlink_usage)/downlink_total, float(uplink_usage)/uplink_total)
 
         print "Score =", value(prob.objective)
