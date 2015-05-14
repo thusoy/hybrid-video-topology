@@ -1,5 +1,6 @@
 from pulp import *
 from pdb import set_trace as trace
+from collections import namedtuple
 import sys
 import argparse
 from itertools import chain
@@ -106,6 +107,8 @@ cases = {
     },
 }
 
+Edge = namedtuple('Edge', ['slots', 'threshold', 'cost'])
+
 
 def main():
     global case
@@ -114,6 +117,8 @@ def main():
         action='store_true', default=False)
     parser.add_argument('-d', '--debug', help='Print debug information',
         action='store_true', default=False)
+    parser.add_argument('-s', '--slot-size', help='Set slot size to this size', default='512kbps')
+    parser.add_argument('-e', '--edges', help='How many parallell edges to add between each pair of nodes', default=4, type=int)
     parser.add_argument('-c', '--case', choices=cases.keys(), default='asia')
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO if args.verbose else logging.WARNING, stream=sys.stdout)
@@ -133,6 +138,31 @@ def edges(include_self=False):
             yield (proxy, repeater)
             yield (repeater, proxy)
 
+def get_edges(number_of_slots, number_of_edges=4):
+    cutoffs = get_cutoffs(number_of_edges)
+    print '%d slots:' % number_of_slots,
+    edges = [] # (slots, treshold, cost) tuples
+    utilization = 0.0
+    utilization_step = 1.0/number_of_slots
+    for cutoff in cutoffs:
+        slots = int(number_of_slots*(cutoff - utilization))
+        utilization += utilization_step*slots
+        edges.append(Edge(slots, utilization, cost(utilization)))
+    edges.append((number_of_slots-sum(edge.slots for edge in edges), 1, cost(1)))
+    edges = [edge for edge in edges if edge.slots]
+    return edges
+
+def cost(utilization, punishment_factor=0.9):
+     # The closer the punishment_factor is to 1, the heavier the punishment
+     # for saturating links (balance against cost factor of delay)
+    return 1/(1-punishment_factor*utilization)
+
+def get_cutoffs(partitions=4):
+    segments = sum(2**i for i in range(partitions)) # Exponentially smaller
+    segment_size = 1.0/segments
+    segs = [segment_size*2**i for i in range(partitions)] # Gives an array like [0.066667, 0.1333, 0.26667, 0.53] for partitions=4
+    cutoffs = [sum(segs[-1:-1-i:-1]) for i in range(1, partitions)] # Reverse the array and make each element a cumulative sum of foregoing elements
+    return cutoffs
 
 def node_pairs():
     for node in nodes():
