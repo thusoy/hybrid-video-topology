@@ -98,10 +98,10 @@ cases = {
 }
 
 default_rolemap = {
-    '1': 'sahara27.item.ntnu.no',
-    '2': 'sahara28.item.ntnu.no',
-    '3': 'sahara30.item.ntnu.no',
-    '4': 'sahara25.item.ntnu.no',
+    '1': 'a.cluster.thusoy.com',
+    '2': 'b.cluster.thusoy.com',
+    '3': 'c.cluster.thusoy.com',
+#    '4': 'd.cluster.thusoy.com',
 }
 
 
@@ -133,20 +133,25 @@ def clear_all_rules():
 
 
 def ipify_role_map(role_map):
+    """ Needed since a DNS lookup usually will only return IPv4 addresses, while the WebRTC-discovery
+    protocol will also find the nodes IPv6 addresses. We thus SSH to each node and query its interface
+    list for all IPs it'll answer on.
+    """
     ip_regex = re.compile(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
     for role, hostname_or_ip in role_map.items():
         if not ip_regex.match(hostname_or_ip):
+            # Not an IP in the role map, let's find the IPs
             ips = []
             ipv4_addr_out = check_output([
                 'ssh',
                 '-o StrictHostKeyChecking=no',
-                'tarjeikl@%s' % hostname_or_ip,
+                hostname_or_ip,
                 "ifconfig | grep -o 'inet addr:[^ ]*' | cut -d: -f2 | grep -v 127.0.0.1"])
             ips += ipv4_addr_out.strip().split('\n')
             ipv6_out = check_output([
                 'ssh',
                 '-o StrictHostKeyChecking=no',
-                'tarjeikl@%s' % hostname_or_ip,
+                hostname_or_ip,
                 "ifconfig | grep -o \"inet6 addr: [^ ]*\" | cut -d' ' -f3 | grep -v '^fe80' | grep -v '^::1'"])
             ips += ipv6_out.strip().split('\n')
             # Probably a hostname, resolve it and use the IP in the role map
