@@ -9,6 +9,7 @@ from subprocess import call as _call, check_output
 
 
 TC=["sudo", "tc"]
+SSH_PORT = 3271
 
 
 cases = {
@@ -146,12 +147,14 @@ def ipify_role_map(role_map):
                 'ssh',
                 '-o StrictHostKeyChecking=no',
                 hostname_or_ip,
+                '-p %d' % SSH_PORT,
                 "ifconfig | grep -o 'inet addr:[^ ]*' | cut -d: -f2 | grep -v 127.0.0.1"])
             ips += ipv4_addr_out.strip().split('\n')
             ipv6_out = check_output([
                 'ssh',
                 '-o StrictHostKeyChecking=no',
                 hostname_or_ip,
+                '-p %d' % SSH_PORT,
                 "ifconfig | grep -o \"inet6 addr: [^ ]*\" | cut -d' ' -f3 | grep -v '^fe80' | grep -v '^::1'"])
             ips += ipv6_out.strip().split('\n')
             # Probably a hostname, resolve it and use the IP in the role map
