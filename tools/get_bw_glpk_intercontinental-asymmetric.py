@@ -242,7 +242,7 @@ def solve_case(args, number_of_edges):
                 # Assume nothing exceeds gigabit speeds, not even backbone links
                 if edge == 0:
                     variables.setdefault(node, {}).setdefault(other_node, []).append([])
-                variables.setdefault(node, {}).setdefault(other_node, [])[-1].append(LpVariable('%sto%sK%dC%d' % (node, other_node, commodity, edge),
+                variables[node][other_node][-1].append(LpVariable('%sto%sK%dC%d' % (node, other_node, commodity, edge),
                     lowBound=0, upBound=1000, cat=LpInteger))
 
 
