@@ -249,12 +249,14 @@ def add_repeater_flow_conservation(variables):
             if commodity.sender == node:
                 left_side += variables[proxy][repeater][commodity][0]
                 right_side.append(variables[repeater][commodity.receiver + 'proxy'][commodity][0])
+
+                # Never send traffic back to source (hopefully not needed)
+                proxy_of_sending_node = commodity.sender + 'proxy'
+                add_constraint(variables[repeater][proxy_of_sending_node][commodity][0] == 0, 'Repeater flow')
+
         for outgoing in right_side:
             add_constraint(left_side == outgoing, 'Repeaterflow')
 
-        # Never send traffic back to source (hopefully not needed)
-        proxy_of_sending_node = commodity.sender + 'proxy'
-        add_constraint(variables[repeater][proxy_of_sending_node][commodity][0] == 0, 'Repeater flow')
 
 
 def get_constraints(variables):
