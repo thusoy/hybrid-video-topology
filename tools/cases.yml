@@ -1,0 +1,71 @@
+asia:
+    nodes:
+        A:
+            gain: 4 # Max quality percievable by this unit. 4=big monitor desktop, 3=laptop, 2=phone
+            downlink: '10Mbit'
+            uplink: '5Mbit'
+            B: '125ms 7ms'  # netem-compatible delay spec
+            C: '3ms 1ms'
+        B:
+            gain: 2
+            downlink: '2Mbit'
+            uplink: '1Mbit'
+            A: '125ms 7ms'
+            C: '130ms 10ms'
+        C:
+            gain: 3
+            downlink: '10Mbit'
+            uplink: '8Mbit'
+            A: '3ms 1ms'
+            B: '130ms 10ms'
+    repeaters:
+        rep_asia:
+            A: '130ms 5ms'
+            B: '20ms 2ms'
+            C: '110ms 4ms'
+            rep_eu: '130ms 2ms' # High-quality SLA-backed connection, how to specify?
+            #cost: '$.01/GB' # Roughly the cost pr GB at DigitalOcean
+#            'rep_eu': {
+#                'A': '15ms 1ms',
+#                'B': '2000ms 150ms',
+#                'C': '10ms 1ms',
+#                'rep_asia': '130ms 2ms', # High-quality SLA-backed connection, how to specify?
+#            }
+standup:
+    nodes:
+        A:
+            downlink: '10Mbit'
+            uplink: '10Mbit'
+            gain: 4
+            B: '5ms 2ms'
+            C: '7ms 2ms'
+            D: '47ms 3ms'
+        B:
+            downlink: '10Mbit'
+            uplink: '10Mbit'
+            gain: 4
+            A: '5ms 1ms'
+            C: '7ms 2ms'
+            D: '50ms 5ms'
+        C:
+            downlink: '5Mbit'
+            uplink: '2Mbit'
+            gain: 3
+            A: '7ms 2ms'
+            B: '7ms 1ms'
+            D: '40ms 5ms'
+        D:
+            downlink: '1Mbit'
+            uplink: '1Mbit'
+            gain: 2
+            A: '50ms 3ms'
+            B: '50ms 5ms'
+            C: '40ms 5ms'
+    repeaters:
+        rep_eu:
+            A: '25ms 2ms'
+            B: '20ms 1ms'
+            C: '40ms 2ms'
+            D: '60ms 4ms'
+            #'rep_eu': '130ms 2ms', # High-quality SLA-backed connection, how to specify?
+            #'cost': '$.01/GB', # Roughly the cost pr GB at DigitalOcean
