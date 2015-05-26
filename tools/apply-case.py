@@ -186,13 +186,18 @@ def activate_role(role, role_map, case):
 
 def add_roots(downlink, uplink):
     device = get_interface_device()
-    call(TC + ['qdisc', 'add', 'dev', device, 'root', 'handle', '1:', 'htb'])
-    call(TC + ['class', 'add', 'dev', device, 'parent', '1:', 'classid', '1:1', 'htb', 'rate', '100Mbit'])
-    call(TC + ['class', 'add', 'dev', device, 'parent', '1:1', 'classid', '1:2', 'htb', 'rate', uplink])
+    # Limit uplink
+    call(TC + ['qdisc', 'add', 'dev', device, 'root', 'handle', '1:', 'tbf', 'rate', uplink, 'buffer', '20000', 'limit', '30000'])
+    call(TC + ['qdisc', 'add', 'dev', device, 'parent', '1:', 'handle', '2:', 'htb'])
+
+    # Limit downlink. This effectively limits UDP to the given downlink bandwidth, but TCP will
+    # have lower performance, because of negative effects of the window size and the large delays.
+    # This doesn't matter in this case, as our traffic is UDP-based, but it's worth to keep it
+    # mind.
     call(TC + ['qdisc', 'add', 'dev', device, 'handle', 'ffff:', 'ingress'])
-    # This effectively limits UDP to the given downlink bandwidth, but TCP will have lower performance, because of negative effects of the window
-    # size and the large delays. This doesn't matter in this case, as our traffic is UDP-based, but it's worth to keep it mind.
-    call(TC + ['filter', 'add', 'dev', device, 'parent', 'ffff:', 'protocol', 'ip', 'prio', '50', 'u32', 'match', 'ip', 'src', '0.0.0.0/0', 'police', 'rate', downlink, 'burst', downlink, 'flowid', ':1'])
+    call(TC + ['filter', 'add', 'dev', device, 'parent', 'ffff:', 'protocol', 'ip', 'prio', '50',
+        'u32', 'match', 'ip', 'src', '0.0.0.0/0', 'police', 'rate', downlink, 'burst', downlink,
+        'flowid', ':1'])
 
 
 def add_role_rules(role, role_map, case):
@@ -206,17 +211,17 @@ def add_role_rules(role, role_map, case):
         delay_config_as_list = delay_config.split()
         if not other_role in role_map:
             raise ValueError('Role does not have a specified target in the role_map: %s' % other_role)
-        call(TC + ['class', 'add', 'dev', device, 'parent', '1:2', 'classid', '1:%d' % class_id, 'htb', 'rate', case[role]['uplink']])
-        call(TC + ['qdisc', 'add', 'dev', device, 'parent', '1:%d' % class_id, 'handle', '%s:' % handle_id, 'netem', 'delay'] + delay_config_as_list)
+        call(TC + ['class', 'add', 'dev', device, 'parent', '2:', 'classid', '2:%d' % class_id, 'htb', 'rate', case[role]['uplink']])
+        call(TC + ['qdisc', 'add', 'dev', device, 'parent', '2:%d' % class_id, 'handle', '%s:' % handle_id, 'netem', 'delay'] + delay_config_as_list)
         for ip in role_map[other_role]:
             if ipv4_regex.match(ip):
                 call(TC + ['filter', 'add', 'dev', device, 'protocol', 'ip',
-                    'parent', '1:0', 'prio', '3', 'u32', 'match', 'ip', 'dst',
-                    ip, 'flowid', '1:%d' % class_id])
+                    'parent', '2:0', 'prio', '3', 'u32', 'match', 'ip', 'dst',
+                    ip, 'flowid', '2:%d' % class_id])
             else:
                 call(TC + ['filter', 'add', 'dev', device, 'protocol', 'ipv6',
-                    'parent', '1:0', 'prio', '4', 'u32', 'match', 'ip6',
-                    'dst', ip, 'flowid', '1:%d' % class_id])
+                    'parent', '2:0', 'prio', '4', 'u32', 'match', 'ip6',
+                    'dst', ip, 'flowid', '2:%d' % class_id])
 
 
 def get_interface_device():
