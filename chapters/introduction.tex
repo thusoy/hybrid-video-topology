@@ -8,15 +8,6 @@ There are lots of competing products on the market today, with different charact
 
 The goal of this project is to maximize user utility in video conference solutions. To maximize utility, we need to have a well-defined sense of what that implies.
 
-\section{Previous and Related Work}
-
-\epigraph{If I have seen further, it is by standing on the shoulders of giants}{Isaac Newton}
-
-The problem we're facing is a derivation of several well-known problems in networking, and especially network flows. We'll thus borrow heavily from several flow algorithms in solving the routing problem.
-
-\todo{Linear programming solution? See wikipedia on minimum cost flow problems, minimum cost circulation problem, and check out Ahuja, Magnanti and Orlin: Network Flows, Theory, Algorithms and Applications, on Prentice-Hall. Also check out multi-commodity flow problems}
-
-
 
 \section{Context and utility}
 
@@ -119,5 +110,14 @@ We assume that the backend networks are not saturated, and that each user is ban
     }
     \caption{Example conversation ``business''}\label{fig:example-conv-business}
 \end{figure}
+
+
+\section{Previous and Related Work}
+
+\epigraph{If I have seen further, it is by standing on the shoulders of giants}{Isaac Newton}
+
+Networking and algorithms related to networking is not a new topic, by any stretch of the imagination, and like in all most branches of computer science, it's mostly old problems in a new context.
+
+During this thesis we will borrow heavily from previous work on networking and graph algorithms in general, and flow algorithms in particular. Many algorithmic problems can be solved as a linear program, which as a problem was first solved by Fourier in 1827\cite{sierksma2001linear}. Another solution, the simplex method, was first introduced by G.B. Dantzig in 1947\cite{sierksma2001linear}, and was first introduced to me in \cite{ahuja1988network} by Ahuja, Magnanti and Orlin, and serves as the basis for much of our suggested solution. The simplex method has been widely adopted for its ease of implementation on computers, and years of exponential growth of computer performance has made increasingly large problem sets solvable in realistic time.
 
 Now that we've established the problem domain and have some grasp of the main challenges, let's see where we are today.
