@@ -352,12 +352,17 @@ def print_solution(variables):
 
 def print_bandwidth_usage(variables):
     for node in nodes():
-        downlink_total = int(case['nodes'][node]['downlink'].strip('Mbit'))
-        uplink_total = int(case['nodes'][node]['uplink'].strip('Mbit'))
+        downlink_capacity = int(case['nodes'][node]['downlink'].strip('Mbit'))
+        uplink_capacity = int(case['nodes'][node]['uplink'].strip('Mbit'))
         proxy = node + 'proxy'
-        downlink_usage = sum(sum(edge.varValue for edge in variables[proxy][node][commodity]) for commodity in commodities())
-        uplink_usage = sum(sum(edge.varValue for edge in variables[node][proxy][commodity]) for commodity in commodities())
-        print '%s downlink: %.1f, uplink: %.1f' % (node, float(downlink_usage)/downlink_total, float(uplink_usage)/uplink_total)
+        downlink_used = sum(sum(edge.varValue for edge in
+            variables[proxy][node][commodity]) for commodity in commodities())
+        uplink_used = sum(sum(edge.varValue for edge in
+            variables[node][proxy][commodity]) for commodity in commodities())
+        downlink_percentage = float(downlink_used)/downlink_capacity
+        uplink_percentage = float(uplink_used)/uplink_capacity
+        print '%s downlink: %.1f, uplink: %.1f' % (node, downlink_percentage,
+            uplink_percentage)
 
 def solve_case(args, number_of_edges):
     variables = initialize_variables(number_of_edges)
@@ -373,7 +378,8 @@ def solve_case(args, number_of_edges):
 
     prob_type = LpMinimize if args.debug else LpMaximize
     prob = LpProblem("interkontinental-asymmetric", prob_type)
-    objective = get_objective(variables, number_of_edges) if not args.debug else sum(_debug_vars)
+    objective = get_objective(variables, number_of_edges) if not args.debug \
+        else sum(_debug_vars)
     logger.info('Objective: %s %s', LpSenses[prob.sense], objective)
     prob += objective
 
@@ -385,7 +391,8 @@ def solve_case(args, number_of_edges):
 
 
     for commodity in commodities():
-        print 'K%d: %s -> %s' % (commodity, commodity.sender, commodity.receiver)
+        print 'K%d: %s -> %s' % (commodity, commodity.sender,
+            commodity.receiver)
 
     if res < 0:
         print 'Unsolvable!'

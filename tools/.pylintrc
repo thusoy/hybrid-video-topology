@@ -1,2 +1,6 @@
 [MASTER]
-disable=missing-docstring
+disable=missing-docstring,
+    bad-continuation
+
+# Maximum number of characters on a single line.
+max-line-length=79
