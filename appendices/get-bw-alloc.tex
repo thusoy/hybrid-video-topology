@@ -1,0 +1,11 @@
+\chapter{The get-bw-alloc script}
+\label{chp:get-bw-alloc}
+
+This is the Python script introduced in the \autoref{chp:suggested-solution}, which computes the optimal video routing for a graph from a file of cases and a set of parameters.
+
+Necessary dependencies for running the script include the glpk LP solver (available for both Windows and *nix), and the python bindings provided by the \texttt{pulp} library\footnote{Install with \texttt{pip install pulp}}.
+
+\inputminted[linenos,
+               numbersep=5pt,
+               frame=lines,
+               framesep=2mm]{python}{tools/get_bw_glpk_intercontinental-asymmetric.py}

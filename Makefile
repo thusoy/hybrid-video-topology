@@ -9,7 +9,7 @@ full:
 	bibtex $(TEXFILE) && \
 	makeglossaries $(TEXFILE) && \
 	pdflatex --shell-escape $(TEXFILE) && \
-	pdflatex $(TEXFILE) && \
+	pdflatex --shell-escape $(TEXFILE) && \
 	cp $(TEXFILE).pdf report.pdf
 
 

@@ -1,9 +1,10 @@
 \documentclass{MScthesisITEM}
 
 % this package is just to generate text for demo-purposes
-\usepackage{blindtext}
 \usepackage{todonotes}
+\usepackage{minted}
 \usepackage{pgfplots}
+\usepackage{scrwfile}
 \usepackage[pdf,tmpdir]{graphviz}
 
 
@@ -122,6 +123,9 @@
 
 %% What remains: Security analysis, cost analysis, implementation, deployment, analysis in the dynamic case, adaptability
 \include{chapters/conclusions_future_work}
+
+%% The source code for the bw-alloc script
+\include{appendices/get-bw-alloc}
 
 \renewcommand*{\bibname}{References}
 \bibliographystyle{alpha}
