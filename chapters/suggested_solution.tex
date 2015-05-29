@@ -9,7 +9,46 @@ With some prior knowledge of graph algorithms, it might be an easy first guess t
 
 If we change perspective slightly, we see that this is not a single flow problem, but a \emph{series} of flow problems, sharing an underlying constrained resource. There's the problem of routing video from A to all other nodes, there's the problem of routing video from B to all other nodes, etc. In a conversation with $n$ participants, we now have $n$ separate flow problems, which all share the same resource. However, also this model is too limiting for our use case, as video is sent at a given bitrate, and this stream can neither be split at a given node without incurring a cost, nor does it make sense to add it; two 2Mbit videos cannot be joined to form a 4Mbit video. If you put enough restrictions on your nodes and edges it's probable that you might be able to able to prevent this from happening, but there's another way.\todo{Insert graph showing how this fails. Does it fail it any obvious way? With flow conservation on the nodes it doesn't seem like it, actually. But it might be harder to add restrictions on re-encoding later. Or it's a completely valid option, open for further investigation.}
 
-This time around, imagine that we have a separate flow problem for each \emph{pair} of nodes; we have one problem routing node A's video to node B, we have one problem routing node A's video to node C, etc. This yields a total of $n(n-1)$ problems, which is $O(n^2)$.
+This time around, imagine that we have a separate flow problem for each \emph{pair} of nodes; we have one problem routing node A's video to node B, we have one problem routing node A's video to node C, etc. This yields a total of $n(n-1)$ problems, which is $O(n^2)$. Modelling the problem this way means we don't have to add any supernodes to connect the targets, each node can act as sink for the video stream, hereafter known as the \emph{commodity}, destined for itself.
+
+One other thing we notice from our initial graph compared to traditional flow problems is that we notice that we have \emph{node constraints} in the initial graph, while flow problems only work on \emph{edge constraints}. To accomodate this, we split each node into two parts, hereafter called the public and private part, as illustrated in \autoref{fig:node-splitting}.
+
+\todo[inline]{Insert node splitting figure}
+\begin{figure}[ht!]
+\centering
+    \digraph{nodesplittingpre}{
+        edge [dir=none];
+        rankdir=LR;
+        a [label="A (20/5)"];
+        b [label="B (30/15)"];
+
+        a -> b [label="8ms"];
+        b -> a [label="7ms"];
+    }
+    \caption{Initial problem}
+\end{figure}
+
+\begin{figure}[ht!]
+\centering
+    \digraph{nodesplittingpost}{
+        edge [dir=none];
+        rankdir=LR;
+        aprivate [label="A private"];
+        apublic [label="A public"];
+        bprivate [label="B private"];
+        bpublic [label="B public"];
+
+        aprivate -> apublic [label="0/5Mbit"];
+        apublic -> aprivate [label="0/20Mbit"];
+
+        apublic -> bpublic [label="8ms"];
+        bpublic -> apublic [label="7ms"];
+
+        bprivate -> bpublic [label="0/15Mbit"];
+        bpublic -> bprivate [label="0/30Mbit"];
+    }
+    \caption{Problem after node splitting}
+\end{figure}
 
 
 \subsection{Alternative model}
