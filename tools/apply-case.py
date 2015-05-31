@@ -11,102 +11,22 @@ from subprocess import call as _call, check_output
 TC=["sudo", "tc"]
 SSH_PORT = 3271
 
-
-cases = {
-    'asia': {
-        '1': {
-            'downlink': '10Mbit',
-            'uplink': '5Mbit',
-            '2': '125ms 7ms',  # netem-compatible delay spec
-            '3': '3ms 1ms'
-        },
-        '2': {
-            'downlink': '2Mbit',
-            'uplink': '1Mbit',
-            '1': '125ms 7ms',
-            '3': '130ms 10ms'
-        },
-        '3': {
-            'downlink': '10Mbit',
-            'uplink': '8Mbit',
-            '1': '3ms 1ms',
-            '2': '130ms 10ms',
-        }
-    },
-    'standup': {
-        '1': {
-            'downlink': '10Mbit',
-            'uplink': '10Mbit',
-            '2': '5ms 2ms',
-            '3': '7ms 2ms',
-            '4': '47ms 3ms'
-        },
-        '2': {
-            'downlink': '10Mbit',
-            'uplink': '10Mbit',
-            '1': '5ms 1ms',
-            '3': '7ms 2ms',
-            '4': '50ms 5ms',
-        },
-        '3': {
-            'downlink': '5Mbit',
-            'uplink': '2Mbit',
-            '1': '7ms 2ms',
-            '2': '7ms 1ms',
-            '4': '40ms 5ms',
-        },
-        '4': {
-            'downlink': '1Mbit',
-            'uplink': '512kbit',
-            '1': '50ms 3ms',
-            '2': '50ms 5ms',
-            '3': '40ms 5ms',
-        }
-    },
-    'sitdown': {
-        '1': {
-            'downlink': '10Mbit',
-            'uplink': '10Mbit',
-            '2': '8ms 3ms',
-            '3': '10ms 2ms',
-            '4': '9ms 2ms',
-        },
-        '2': {
-            'downlink': '3Mbit',
-            'uplink': '2Mbit',
-            '1': '7ms 2ms',
-            '3': '9ms 2ms',
-            '4': '7ms 2ms',
-        },
-        '3': {
-            'downlink': '5Mbit',
-            'uplink': '2Mbit',
-            '1': '10ms 2ms',
-            '2': '9ms 2ms',
-            '4': '10ms 2ms',
-        },
-        '4': {
-            'downlink': '2Mbit',
-            'uplink': '1Mbit',
-            '1': '9ms 2ms',
-            '2': '8ms 2ms',
-            '3': '10ms 2ms',
-        }
-    },
-    'friends': {
-        # Add this later
-    }
-}
-
 default_rolemap = {
-    '1': 'a.cluster.thusoy.com',
-    '2': 'b.cluster.thusoy.com',
-    '3': 'c.cluster.thusoy.com',
-#    '4': 'd.cluster.thusoy.com',
+    'A': 'a.cluster.thusoy.com',
+    'B': 'b.cluster.thusoy.com',
+    'C': 'c.cluster.thusoy.com',
+#    'D': 'd.cluster.thusoy.com',
 }
+
+
+def load_cases(case_file):
+    with open(case_file) as fh:
+        return yaml.load(fh)
 
 
 def main():
+    default_case_file = os.path.join(os.path.dirname(__file__), 'cases.yml')
+    cases = load_cases(default_case_file)
     parser = argparse.ArgumentParser(prog='case-asia')
     parser.add_argument('-m', '--role-map', help='A mapping of roles to ip addresses',
         default=default_rolemap)
