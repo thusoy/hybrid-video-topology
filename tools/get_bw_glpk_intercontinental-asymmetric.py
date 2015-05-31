@@ -146,6 +146,28 @@ def dump_nonzero_variables(prob):
     print '\n'.join('%s = %s' % (v.name, v.varValue) for v in prob.variables() if v.varValue)
 
 
+def get_edge_latency(node, other_node):
+    """ Get latency of edge between node and other_node. If that is not specified in the case spec,
+    latency from other_node to node will be returned if present.
+    """
+    if node.startswith('rep'):
+        other_actual_node = other_node[0]
+        edge_latency = int(case['repeaters'][node][other_actual_node].split()[0].strip('ms'))
+    elif other_node.startswith('rep'):
+        other_actual_node = node[0]
+        edge_latency = int(case['repeaters'][other_node][other_actual_node].split()[0].strip('ms'))
+    elif 'proxy' in node and 'proxy' in other_node:
+        try:
+            edge_latency = int(case['nodes'][node[0]][other_node[0]].split()[0].strip('ms'))
+        except:
+            # A -> B not defined, lookup B -> A
+            edge_latency = int(case['nodes'][other_node[0]][node[0]].split()[0].strip('ms'))
+    else:
+        # TODO: Add edge cost for parallell edges between proxies and their nodes
+        edge_latency = 0
+    return edge_latency
+
+
 def get_objective(variables, number_of_edges):
     objective = 0
     for node, other_node in node_pairs():
@@ -159,18 +181,7 @@ def get_objective(variables, number_of_edges):
 
     for commodity, (node, other_node) in product(commodities(), edges()):
         # Subtract edge cost from objective
-        if node.startswith('rep') or other_node.startswith('rep'):
-            if node.startswith('rep'):
-                other_actual_node = other_node[0]
-                edge_latency = int(case['repeaters'][node][other_actual_node].split()[0].strip('ms'))
-            else:
-                other_actual_node = node[0]
-                edge_latency = int(case['repeaters'][other_node][other_actual_node].split()[0].strip('ms'))
-        elif 'proxy' in node and 'proxy' in other_node:
-            edge_latency = int(case['nodes'][node[0]][other_node[0]].split()[0].strip('ms'))
-        else:
-            # TODO: Add edge cost for parallell edges between proxies and their nodes
-            edge_latency = 0
+        edge_latency = get_edge_latency(node, other_node)
         for edge in variables[node][other_node][commodity]:
             objective -= edge_latency*edge
 
@@ -339,14 +350,8 @@ def print_solution(variables):
             print ' -> '.join(p for p  in path), ',',
             for index, edge in enumerate(path[1:], 1):
                 flow = sum(edge.varValue for edge in variables[path[index-1]][path[index]][commodity])
-                if 'proxy' in path[index] and 'proxy' in path[index-1]:
-                    # It's an edge between two proxies, ie. it has a latency cost
-                    # which can be found from the case
-                    cost += int(case['nodes'][path[index-1][0]][path[index][0]].split()[0].strip('ms'))
-                elif 'rep' in path[index] and 'proxy' in path[index-1]:
-                    cost += int(case['repeaters'][path[index]][path[index-1][0]].split()[0].strip('ms'))
-                elif 'proxy' in path[index] and 'rep' in path[index-1]:
-                    cost += int(case['repeaters'][path[index-1]][path[index][0]].split()[0].strip('ms'))
+                sender, receiver = path[index-1], path[index]
+                cost += get_edge_latency(sender, receiver)
             print 'Flow: %s, cost: %dms' % (flow, cost)
 
 
