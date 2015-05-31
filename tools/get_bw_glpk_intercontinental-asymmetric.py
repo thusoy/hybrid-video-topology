@@ -12,6 +12,12 @@ logger = logging.getLogger('hytop')
 case = None
 constraints = []
 
+device_gain = {
+    'desktop': 4,
+    'laptop': 3,
+    'tablet': 2,
+    'mobile': 1,
+}
 
 class Commodity(int):
     def set_pair(self, sender, receiver):
@@ -175,7 +181,9 @@ def get_objective(variables, number_of_edges):
         other_proxy = other_node + 'proxy'
         for edge in range(number_of_edges):
             # Add bandwidth-gains to objective
-            objective += 10*case['nodes'][other_node]['gain'] * variables[other_proxy][other_node][commodity][edge]
+            device_class = case['nodes'][other_node]['class']
+            gain = device_gain[device_class]
+            objective += 10 * gain * variables[other_proxy][other_node][commodity][edge]
             # TODO: Subtract incoming flow to the source node from objective?
 
 
