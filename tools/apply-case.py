@@ -203,10 +203,10 @@ def add_roots(downlink, uplink):
 def add_role_rules(role, role_map, case):
     device = get_interface_device()
     ipv4_regex = re.compile(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
-    for other_role, delay_config in case[role].items():
+    for role_num, (other_role, delay_config) in enumerate(1, sorted(case[role].items(), key=lambda t: t[0])):
         if other_role in ('uplink', 'downlink'):
             continue
-        class_id = int(other_role)*10
+        class_id = role_num*10
         handle_id = str(class_id) + '1'
         delay_config_as_list = delay_config.split()
         if not other_role in role_map:
