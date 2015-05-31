@@ -69,3 +69,90 @@ standup:
             D: '60ms 4ms'
             #'rep_eu': '130ms 2ms', # High-quality SLA-backed connection, how to specify?
             #'cost': '$.01/GB', # Roughly the cost pr GB at DigitalOcean
+
+sitdown:
+    nodes:
+        A:
+            downlink: 10Mbit
+            uplink: 10Mbit
+            class: desktop
+            B: 8ms 3ms
+            C: 10ms 2ms
+            D: 9ms 2ms
+        B:
+            downlink: 3Mbit
+            uplink: 2Mbit
+            class: mobile
+            A: 7ms 2ms
+            C: 9ms 2ms
+            D: 7ms 2ms
+        C:
+            downlink: 5Mbit
+            uplink: 2Mbit
+            class: laptop
+            A: 10ms 2ms
+            B: 9ms 2ms
+            D: 10ms 2ms
+        D:
+            downlink: 2Mbit
+            uplink: 1Mbit
+            class: mobile
+            A: 9ms 2ms
+            B: 8ms 2ms
+            C: 10ms 2ms
+
+friends:
+    nodes:
+        A:
+            downlink: 15Mbit
+            uplink: 15Mbit
+            class: desktop
+            B: 2ms
+            C: 3ms
+            D: 70ms 4ms
+            E: 71ms 3ms
+            F: 70ms 4ms
+            G: 72ms 4ms
+        B:
+            downlink: 50Mbit
+            uplink: 50Mbit
+            class: desktop
+            C: 2ms
+            D: 70ms 4ms
+            E: 71ms 3ms
+            F: 70ms 4ms
+            G: 72ms 4ms
+        C:
+            downlink: 10Mbit
+            uplink: 2Mbit
+            class: laptop
+            D: 70ms 4ms
+            E: 71ms 3ms
+            F: 70ms 4ms
+            G: 72ms 4ms
+        D:
+            downlink: 10Mbit
+            uplink: 5Mbit
+            class: laptop
+            E: 4ms
+            F: 3ms
+            G: 2ms
+        E:
+            downlink: 10Mbit
+            uplink: 10Mbit
+            class: desktop
+            F: 2ms
+            G: 1ms
+        G:
+            downlink: 7Mbit
+            uplink: 3Mbit
+            class: tablet
+    repeaters:
+        rep_eu:
+            A: 68ms 3ms
+            B: 67ms 3ms
+            C: 69ms 2ms
+            D: 9ms 1ms
+            E: 11ms 1ms
+            F: 10ms 1ms
+            G: 14ms 2ms
