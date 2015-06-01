@@ -79,7 +79,7 @@ def ipify_role_map(role_map):
                 '-o StrictHostKeyChecking=no',
                 hostname_or_ip,
                 '-p %d' % SSH_PORT,
-                "ifconfig | grep -o \"inet6 addr: [^ ]*\" | cut -d' ' -f3 | grep -v '^fe80' | grep -v '^::1'"])
+                "ifconfig | grep -o \"inet6 addr: [^ ]*\" | cut -d' ' -f3 | grep -v '^fe80' | grep -v '^::1' || exit 0"])
             ips += ipv6_out.strip().split('\n')
             # Probably a hostname, resolve it and use the IP in the role map
             role_map[role] = ips
