@@ -326,72 +326,110 @@ def print_problem_constraints(prob):
                 if ' %s ' % (v.name,) in str(c):
                     print '\t%s' % c
 
+def find_path_between_nodes(variables, node, other_node):
+    commodity = commodity_from_nodes(node, other_node)
+    destination = node + 'proxy'
+    path = [other_node + 'proxy']
+    while path[-1] != destination:
+        # print path
+        path_hops, commodity = find_next_path_hops_and_commodity(variables,
+            path[-1], destination, commodity)
+        path.extend(path_hops)
+    else:
+        # Found path between nodes
+        path = list(reversed(path))
+        return path
+
+def find_next_path_hops_and_commodity(variables, origin, destination,
+    commodity):
+    incoming_paths = find_nodes_who_sends_commodity(variables, origin,
+        commodity)
+    if len(incoming_paths) == 2:
+        # There's a cycle (we go through another node), add the cycle and
+        # the actual exit to the path
+        return get_exit_path_from_proxy(variables, destination,
+            incoming_paths, commodity), commodity
+    elif len(incoming_paths) == 1:
+        return incoming_paths, commodity
+
+    else:
+        if not origin.startswith('rep'):
+            raise ValueError('Commodity K%d not found in to %s' % (commodity,
+                destination))
+        # Trace a repeater changing commodity type
+        commodity = find_mangled_commodity(variables, destination,
+            commodity.sender)
+        return find_path(variables, origin, destination, commodity), commodity
+
+def get_exit_path_from_proxy(variables, origin, incoming_paths, commodity):
+    path = []
+    # Check for cycle
+    for incoming_path in incoming_paths:
+        # Do we send to that node as well as receive -> cycle.
+        if any(edge.varValue for edge in
+            variables[origin][incoming_path][commodity]):
+                path.append(incoming_path)
+                path.append(origin)
+                break
+
+    # Add non-cycle path
+    for incoming_path in incoming_paths:
+        if incoming_path not in path:
+            # The other non-cycle path
+            path.append(incoming_path)
+            break
+    return path
+
+def find_mangled_commodity(variables, repeater, sender):
+    all_node_commodities = [c for c in commodities() if c.sender == sender]
+    for c in all_node_commodities:
+        for sending_node, variable in variables.iteritems():
+            if repeater in variable and any(edge.varValue for edge in variable[repeater][c]):
+                return c
+    raise ValueError('Mangled commodity not found.')
+
+def find_path(variables, origin, destination, commodity):
+    path = []
+    last_node_found = origin
+    while last_node_found != destination:
+        sending_nodes = find_nodes_who_sends_commodity(variables, last_node_found, commodity)
+        if sending_nodes:
+            last_node_found = sending_nodes[0]
+        else:
+            raise ValueError('No path found after repeater change, '
+                'path: %s, origin: %s, dest: %s, c: %s' % (path, origin, destination, commodity))
+        path.append(last_node_found)
+    return path
+
+def find_nodes_who_sends_commodity(variables, destination, commodity):
+    sending_nodes = []
+    for search_node, variable in variables.iteritems():
+        if destination in variable:
+            edges = variable[destination][commodity]
+            any_traffic = any(edge.varValue for edge in edges)
+            if any_traffic:
+                sending_nodes.append(search_node)
+    return sending_nodes
+
+
+def get_path_cost(variables, path, commodity):
+    cost = 0
+    for index, edge in enumerate(path[1:], 1):
+        sender, receiver = path[index-1], path[index]
+        cost += get_edge_latency(sender, receiver)
+    return cost
 
 def print_solution(variables):
     # Print the solution
     for node, other_node in node_pairs():
         commodity = commodity_from_nodes(node, other_node)
-        proxy = node + 'proxy'
-        other_proxy = other_node + 'proxy'
-        path = [other_proxy]
-        other_proxy = other_node + 'proxy'
-        while path[-1] != proxy:
-            incoming_paths = []
-            for search_node, variable in variables.iteritems():
-                if path[-1] in variable and any(edge.varValue for edge in variable[path[-1]][commodity]):
-                    # search_node has a path to the last node we found
-                    incoming_paths.append(search_node)
-            # Check for cycle
-            for incoming_path in incoming_paths:
-                # Do we send to that node as well as receive -> cycle.
-                if any(edge.varValue for edge in variables[path[-1]][incoming_path][commodity]):
-                    path.append(incoming_path)
-                    path.append(path[-2])
-
-            # Add non-cycle path
-            for incoming_path in incoming_paths:
-                if incoming_path not in path:
-                    # The other non-cycle path
-                    path.append(incoming_path)
-
-            if not incoming_paths:
-                if not path[-1].startswith('rep'):
-                    print 'Commodity K%d not found in to %s' % (commodity, path[-1])
-                    break
-                # Trace a repeater changing commodity type
-                all_node_commodities = [c for c in commodities() if c.sender == node and c != commodity]
-                origin_commodity = None
-                for c in all_node_commodities:
-                    for sending_node, variable in variables.iteritems():
-                        if path[-1] in variable and any(edge.varValue for edge in variable[path[-1]][c]):
-                            origin_commodity = c
-                            break
-                if origin_commodity is None:
-                    print path
-                assert origin_commodity is not None, "Didn't find mangled commodity"
-                while path[-1] != proxy:
-                    for search_node, variable in variables.iteritems():
-                        if path[-1] in variable and any(edge.varValue for edge in variable[path[-1]][origin_commodity]):
-                            path.append(search_node)
-                            break
-                    else:
-                        print 'No path found after repeater change, path: %s' % path
-                        break
-
-                if path[-1] != proxy:
-                    break
-        else:
-            # Found path between nodes
-            print '%s til %s (K%d):' % (node, other_node, commodity),
-            cost = 0
-            path = list(reversed(path))
-            print ' -> '.join(p for p  in path), ',',
-            for index, edge in enumerate(path[1:], 1):
-                flow = sum(edge.varValue for edge in variables[path[index-1]][path[index]][commodity])
-                sender, receiver = path[index-1], path[index]
-                cost += get_edge_latency(sender, receiver)
-            print 'Flow: %s, cost: %dms' % (flow, cost)
-
+        path = find_path_between_nodes(variables, node, other_node)
+        cost = get_path_cost(variables, path, commodity)
+        flow = sum(edge.varValue for edge in
+            variables[path[-2]][path[-1]][commodity])
+        path_as_str = ' -> '.join(path)
+        print '%s til %s (K%d): %s, flow: %d, cost: %dms' % (node, other_node,
+            commodity, path_as_str, flow, cost)
 
 def print_bandwidth_usage(variables):
     for node in nodes():
