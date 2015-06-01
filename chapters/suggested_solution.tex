@@ -11,7 +11,7 @@ If we change perspective slightly, we see that this is not a single flow problem
 
 This time around, imagine that we have a separate flow problem for each \emph{pair} of nodes; we have one problem routing node A's video to node B, we have one problem routing node A's video to node C, etc. This yields a total of $n(n-1)$ problems, which is $O(n^2)$. Modelling the problem this way means we don't have to add any supernodes to connect the targets, each node can act as sink for the video stream, hereafter known as the \emph{commodity}, destined for itself.
 
-One other thing we notice from our initial graph compared to traditional flow problems is that we notice that we have \emph{node constraints} in the initial graph, while flow problems only work on \emph{edge constraints}. To accomodate this, we split each node into two parts, hereafter called the public and private part, as illustrated in \autoref{fig:node-splitting}.
+One other thing we notice from our initial graph compared to traditional flow problems is that we notice that we have \emph{node constraints} in the initial graph, while flow problems only work on \emph{edge constraints}. To accommodate this, we split each node into two parts, hereafter called the external and internal part, as illustrated in \autoref{fig:node-splitting}.
 
 \todo[inline]{Insert node splitting figure}
 \begin{figure}[ht!]
@@ -31,24 +31,23 @@ One other thing we notice from our initial graph compared to traditional flow pr
 \begin{figure}[ht!]
 \centering
     \digraph{nodesplittingpost}{
-        edge [dir=none];
         rankdir=LR;
-        aprivate [label="A private"];
-        apublic [label="A public"];
-        bprivate [label="B private"];
-        bpublic [label="B public"];
+        aext [label="A ext"];
+        aint [label="A int"];
+        bext [label="B ext"];
+        bint [label="B int"];
 
-        aprivate -> apublic [label="0/5Mbit"];
-        apublic -> aprivate [label="0/20Mbit"];
+        aint -> aext [label="5Mbit"];
+        aext -> aint [label="20Mbit"];
 
-        apublic -> bpublic [label="8ms"];
-        bpublic -> apublic [label="7ms"];
+        aext -> bext [label="8ms"];
+        bext -> aext [label="7ms"];
 
-        bprivate -> bpublic [label="0/15Mbit"];
-        bpublic -> bprivate [label="0/30Mbit"];
+        bint -> bext [label="15Mbit"];
+        bext -> bint [label="30Mbit"];
     }
     \caption{Problem after node splitting}
-\end{figure}
+\end{figure}\todo{[minor]: Make both arrows bendy?}
 
 
 \subsection{Alternative model}
