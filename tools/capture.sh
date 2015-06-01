@@ -17,7 +17,7 @@ clock_pid=$!
 trap cleanup INT
 
 function cleanup () {
-    echo -e "\$session_id/$my_ip"
+    echo -e "\n$session_id/$my_ip"
     kill -9 $clock_pid
     sudo kill -INT $tcpdump_pid
     exit $?
