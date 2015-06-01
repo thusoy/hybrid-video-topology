@@ -18,8 +18,8 @@ trap cleanup INT
 
 function cleanup () {
     echo -e "\nStopping children..."
-    kill -INT $clock_pid
-    kill -INT $tcpdump_pid
+    kill -9 $clock_pid
+    sudo kill -INT $tcpdump_pid
     exit $?
 }
 
