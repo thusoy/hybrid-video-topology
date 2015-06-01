@@ -4,10 +4,12 @@
 session_id=$(hostname)-$(date +"%s")
 
 # Print which role we're configured as
-grep $(hostname) apply-case.py
+# grep $(hostname) apply-case.py
+
+iface=$(ifconfig | grep "inet addr:$(curl canhazip.com)" -B1 | head -1 | cut -d" " -f1)
 
 # Start sniffing traffic to reconstruct bandwidth usage between peers, excluding some common spammy services (ssh, spotify, name lookups, ssdp)
-sudo tcpdump -nNqtts68 "port not 3271 and port not 17500 and port not 137 and port not 138 and port not 1900 and (udp or tcp)" -w /tmp/$session-id.pcap &
+sudo tcpdump -i $iface -nNqtts68 "port not 3271 and port not 17500 and port not 137 and port not 138 and port not 1900 and (udp or tcp)" -w /tmp/$session-id.pcap &
 tcpdump_pid=$!
 
 python clock.py &
