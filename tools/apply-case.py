@@ -103,8 +103,8 @@ def get_my_ip():
 def activate_role(role, role_map, case):
     print 'Activating role %s' % role
     clear_all_rules()
-    uplink = case[role]['uplink']
-    downlink = case[role]['downlink']
+    uplink = case['nodes'][role]['uplink']
+    downlink = case['nodes'][role]['downlink']
     add_roots(downlink, uplink)
     add_role_rules(role, role_map, case)
 
@@ -128,7 +128,7 @@ def add_roots(downlink, uplink):
 def add_role_rules(role, role_map, case):
     device = get_interface_device()
     ipv4_regex = re.compile(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
-    for role_num, (other_role, delay_config) in enumerate(1, sorted(case[role].items(), key=lambda t: t[0])):
+    for role_num, (other_role, delay_config) in enumerate(1, sorted(case['nodes'][role].items(), key=lambda t: t[0])):
         if other_role in ('uplink', 'downlink'):
             continue
         class_id = role_num*10
@@ -136,7 +136,7 @@ def add_role_rules(role, role_map, case):
         delay_config_as_list = delay_config.split()
         if not other_role in role_map:
             raise ValueError('Role does not have a specified target in the role_map: %s' % other_role)
-        call(TC + ['class', 'add', 'dev', device, 'parent', '2:', 'classid', '2:%d' % class_id, 'htb', 'rate', case[role]['uplink']])
+        call(TC + ['class', 'add', 'dev', device, 'parent', '2:', 'classid', '2:%d' % class_id, 'htb', 'rate', case['nodes'][role]['uplink']])
         call(TC + ['qdisc', 'add', 'dev', device, 'parent', '2:%d' % class_id, 'handle', '%s:' % handle_id, 'netem', 'delay'] + delay_config_as_list)
         for ip in role_map[other_role]:
             if ipv4_regex.match(ip):
