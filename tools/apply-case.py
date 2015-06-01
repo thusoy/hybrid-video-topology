@@ -15,7 +15,10 @@ default_rolemap = {
     'A': 'a.cluster.thusoy.com',
     'B': 'b.cluster.thusoy.com',
     'C': 'c.cluster.thusoy.com',
-#    'D': 'd.cluster.thusoy.com',
+    'D': 'd.cluster.thusoy.com',
+    'E': 'e.cluster.thusoy.com',
+    'F': 'f.cluster.thusoy.com',
+    'G': 'g.cluster.thusoy.com',
 }
 
 
@@ -55,7 +58,7 @@ def clear_all_rules():
 
 def ipify_role_map(role_map):
     """ Needed since a DNS lookup usually will only return IPv4 addresses, while the WebRTC-discovery
-    protocol will also find the nodes IPv6 addresses. We thus SSH to each node and query its interface
+    protocol will also find the node's IPv6 addresses. We thus SSH to each node and query its interface
     list for all IPs it'll answer on.
     """
     ip_regex = re.compile(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
