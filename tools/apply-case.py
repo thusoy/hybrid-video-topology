@@ -46,7 +46,7 @@ def main():
         return
     case = cases[args.case]
     role_map = args.role_map
-    ipify_role_map(role_map)
+    ipify_role_map(role_map, case['nodes'].keys())
     role = args.role or get_role_from_ip(args.role_map)
     activate_role(role, args.role_map, case)
 
@@ -57,13 +57,14 @@ def clear_all_rules():
     call(TC + ['qdisc', 'del', 'dev', device, 'root'], silent=True)
 
 
-def ipify_role_map(role_map):
+def ipify_role_map(role_map, roles_in_use):
     """ Needed since a DNS lookup usually will only return IPv4 addresses, while the WebRTC-discovery
     protocol will also find the node's IPv6 addresses. We thus SSH to each node and query its interface
     list for all IPs it'll answer on.
     """
     ip_regex = re.compile(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
-    for role, hostname_or_ip in role_map.items():
+    for role in roles_in_use:
+        hostname_or_ip = role_map[role]
         if not ip_regex.match(hostname_or_ip):
             # Not an IP in the role map, let's find the IPs
             ips = []
