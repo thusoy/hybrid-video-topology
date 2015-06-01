@@ -124,23 +124,21 @@
 %% What remains: Security analysis, cost analysis, implementation, deployment, analysis in the dynamic case, adaptability
 \include{chapters/conclusions_future_work}
 
-%% The source code for the bw-alloc script
-\include{appendices/get-bw-alloc}
 
 \renewcommand*{\bibname}{References}
 \bibliographystyle{alpha}
 \bibliography{main}
 
-%% Uncomment the following if you have any appendix
-%\appendix
-%\addtocontents{toc}{
-% \protect\vspace{1em}
-% \protect\noindent \bfseries \appendixtocname\protect\par
-% \protect\vspace{-.5em}
-%}
-%\renewcommand{\chaptername}{\appendixname}
+\appendix
+\addtocontents{toc}{
+\protect\vspace{1em}
+\protect\noindent \bfseries \appendixtocname\protect\par
+\protect\vspace{-.5em}
+}
+\renewcommand{\chaptername}{\appendixname}
 
-%\include{appendices/<appendix>}
+%% The source code for the bw-alloc script
+\include{appendices/get-bw-alloc}
 
 
 \end{document}
