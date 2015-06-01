@@ -128,7 +128,7 @@ def add_roots(downlink, uplink):
 def add_role_rules(role, role_map, case):
     device = get_interface_device()
     ipv4_regex = re.compile(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
-    for role_num, (other_role, delay_config) in enumerate(1, sorted(case['nodes'][role].items(), key=lambda t: t[0])):
+    for role_num, (other_role, delay_config) in enumerate(sorted(case['nodes'][role].items(), key=lambda t: t[0]), 1):
         if other_role in ('uplink', 'downlink'):
             continue
         class_id = role_num*10
