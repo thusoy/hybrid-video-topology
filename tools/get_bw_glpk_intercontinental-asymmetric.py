@@ -1,7 +1,8 @@
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from itertools import chain, product
 from pdb import set_trace as trace
-from pulp import LpMinimize, LpMaximize, LpProblem, LpVariable, LpInteger, LpSenses, GLPK, value
+from pulp import (LpMinimize, LpMaximize, LpProblem, LpVariable, LpInteger,
+    LpSenses, GLPK, value)
 import argparse
 import logging
 import os
@@ -41,12 +42,14 @@ def main():
         action='store_true', default=False)
     parser.add_argument('-d', '--debug', help='Print debug information',
         action='store_true', default=False)
-    parser.add_argument('-s', '--slot-size', help='Set slot size to this size', default='512kbps')
+    parser.add_argument('-s', '--slot-size', help='Set slot size to this size',
+        default='512kbps')
     parser.add_argument('-e', '--edges', default=4, type=int,
         help='How many parallell edges to add between each pair of nodes')
     parser.add_argument('-c', '--case', choices=cases.keys(), default='asia')
     args = parser.parse_args()
-    logging.basicConfig(level=logging.INFO if args.verbose else logging.WARNING, stream=sys.stdout)
+    log_level = logging.INFO if args.verbose else logging.WARNING
+    logging.basicConfig(level=log_level, stream=sys.stdout)
     case = cases[args.case]
     solve_case(args, number_of_edges=args.edges)
 
@@ -73,7 +76,8 @@ def get_edges(number_of_slots, number_of_edges=4):
         slots = int(number_of_slots*(cutoff - utilization))
         utilization += utilization_step*slots
         edges.append(Edge(slots, utilization, cost(utilization)))
-    edges.append((number_of_slots-sum(edge.slots for edge in edges), 1, cost(1)))
+    utilized_slots = sum(edge.slots for edge in edges)
+    edges.append((number_of_slots - utilized_slots, 1, cost(1)))
     edges = [edge for edge in edges if edge.slots]
     return edges
 
@@ -83,10 +87,20 @@ def cost(utilization, punishment_factor=0.9):
     return 1/(1-punishment_factor*utilization)
 
 def get_cutoffs(partitions=4):
-    segments = sum(2**i for i in range(partitions)) # Exponentially smaller
-    segment_size = 1.0/segments
-    segs = [segment_size*2**i for i in range(partitions)] # Gives an array like [0.066667, 0.1333, 0.26667, 0.53] for partitions=4
-    cutoffs = [sum(segs[-1:-1-i:-1]) for i in range(1, partitions)] # Reverse the array and make each element a cumulative sum of foregoing elements
+    """ Find the cut-off points for partitioning something where each part is
+    twice as large as the previous.
+
+    >>> get_cutoffs(2)
+    [0.66]
+    """
+    number_of_segments = sum(2**i for i in range(partitions))
+    segment_size = 1.0/number_of_segments
+
+    # Create an array like [0.066667, 0.1333, 0.26667, 0.53] for partitions=4
+    segs = [segment_size*2**i for i in range(partitions)]
+
+    # Reverse the array and make each element a cumulative sum
+    cutoffs = [sum(segs[-1:-1-i:-1]) for i in range(1, partitions)]
     return cutoffs
 
 def node_pairs():
@@ -144,8 +158,8 @@ _debug_index = 0
 def debug():
     global _debug_index
     _debug_index += 1
-    _debug_vars.append(LpVariable('x%d' % _debug_index, lowBound=0))
-    _debug_vars.append(LpVariable('y%d' % _debug_index, lowBound=0))
+    _debug_vars.append(LpVariable('__debug__x%d' % _debug_index, lowBound=0))
+    _debug_vars.append(LpVariable('__debug__y%d' % _debug_index, lowBound=0))
     return _debug_vars[-1] - _debug_vars[-2]
 
 def dump_nonzero_variables(prob):
@@ -153,25 +167,24 @@ def dump_nonzero_variables(prob):
 
 
 def get_edge_latency(node, other_node):
-    """ Get latency of edge between node and other_node. If that is not specified in the case spec,
-    latency from other_node to node will be returned if present.
+    """ Get latency of edge between node and other_node. If that is not
+    specified in the case spec, latency from other_node to node will be
+    returned if present.
     """
     if node.startswith('rep'):
-        other_actual_node = other_node[0]
-        edge_latency = int(case['repeaters'][node][other_actual_node].split()[0].strip('ms'))
+        edge_latency = case['repeaters'][node][other_node[0]].split()[0]
     elif other_node.startswith('rep'):
-        other_actual_node = node[0]
-        edge_latency = int(case['repeaters'][other_node][other_actual_node].split()[0].strip('ms'))
+        edge_latency = case['repeaters'][other_node][node[0]].split()[0]
     elif 'proxy' in node and 'proxy' in other_node:
         try:
-            edge_latency = int(case['nodes'][node[0]][other_node[0]].split()[0].strip('ms'))
+            edge_latency = case['nodes'][node[0]][other_node[0]].split()[0]
         except:
             # A -> B not defined, lookup B -> A
-            edge_latency = int(case['nodes'][other_node[0]][node[0]].split()[0].strip('ms'))
+            edge_latency = case['nodes'][other_node[0]][node[0]].split()[0]
     else:
         # TODO: Add edge cost for parallell edges between proxies and their nodes
-        edge_latency = 0
-    return edge_latency
+        edge_latency = '0ms'
+    return int(edge_latency.strip('ms'))
 
 
 def get_objective(variables, number_of_edges):
@@ -183,7 +196,8 @@ def get_objective(variables, number_of_edges):
             # Add bandwidth-gains to objective
             device_class = case['nodes'][other_node]['class']
             gain = device_gain[device_class]
-            objective += 10 * gain * variables[other_proxy][other_node][commodity][edge]
+            edge_var = variables[other_proxy][other_node][commodity][edge]
+            objective += 10 * gain * edge_var
             # TODO: Subtract incoming flow to the source node from objective?
 
 
@@ -197,39 +211,46 @@ def get_objective(variables, number_of_edges):
 
 
 def initialize_variables(number_of_edges):
-    variables = {}
+    variables = defaultdict(lambda: defaultdict(list))
     # Initialize all edge variables
     for (node, other_node), commodity in product(edges(), commodities()):
-        bandwidth_limited = ('proxy' in node and node[0] == other_node) or ('proxy' in other_node and other_node[0] == node)
+        bandwidth_limited = ('proxy' in node and node[0] == other_node) or (
+            'proxy' in other_node and other_node[0] == node)
         parallell_edges = number_of_edges if bandwidth_limited else 1
         for edge in range(parallell_edges):
             # Assume nothing exceeds gigabit speeds, not even backbone links
             if edge == 0:
-                variables.setdefault(node, {}).setdefault(other_node, []).append([])
-            variables[node][other_node][-1].append(LpVariable('%sto%sK%dC%d' % (node, other_node, commodity, edge),
-                lowBound=0, upBound=1000, cat=LpInteger))
+                variables[node][other_node].append([])
+            variables[node][other_node][-1].append(LpVariable('%sto%sK%dC%d' %
+                (node, other_node, commodity, edge), lowBound=0, upBound=1000,
+                cat=LpInteger))
     return variables
 
 def add_bandwidth_conservation(variables):
     # Stay below bandwidth (capacities)
     for node in nodes():
         downlink_capacity = int(case['nodes'][node]['downlink'].strip('Mbit'))
-        add_constraint(sum(sum(variables[node+'proxy'][node][commodity]) for commodity in commodities()) <= downlink_capacity)
+        add_constraint(sum(sum(variables[node+'proxy'][node][commodity]) for
+            commodity in commodities()) <= downlink_capacity)
         uplink_capacity = int(case['nodes'][node]['uplink'].strip('Mbit'))
-        add_constraint(sum(sum(variables[node][node+'proxy'][commodity]) for commodity in commodities()) <= uplink_capacity)
+        add_constraint(sum(sum(variables[node][node+'proxy'][commodity]) for
+            commodity in commodities()) <= uplink_capacity)
 
 
 def add_all_commodities_must_be_sent_and_received_constraint(variables):
     # All commodities must be sent by the correct parties
-    # Note: Node should not need to send a commodity if a repeater does, and the
-    # repeater receives another commodity from this node
+    # Note: Node should not need to send a commodity if a repeater does, and
+    # the repeater receives another commodity from this node
     for commodity in commodities():
         proxy = commodity.sender + 'proxy'
         commodity_sources = sum(variables[commodity.sender][proxy][commodity])
         for repeater, proxy in product(repeaters(), proxies()):
             commodity_sources += sum(variables[repeater][proxy][commodity])
         add_constraint(commodity_sources >= 1)
-        add_constraint(sum(variables[commodity.receiver + 'proxy'][commodity.receiver][commodity]) >= 1)
+        node_ext = commodity.receiver + 'proxy'
+        node = commodity.receiver
+        all_incoming_edges = variables[node_ext][node][commodity]
+        add_constraint(sum(all_incoming_edges) >= 1)
 
 
 def add_proxy_flow_conservation(variables):
@@ -249,17 +270,22 @@ def add_proxy_flow_conservation(variables):
 
 def add_node_flow_conservation(variables):
     for commodity, node in product(commodities(), nodes()):
-        # Add flow conservation for nodes, make sure they can only be origin for their own commodity,
-        # and does not terminate their own commodities
+        # Add flow conservation for nodes, make sure they can only be origin
+        # for their own commodity, and does not terminate their own
+        # commodities
         # TODO: Does not allow nodes to re-encode data for now
         proxy = node + 'proxy'
-        if node != commodity.sender and node != commodity.receiver:
-            add_constraint(sum(variables[node][proxy][commodity]) == sum(variables[proxy][node][commodity]), 'Node')
-        elif node == commodity.sender:
-            add_constraint(sum(variables[proxy][node][commodity]) == 0, 'Node')
+        if node == commodity.sender:
+            received = sum(variables[proxy][node][commodity])
+            add_constraint(received == 0, 'Node')
+        elif node != commodity.receiver:
+            sent = sum(variables[node][proxy][commodity])
+            received = sum(variables[proxy][node][commodity])
+            add_constraint(sent == received, 'Node')
 
 def add_repeater_flow_conservation(variables):
-    # Repeaters repeat incoming commodities out to all proxies, converted to their desired commodity
+    # Repeaters repeat incoming commodities out to all proxies, mangled to
+    # their desired commodity
     for repeater, node in product(repeaters(), nodes()):
         proxy = node + 'proxy'
         left_side = 0
@@ -267,11 +293,13 @@ def add_repeater_flow_conservation(variables):
         for commodity in commodities():
             if commodity.sender == node:
                 left_side += variables[proxy][repeater][commodity][0]
-                right_side.append(variables[repeater][commodity.receiver + 'proxy'][commodity][0])
+                node_ext = commodity.receiver + 'proxy'
+                right_side.append(variables[repeater][node_ext][commodity][0])
 
                 # Never send traffic back to source (hopefully not needed)
-                proxy_of_sending_node = commodity.sender + 'proxy'
-                add_constraint(variables[repeater][proxy_of_sending_node][commodity][0] == 0, 'Repeater flow')
+                sender_ext = commodity.sender + 'proxy'
+                edge_var = variables[repeater][sender_ext][commodity][0]
+                add_constraint(edge_var == 0, 'Repeater flow')
 
         for outgoing in right_side:
             add_constraint(left_side == outgoing, 'Repeaterflow')
@@ -293,8 +321,10 @@ def get_constraints(variables):
 def print_problem_constraints(prob):
     print 'Problem constraints:'
     for v in prob.variables():
-        if v.varValue != 0.0 and (v.name.startswith('x') or v.name.startswith('y')):
-                print '\n'.join('\t' + str(c) for c in prob.constraints.values() if ' %s ' % (v.name,) in str(c))
+        if v.varValue and v.name.startswith('__debug__'):
+            for c in prob.constraints.values():
+                if ' %s ' % (v.name,) in str(c):
+                    print '\t%s' % c
 
 
 def print_solution(variables):
