@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Convert a pcap dump (stored in dropbox) to a csv which can be stored in the
+# repo for further processing
+
 filters=$(python -c "import sys; print ','.join(sys.argv[2:])" $@)
 
 tshark -r $1 -qz io,stat,1,$filters | sed "1,/0 <>/d" | tr -d "|" | python -c "
