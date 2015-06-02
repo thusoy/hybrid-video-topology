@@ -9,6 +9,14 @@ import socket
 import yaml
 from collections import defaultdict, namedtuple
 
+def main(data_files, cutoff=0):
+    role_map = load_role_map()
+    ip_map = create_ip_to_role_map(role_map)
+    results = read_data_sets(data_files, cutoff, ip_map)
+    properties = summarize_results(results)
+    latexify_properties(properties)
+
+
 def load_role_map():
     rolemap = os.path.join(os.path.dirname(__file__), 'rolemap.yml')
     with open(rolemap) as fh:
@@ -20,6 +28,7 @@ def create_ip_to_role_map(role_map):
     for role, hostname in role_map.items():
         ips[socket.gethostbyname(hostname)] = role
     return ips
+
 
 def read_data_sets(data_files, cutoff, ip_map):
     results = defaultdict(lambda: defaultdict(list))
@@ -39,13 +48,8 @@ def read_data_sets(data_files, cutoff, ip_map):
                     results[sending_role][role].append(float(value)*8)
     return results
 
-def main(data_files, cutoff=0):
-    role_map = load_role_map()
-    ip_map = create_ip_to_role_map(role_map)
-    results = read_data_sets(data_files, cutoff, ip_map)
-    latexify_results(results)
 
-def latexify_results(results):
+def summarize_results(results):
     properties = defaultdict(lambda: defaultdict(lambda: BitrateProperties(0, 0)))
     for sender in sorted(results):
         BitrateProperties = namedtuple('BitrateProperties', ['mean', 'stdev'])
@@ -54,7 +58,10 @@ def latexify_results(results):
             stdev = statistics.pstdev(values) if values else 0
             mean = statistics.mean(values) if values else 0
             properties[receiver][sender] = BitrateProperties(mean, stdev)
+    return properties
 
+
+def latexify_properties(properties):
     for receiver in sorted(properties):
         print('\\addplot+[error bars/.cd,y dir=both, y explicit]\ncoordinates{', end='')
         for sender in sorted(properties[receiver]):
