@@ -12,28 +12,22 @@ from subprocess import call as _call, check_output
 TC=["sudo", "tc"]
 SSH_PORT = 3271
 
-default_rolemap = {
-    'A': 'a.cluster.thusoy.com',
-    'B': 'b.cluster.thusoy.com',
-    'C': 'c.cluster.thusoy.com',
-    'D': 'd.cluster.thusoy.com',
-    'E': 'e.cluster.thusoy.com',
-    'F': 'f.cluster.thusoy.com',
-    'G': 'g.cluster.thusoy.com',
-}
-
 
 def load_cases(case_file):
     with open(case_file) as fh:
         return yaml.load(fh)
 
+def load_role_map(map_file):
+    with open(map_file) as fh:
+        return yaml.load(map_file)
+
 
 def main():
     default_case_file = os.path.join(os.path.dirname(__file__), 'cases.yml')
+    default_role_map = os.path.join(os.path.dirname(__file__), 'rolemap.yml')
     cases = load_cases(default_case_file)
+    role_map = load_role_map(default_role_map)
     parser = argparse.ArgumentParser(prog='case-asia')
-    parser.add_argument('-m', '--role-map', help='A mapping of roles to ip addresses',
-        default=default_rolemap)
     parser.add_argument('-r', '--role', help='Which role should be activated. Defaults to'
         'checking whether any role is associated with your IP address')
     parser.add_argument('-c', '--case', help='Which case to load', default='asia', choices=cases.keys())
@@ -45,7 +39,6 @@ def main():
         clear_all_rules()
         return
     case = cases[args.case]
-    role_map = args.role_map
     ipify_role_map(role_map, case['nodes'].keys())
     role = args.role or get_role_from_ip(args.role_map)
     activate_role(role, args.role_map, case)
