@@ -42,12 +42,30 @@
 }
 
 \pgfplotsset{every axis/.append style={
-                    axis x line=middle,    % put the x axis in the middle
-                    axis y line=middle,    % put the y axis in the middle
-                    axis line style={<->}, % arrows on the axis
-                    xlabel={$x$},          % default put x on x-axis
+                    % axis x line=middle,    % put the x axis in the middle
+                    % axis y line=middle,    % put the y axis in the middle
+                    % axis y line style={<->}, % arrows on the axis
+                    % xlabel={$x$},          % default put x on x-axis
+                    axis lines*=left,
+                    axis x line=center,
+                    y axis line style={->}, % arrows on the axis
+                    x axis line style={-},
                     ylabel={$y$},          % default put y on y-axis
                 }}
+
+% \definecolor{blues1}{RGB}{198, 219, 239}
+% \definecolor{blues2}{RGB}{158, 202, 225}
+% \definecolor{blues3}{RGB}{107, 174, 214}
+% \definecolor{blues4}{RGB}{49, 130, 189}
+% \definecolor{blues5}{RGB}{8, 81, 156}
+
+% \pgfplotscreateplotcyclelist{colorbrewer-blues}{
+%     {blues1},
+%     {blues2},
+%     {blues3},
+%     {blues4},
+%     {blues5},
+% }
 
 \begin{document}
 \listoftodos

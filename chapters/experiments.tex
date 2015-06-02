@@ -58,4 +58,36 @@ Using this partitioning as a guide, we can map any number of slots on a physical
 
 \section{Results}
 
+\todo[inline]{[minor] If time, define custom color set for graphing, based possibly either on solarized or http://clrs.cc/}
 \todo{Gather some metrics from running the implementation in a prod environment}
+
+\begin{tikzpicture}
+\begin{axis}[
+    ybar,
+    ylabel=Bitrate,
+    xtick=data,
+    symbolic x coords={A,B,C},
+    legend style={at={(0.5,-0.15)}, anchor=north,legend columns=-1},
+    enlargelimits=0.15
+    ]
+\addplot+[error bars/.cd,y dir=both, y explicit]
+coordinates{
+    (A,0) +- (0.0, 0)
+    (B,1484609) +- (0.0, 208950)
+    (C,1289517) +- (0.0, 488760)};
+
+\addplot+[error bars/.cd,y dir=both, y explicit]
+coordinates{
+    (A,1441354) +- (0.0, 27516)
+    (B,0) +- (0.0, 0)
+    (C,1527514) +- (0.0, 369720)};
+
+\addplot+[error bars/.cd,y dir=both, y explicit]
+coordinates{
+    (A,1446979) +- (0.0, 25559)
+    (B,1550429) +- (0.0, 260522)
+    (C,0) +- (0.0, 0)};
+
+\legend{A, B, C}
+\end{axis}
+\end{tikzpicture}
