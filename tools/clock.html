@@ -1,0 +1,46 @@
+<!doctype html>
+
+<title>Time</title>
+
+<style>
+html, body, h1 {
+    height: 100%;
+}
+
+h1 {
+    height: 10vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Courier", monospace;
+    font-size: 150px;
+}
+</style>
+
+<script>
+function pad(n, width, z) {
+  z = z || '0';
+  n = n + '';
+  return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
+function printTime() {
+    var now = new Date();
+    var timestring = pad(now.getSeconds(), 2) + "." + pad(now.getMilliseconds(), 3);
+    var header = document.getElementsByTagName('h1')[0];
+    header.innerHTML = timestring;
+    setTimeout(printTime, 1);
+}
+
+function printLoop() {
+    while (true) {
+        setTimeout(printTime, 1);
+    }
+}
+</script>
+
+<h1></h1>
+
+<script>
+printTime();
+</script>
