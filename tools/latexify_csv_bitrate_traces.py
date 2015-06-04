@@ -57,6 +57,8 @@ def summarize_results(results):
             values = results[sender][receiver]
             stdev = statistics.pstdev(values) if values else 0
             mean = statistics.mean(values) if values else 0
+            if sender != receiver:
+                print('Num measurements {} -> {}: {}'.format(sender, receiver, len(values)))
             properties[receiver][sender] = BitrateProperties(mean, stdev)
     return properties
 
