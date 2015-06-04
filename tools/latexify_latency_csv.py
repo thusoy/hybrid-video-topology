@@ -29,12 +29,15 @@ def get_latencies(input_file):
         reader = csv.DictReader(fh)
         for row in reader:
             timestamp = row.pop('Timestamp')
+            local_time = float(row.pop('Local time'))
             receiver_max = '0'
             receiver = None
             for role, value in row.items():
                 if value > receiver_max:
                     receiver = role
                     receiver_max = value
+                if float(value) > (local_time if local_time > 1 else local_time + 60):
+                    print('OBS: Possible erroneous reading at {}, local time was {:.3f}, measured value {:.3f}'.format(timestamp, local_time, float(value)))
             row.pop(receiver)
             for sender, value in row.items():
                 if value:
@@ -44,7 +47,7 @@ def get_latencies(input_file):
 
 
 def get_statistical_properties(latencies):
-    # {
+    # creates a dict like {
     #     'A': {
     #         'B': (mean, stdev),
     #     }
@@ -53,9 +56,10 @@ def get_statistical_properties(latencies):
     for receiver, sender_dict in latencies.items():
         for sender, measurements in sender_dict.items():
             values = [t[1] for t in measurements]
-            print(values)
             mean = statistics.mean(values)
             stdev = statistics.pstdev(values)
+            if any(value for value in values if abs(value - mean) > stdev):
+                print('OBS: Large offset at {}'.format(str([(timestamp, value) for timestamp, value in measurements if abs(value - mean) > stdev])))
             properties[receiver][sender] = (mean, stdev)
     return properties
 
