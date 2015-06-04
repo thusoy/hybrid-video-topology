@@ -20,7 +20,7 @@ def start_printing_time():
             t = now()
             print '%2.3f' % (t % 60),
             sys.stdout.flush()
-            time.sleep(0.005)
+            time.sleep(0.002)
             print '\r',
         except KeyboardInterrupt:
             break
