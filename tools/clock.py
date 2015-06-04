@@ -6,7 +6,7 @@ def print_clock_offset():
     ntpdate_output = subprocess.check_output([
         'ntpdate',
         '-q',
-        'no.pool.ntp.org',
+        'ntp.ntnu.no',
         ]).strip().split('\n')
     offset_start = ntpdate_output[-1].find('offset')
     return ntpdate_output[-1][offset_start:]
