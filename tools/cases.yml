@@ -34,29 +34,29 @@ asia:
 standup:
     nodes:
         A:
-            downlink: '10Mbit'
-            uplink: '10Mbit'
+            downlink: '30Mbit'
+            uplink: '20Mbit'
             class: desktop
             B: '5ms 2ms'
             C: '7ms 2ms'
             D: '47ms 3ms'
         B:
-            downlink: '10Mbit'
-            uplink: '10Mbit'
+            downlink: '30Mbit'
+            uplink: '15Mbit'
             class: desktop
             A: '5ms 1ms'
             C: '7ms 2ms'
             D: '50ms 5ms'
         C:
-            downlink: '5Mbit'
-            uplink: '2Mbit'
+            downlink: '8Mbit'
+            uplink: '6Mbit'
             class: laptop
             A: '7ms 2ms'
             B: '7ms 1ms'
             D: '40ms 5ms'
         D:
-            downlink: '1Mbit'
-            uplink: '1Mbit'
+            downlink: '6Mbit'
+            uplink: '3Mbit'
             class: tablet
             A: '50ms 3ms'
             B: '50ms 5ms'
@@ -123,29 +123,29 @@ friends:
             F: 70ms 4ms
             G: 72ms 4ms
         C:
-            downlink: 10Mbit
-            uplink: 2Mbit
+            downlink: 14Mbit
+            uplink: 8Mbit
             class: laptop
             D: 70ms 4ms
             E: 71ms 3ms
             F: 70ms 4ms
             G: 72ms 4ms
         D:
-            downlink: 10Mbit
-            uplink: 5Mbit
+            downlink: 15Mbit
+            uplink: 9Mbit
             class: laptop
             E: 4ms
             F: 3ms
             G: 2ms
         E:
-            downlink: 10Mbit
-            uplink: 10Mbit
+            downlink: 30Mbit
+            uplink: 20Mbit
             class: desktop
             F: 2ms
             G: 1ms
         G:
-            downlink: 7Mbit
-            uplink: 3Mbit
+            downlink: 9Mbit
+            uplink: 4Mbit
             class: tablet
     repeaters:
         rep_eu:
