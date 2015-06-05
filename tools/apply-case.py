@@ -15,7 +15,15 @@ SSH_PORT = 3271
 
 def load_cases(case_file):
     with open(case_file) as fh:
-        return yaml.load(fh)
+        cases = yaml.load(fh)
+    for case in cases.values():
+        for role in case['nodes']:
+            for other_role in case['nodes']:
+                if role == other_role:
+                    continue
+                if other_role not in case['nodes'][role]:
+                    case['nodes'][role][other_role] = case['nodes'][other_role][role]
+    return cases
 
 def load_role_map(map_file):
     with open(map_file) as fh:
