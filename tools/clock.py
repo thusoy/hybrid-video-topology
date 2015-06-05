@@ -18,7 +18,7 @@ def start_printing_time():
     while True:
         try:
             t = now()
-            print '%2.3f' % (t % 60),
+            print '%4.3f' % (t % 60),
             sys.stdout.flush()
             time.sleep(0.002)
             print '\r',
