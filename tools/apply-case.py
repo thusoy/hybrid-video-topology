@@ -40,8 +40,8 @@ def main():
         return
     case = cases[args.case]
     ipify_role_map(role_map, case['nodes'].keys())
-    role = args.role or get_role_from_ip(args.role_map)
-    activate_role(role, args.role_map, case)
+    role = args.role or get_role_from_ip(role_map)
+    activate_role(role, role_map, case)
 
 
 def clear_all_rules():
