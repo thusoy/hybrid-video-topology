@@ -19,7 +19,7 @@ def load_cases(case_file):
 
 def load_role_map(map_file):
     with open(map_file) as fh:
-        return yaml.load(map_file)
+        return yaml.load(fh)
 
 
 def main():
