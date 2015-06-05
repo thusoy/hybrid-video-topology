@@ -112,7 +112,7 @@ friends:
             D: 70ms 4ms
             E: 71ms 3ms
             F: 70ms 4ms
-            G: 72ms 4ms
+            G: 79ms 4ms
         B:
             downlink: 50Mbit
             uplink: 50Mbit
@@ -121,7 +121,7 @@ friends:
             D: 70ms 4ms
             E: 71ms 3ms
             F: 70ms 4ms
-            G: 72ms 4ms
+            G: 77ms 4ms
         C:
             downlink: 14Mbit
             uplink: 8Mbit
@@ -129,20 +129,25 @@ friends:
             D: 70ms 4ms
             E: 71ms 3ms
             F: 70ms 4ms
-            G: 72ms 4ms
+            G: 78ms 4ms
         D:
             downlink: 15Mbit
             uplink: 9Mbit
             class: laptop
             E: 4ms
             F: 3ms
-            G: 2ms
+            G: 4ms
         E:
             downlink: 30Mbit
             uplink: 20Mbit
             class: desktop
             F: 2ms
-            G: 1ms
+            G: 5ms
+        F:
+            downlink: 40Mbit
+            uplink: 30Mbit
+            class: desktop
+            G: 8ms
         G:
             downlink: 9Mbit
             uplink: 4Mbit
