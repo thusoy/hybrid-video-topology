@@ -1,0 +1,15 @@
+\chapter{apply-case.py script}
+\label{chp:apply-case}
+
+This is the script\footnote{Available online at \url{https://github.com/thusoy/hybrid-video-topology/blob/master/tools/apply-case.py}} used to limit available bandwidth and set up inter-node latencies in the test cluster. The script loads it's configuration from the same \texttt{cases.yml} case definition file as some of the other scripts. It then calls out to the Linux command \texttt{tc}, which instructs the kernel to assign the given parameters to outgoing traffic.
+
+Incoming traffic is only restricted in bandwidth, no latencies are being applied.
+
+The script automatically detects from the IP of the host running it which role it should be assigned in the case, which makes it fast and easy to script execution of the script across several machines. This is based on another YAML-file \texttt{rolemap.yml}, which holds a simple mapping from role names to their hostname. This enables the script to use the hostname of the current machine to find the role, and to use DNS to find the IP of the other machines, which is necessary as parameters to \texttt{tc}.
+
+\inputminted[
+    linenos,
+    numbersep=5pt,
+    frame=lines,
+    framesep=2mm]
+    {python}{tools/apply-case.py}

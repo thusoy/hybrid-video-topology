@@ -1,0 +1,11 @@
+\chapter{capture.sh}
+\label{chp:capture}
+
+The \texttt{capture.sh}\footnote{Available online at \url{https://github.com/thusoy/hybrid-video-topology/blob/master/tools/capture.sh}} script was executed on each of the machines in the cluster to start taking regular screenshots, and print the current local time to the terminal. This allowed calculating the end-to-end latency as the difference between the local current time (which was kept in sync between the nodes using a common nearby \gls{NTP} server) and the time sent by each of the nodes in the conversation. The observed times was later manually interpreted and noted down in a \gls{CSV} document, which was then used for further analysis. Manual interpretation was unavoidable since the timestamps was often overlayed with previous timestamps, due to several components in the end-to-end chain having refresh rates far larger than the millisecond accuracy we'd prefer.
+
+\inputminted[
+    linenos,
+    numbersep=5pt,
+    frame=lines,
+    framesep=2mm]
+    {bash}{tools/capture.sh}
