@@ -30,18 +30,22 @@ def get_latencies(input_file):
         for row in reader:
             timestamp = row.pop('Timestamp')
             local_time = float(row.pop('Local time'))
-            receiver_max = '0'
+            receiver_max = 0
             receiver = None
             for role, value in row.items():
+                value = float(value)
                 if value > receiver_max:
                     receiver = role
                     receiver_max = value
-                if float(value) > (local_time if local_time > 1 else local_time + 60):
+                if value > (local_time if local_time > 1 else local_time + 60):
                     print('OBS: Possible erroneous reading at {}, local time was {:.3f}, measured value {:.3f}'.format(timestamp, local_time, float(value)))
             row.pop(receiver)
             for sender, value in row.items():
                 if value:
                     latency = int(1000*(float(receiver_max) - float(value)))
+                    if latency < 0:
+                        print('Invalid reading between {} and {}: {} and {} (negative diff)'.format(receiver, sender, receiver_max, value))
+                        sys.exit(1)
                     latencies[receiver][sender].append((timestamp, latency))
     return latencies
 
@@ -57,8 +61,8 @@ def get_statistical_properties(latencies):
         for sender, measurements in sender_dict.items():
             values = [t[1] for t in measurements]
             mean = statistics.mean(values)
-            stdev = statistics.pstdev(values)
-            if any(value for value in values if abs(value - mean) > stdev):
+            stdev = statistics.stdev(values)
+            if any(value for value in values if abs(value - mean) > 2*stdev):
                 print('OBS: Large offset at {}'.format(str([(timestamp, value) for timestamp, value in measurements if abs(value - mean) > stdev])))
             properties[receiver][sender] = (mean, stdev)
     return properties
