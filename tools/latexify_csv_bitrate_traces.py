@@ -65,6 +65,7 @@ def summarize_results(results):
 
 def latexify_properties(properties):
     for receiver in sorted(properties):
+        print('%% Traffic received by {}'.format(receiver))
         print('\\addplot+[error bars/.cd,y dir=both, y explicit]\ncoordinates{', end='')
         for sender in sorted(properties[receiver]):
             prop = properties[receiver][sender]
