@@ -101,3 +101,84 @@ coordinates{
 \legend{A, B, C}
 \end{axis}
 \end{tikzpicture}
+
+
+For our first test case, "Asia", the bandwidth utilized by each node is shown insia-bitrate.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Bitrate,
+            xtick=data,
+            width=\textwidth,
+            symbolic x coords={A,B,C},
+            legend style={at={(0.5,-0.15)}, anchor=north,legend columns=-1},
+            enlargelimits=0.15
+            ]
+            %% Traffic received by A
+            \addplot+[error bars/.cd,y dir=both, y explicit]
+            coordinates{
+                (A,0) +- (0.0, 0)
+                (B,499012) +- (0.0, 7163)
+                (C,2146920) +- (0.0, 94119)};
+
+            %% Traffic received by B
+            \addplot+[error bars/.cd,y dir=both, y explicit]
+            coordinates{
+                (A,1466045) +- (0.0, 396215)
+                (B,0) +- (0.0, 0)
+                (C,2128002) +- (0.0, 175433)};
+
+            %% Traffic received by C
+            \addplot+[error bars/.cd,y dir=both, y explicit]
+            coordinates{
+                (A,1847944) +- (0.0, 247449)
+                (B,498988) +- (0.0, 5709)
+                (C,0) +- (0.0, 0)};
+            \legend{A, B, C}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Outgoing traffic from each node}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            compat=newest,
+            ylabel=Latency (ms),
+            xtick=data,
+            ymax=1000,
+            width=\textwidth,
+            symbolic x coords={A,B,C},
+            legend style={at={(0.5,-0.15)}, anchor=north,legend columns=-1},
+            enlargelimits=0.15,
+            nodes near coords=\raisebox{.3cm}{\pgfmathprintnumber{\pgfplotspointmeta}}
+            ]
+
+            \addplot+[error bars/.cd,y dir=both, y explicit]
+            coordinates{
+                (B,25186) +- (0.0, 7820)
+                (C,134) +- (0.0, 106)};
+
+            \addplot+[error bars/.cd,y dir=both, y explicit]
+            coordinates{
+                (A,47731) +- (0.0, 21209)
+                (C,47752) +- (0.0, 21196)};
+
+            \addplot+[error bars/.cd,y dir=both, y explicit]
+            coordinates{
+                (A,41) +- (0.0, 23)
+                (B,24047) +- (0.0, 6977)};
+            \legend{A, B, C}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Outgoing latencies for each node}
+    \end{subfigure}
+    \caption{Test results for the "asia" test case.}
+\end{figure}
