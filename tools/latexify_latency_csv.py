@@ -69,12 +69,16 @@ def get_statistical_properties(latencies):
 
 
 def latexify_properties(properties):
+    indent_unit = ' '*4
+    indent_level = 3
+    indent = indent_unit*indent_level
     for receiver in sorted(properties):
-        print('\\addplot+[error bars/.cd,y dir=both, y explicit]\ncoordinates{', end='')
-        for sender in sorted(properties[receiver]):
-            mean, stdev = properties[receiver][sender]
-            print('\n    ({sender},{value:.0f}) +- (0.0, {stdev:.0f})'.format(**{'sender': sender,
-                'value': mean, 'stdev': stdev}), end='')
+        print('{0}\\addplot+[error bars/.cd,y dir=both, y explicit]\n{0}coordinates{{'.format(indent),
+            end='')
+        for sender in sorted(properties):
+            mean, stdev = properties[receiver].get(sender, (0, 0))
+            print('\n{indent}({sender},{value:.0f}) +- (0.0, {stdev:.0f})'.format(**{'sender': sender,
+                'value': mean, 'stdev': stdev, 'indent': indent_unit*(indent_level+1)}), end='')
 
         print('};\n')
 

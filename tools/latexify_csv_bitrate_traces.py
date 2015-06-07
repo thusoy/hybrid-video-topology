@@ -64,13 +64,18 @@ def summarize_results(results):
 
 
 def latexify_properties(properties):
+    indent_unit = ' '*4
+    indent_level = 3
+    indent = indent_unit*indent_level
     for receiver in sorted(properties):
-        print('%% Traffic received by {}'.format(receiver))
-        print('\\addplot+[error bars/.cd,y dir=both, y explicit]\ncoordinates{', end='')
+        print('{}%% Traffic received by {}'.format(indent, receiver))
+        print('{0}\\addplot+[error bars/.cd,y dir=both, y explicit]\n{0}coordinates{{'.format(indent),
+            end='')
         for sender in sorted(properties[receiver]):
             prop = properties[receiver][sender]
-            print('\n    ({sender},{value:.0f}) +- (0.0, {stdev:.0f})'.format(**{'sender': sender,
-                'value': prop.mean, 'stdev': prop.stdev}), end='')
+            print('\n{indent}({sender},{value:.0f}) +- (0.0, {stdev:.0f})'.format(**{'sender': sender,
+                'value': prop.mean, 'stdev': prop.stdev, 'indent': indent_unit*(indent_level+1)}),
+                end='')
 
         print('};\n')
 
