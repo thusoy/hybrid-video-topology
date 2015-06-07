@@ -112,7 +112,7 @@ For our first test case, "Asia", the bandwidth utilized by each node is shown in
         \begin{tikzpicture}
         \begin{axis}[
             ybar,
-            ylabel=Bitrate,
+            ylabel=Bitrate (bps),
             xtick=data,
             width=\textwidth,
             symbolic x coords={A,B,C},
@@ -181,4 +181,101 @@ For our first test case, "Asia", the bandwidth utilized by each node is shown in
         \subcaption{Outgoing latencies for each node}
     \end{subfigure}
     \caption{Test results for the "asia" test case.}
+\end{figure}
+
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+    \begin{axis}[
+        ybar,
+        ylabel=Bitrate (bps),
+        xtick=data,
+        bar width=3,
+        width=\textwidth,
+        symbolic x coords={A,B,C,D,E,F,G},
+        legend style={at={(0.5,-0.15)}, anchor=north,legend columns=-1},
+        enlargelimits=0.15
+        ]
+        %% Traffic received by A
+        \addplot+[error bars/.cd,y dir=both, y explicit]
+        coordinates{
+            (A,0) +- (0.0, 0)
+            (B,2124238) +- (0.0, 92450)
+            (C,1329450) +- (0.0, 350637)
+            (D,1441385) +- (0.0, 442924)
+            (E,1438700) +- (0.0, 384199)
+            (F,1941424) +- (0.0, 239952)
+            (G,664503) +- (0.0, 160243)};
+
+        %% Traffic received by B
+        \addplot+[error bars/.cd,y dir=both, y explicit]
+        coordinates{
+            (A,2117362) +- (0.0, 177634)
+            (B,0) +- (0.0, 0)
+            (C,1323516) +- (0.0, 348056)
+            (D,1507962) +- (0.0, 453331)
+            (E,1423410) +- (0.0, 307100)
+            (F,1972462) +- (0.0, 168706)
+            (G,663681) +- (0.0, 181968)};
+
+        %% Traffic received by C
+        \addplot+[error bars/.cd,y dir=both, y explicit]
+        coordinates{
+            (A,2125756) +- (0.0, 176525)
+            (B,2132591) +- (0.0, 94795)
+            (C,0) +- (0.0, 0)
+            (D,1525148) +- (0.0, 425193)
+            (E,2055830) +- (0.0, 360754)
+            (F,2142022) +- (0.0, 74382)
+            (G,663132) +- (0.0, 160074)};
+
+        %% Traffic received by D
+        \addplot+[error bars/.cd,y dir=both, y explicit]
+        coordinates{
+            (A,2132203) +- (0.0, 176852)
+            (B,2140803) +- (0.0, 96329)
+            (C,1317640) +- (0.0, 355649)
+            (D,0) +- (0.0, 0)
+            (E,1878469) +- (0.0, 451701)
+            (F,2134750) +- (0.0, 73643)
+            (G,663939) +- (0.0, 181132)};
+
+        %% Traffic received by E
+        \addplot+[error bars/.cd,y dir=both, y explicit]
+        coordinates{
+            (A,2109633) +- (0.0, 210967)
+            (B,2111725) +- (0.0, 142191)
+            (C,1300411) +- (0.0, 343230)
+            (D,1478072) +- (0.0, 384978)
+            (E,0) +- (0.0, 0)
+            (F,2126161) +- (0.0, 73246)
+            (G,664407) +- (0.0, 158915)};
+
+        %% Traffic received by F
+        \addplot+[error bars/.cd,y dir=both, y explicit]
+        coordinates{
+            (A,1892038) +- (0.0, 220045)
+            (B,1956635) +- (0.0, 246159)
+            (C,1326319) +- (0.0, 357152)
+            (D,1503433) +- (0.0, 435951)
+            (E,1967681) +- (0.0, 398934)
+            (F,0) +- (0.0, 0)
+            (G,664472) +- (0.0, 180574)};
+
+        %% Traffic received by G
+        \addplot+[error bars/.cd,y dir=both, y explicit]
+        coordinates{
+            (A,2130348) +- (0.0, 198078)
+            (B,2137320) +- (0.0, 116378)
+            (C,1364752) +- (0.0, 325724)
+            (D,1529288) +- (0.0, 365472)
+            (E,1846851) +- (0.0, 499456)
+            (F,2133775) +- (0.0, 89096)
+            (G,0) +- (0.0, 0)};
+
+        \legend{A, B, C, D, E, F, G}
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Outgoing traffic from each node}
 \end{figure}
