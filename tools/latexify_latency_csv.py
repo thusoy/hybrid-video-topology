@@ -64,6 +64,11 @@ def get_statistical_properties(latencies):
             stdev = statistics.stdev(values)
             if any(value for value in values if abs(value - mean) > 2*stdev):
                 print('OBS: Large offset at {}'.format(str([(timestamp, value) for timestamp, value in measurements if abs(value - mean) > stdev])))
+
+            # Ignore stdev if mean is too large to effectively visualize, as the error bars
+            # are just in the way
+            if mean > 1000:
+                stdev = 0
             properties[receiver][sender] = (mean, stdev)
     return properties
 
