@@ -1,67 +1,50 @@
 \chapter{Experiments}\label{chp:experiments}
 
-In this chapter the sample implementation is introduced, we'll take a look at the test environment, and present the results.
+In this chapter we'll benchmark a WebRTC-based video conferencing solution for our test cases, to get a sense of how a peer-to-peer architecture performs.
+
 
 \section{Test Setup}
 
-Since much of the software to be tested is proprietary and very consumer-oriented, detailed call statistics like dropped packets, latency and bandwidth utilization is not easily available. We need an application-agnostic technique to measure the performance of the different solutions, and our ad-hoc method of doing this is based on comparing timing offsets in the transmitted video stream, and measuring utilized bandwidth as seen by the operating system.
+To benchmark appear.in, our WebRTC-based video conferencing solution of choice, we have utilized a small cluster of desktop computers with web cameras, running a recent version of Mozilla Firefox. The goal of the benchmark is to get a sense of how the application performs with regard to latency and bandwidth usage in our different test scenarios, and from that data observe how resources are shared among the nodes in a conversation.
 
-Timing offsets is embedded in the video stream by having each node share their desktop running some pre-recorded video, with an application continously printing a millisecond-accurate clock. Each node can thus find the delay in each stream transmitted to it by finding the difference between it's own clock and the time as transmitted by the other nodes. As long as the clocks on each node is syncronized against the same NTP servers, the clocks should be more than accurate enough to measure the different timing delays observed in the system.
+WebRTC doesn't expose any \glspl{api} for accessing latency of a given stream, thus we had to improvise how to measure this. We settled for a solution based on having each node broadcast a timestamp in its video stream, which each receiving node could then compare to their local time. As long as all the clocks are syncronized against the same NTP servers, they should be more than accurate enough to measure the different latencies observed in the system.
 
-It must be noted, our custom algorithm will not be unjustly favored since it can access the additional forwarding nodes. Google Hangouts and Skype both utilize similar nodes, but their architecture and inner working is hidden from us due to the proprietary nature of these products, and thus they can not be modelled accurately. Only pure peer-to-peer WebRTC products like appear.in and Firefox Hello rely only on the client nodes, but they're both free to add any helpers themselves.
+Practically this was accomplished by having each computer film a timer running on a separate computer, and run the same timer locally. A screenshot was taken regularly through the test run, enabling extraction of the time as sent by each of the other nodes later.
 
+Bandwidth usage was measured by running \texttt{tcpdump} throughout the test run, and later extracting sent and received data with \texttt{tshark}.
 
-\section{Cost Function}
+To configure the cluster according to the different test cases, we utilized the Linux traffic control utility \texttt{tc}, which is capable of rate-limiting incoming and outgoing traffic, as well as delaying traffic destined for certain hosts. A small script was developed to act as a glue layer between a representation of a network and \texttt{tc}, making configuration repeatable and easily parametrized. The script is included in \autoref{chp:apply-case}.
 
-The cost of utilizing a given network link is a function of the link's utilization, which is given by the classic queuing delay formula, $1/(1 - \mu/\lambda)$. As can be seen in \autoref{fig:utility-latency}, this function is not linear, and can thus not be used directly in our objective function. Nonetheless, we can achieve the same goal -- punishing over-utilization of individual links -- by approximating the function with a piecewise linear graph. The following algorithm partitions a set of slots into a set of edges:
+Thus, applying a given test case is completely independent of the actual network utilized in the test cluster, keeping all intelligence on the nodes themselves. This removed the need for expensive routers or having to customize the application code, thus making the method application agnostic and applicable to any peer-to-peer solution, not just appear.in.
 
-\todo{Insert partitioning-algo here}
+In contrast to most other video conferencing solutions, appear.in displays a node's own video stream just as big as the other streams in the conversation. This enables us to get a sense of how much time the browser spends processing the incoming video stream, as we can estimate this as the difference between the local timestamp and the timestamp of your own video stream as displayed in the browser. Since we're not benchmarking CPU usage in these tests, we can subtract this difference from the observed latencies between the other nodes, to only look at latencies originating in the network stack.
 
-Based on this formula, we can formulate the cost multiplier of a link as $1 + k/(\mu - \lambda)$, where $k$ is a customizable parameter for how heavily link saturation should be punished. In our experiments, $k=10$ seems appropriate. This cost function can be seen in \autoref{fig:utility-latency}. We then partion this function into a small set of piecewise linear intervals, which we can model as parallell edges between two nodes, with different capacities and costs. Keeping this set small limits the number of variables in the resulting matrix, and thus keeps processing times reasonably low.
-
-\begin{tikzpicture}
-    \begin{axis}[
-        xlabel={\% utilization of link},
-        ylabel={Cost multiplier},
-        xmin=0,
-        ymin=1,
-        ymax=3,
-        xmax=100]
-
-    \addplot+[domain=0:99]{1 + 10/(100 - x)};
-    \label{fig:utility-latency}
-    \end{axis}
-\end{tikzpicture}
+Ideally, testing would be automated and not require a running graphical environment, to allow it to be tested using remote servers. This could be possible using \texttt{node-webrtc}\footnote{\url{https://github.com/js-platform/node-webrtc}} or running a browser in a fake framebuffer like \texttt{Xvfb}\footnote{\url{http://www.x.org/releases/X11R7.6/doc/man/man1/Xvfb.1.xhtml}} and faking out a media stream\footnote{Chrome and Firefox have different ways to this, look it up for your browser}. It is thus probably possible to automate this, but was considered out of scope for this thesis.
 
 
-\begin{center}
-    \label{tab:utilization-to-cost}
-    \begin{tabular}{| l | l |}
-    \hline
-    \textbf{Link utilization} & \textbf{Cost multiplier} \\ \hline
-    0--50\% & 1.2 \\ \hline
-    51--75\% & 1.40 \\ \hline
-    76--80\% & 1.50 \\ \hline
-    81--90\% & 2.00 \\ \hline
-    \end{tabular}
-\end{center}
+\section{Caveats}
 
-Using this partitioning as a guide, we can map any number of slots on a physical link into a set of edges $E$ in our graph where $|E| <= 4$.
+Our method is accurate in the sense that latencies observed are the actual end-to-end latencies that users would observe, but the precision of the timing values observed is not on the millisecond level we'd prefer. This is due to a number of factors, most notably the refresh rate of the screen running the timer and the framerate of the video, limiting the precision to $1s/60\approx17ms$ and $1s/30\approx33ms$ respectively. However, we can surpass this precision by averaging several samples taken during the test run, which is why we take several screenshots for each test case, once every 10s for at least a minute. The standard deviation of the measurements is reported in the graphs included later in this chapter, which should give some indication towards how accurate the average is.
 
+Taking several samples to improve accuracy leads us to another weakness, which is the manual interpretation of the screenshots. Due to the frequency-related issues discussed above, many of the images include timestamps that are blurred, as the camera captured two underlying screen updates in the same frame, as shown in \autoref{fig:blurred-capture}.
 
+\begin{figure}
+    \centering
+    \includegraphics[width=.7\textwidth]{blurred-capture}
+    \caption{A screenshot where a node has sent two overlaying timestamps. In this case interpreted as 10.106, which is reasonable as it's close to a 33ms increase from the previous 10.075.}
+    \label{fig:blurred-capture}
+\end{figure}
 
+In general for these cases, the recorded timestamp was consistently interpreted to be the latest of what could be distinguished in the screenshot.
 
-\section{Implementation}\label{sec:implementation}
+Even assuming that the timestamps are comprehensible and fairly accurate, there's still a possibility of human error when lots of numbers has to be recorded in this way. To minimize the risk of any mistyped numbers making it into the dataset, any number outside 1.5 standard deviations of the mean (a range which should include \todo{find actual range covered}80\% of the numbers observed) was verified once more. There's still a chance of smaller errors making it into the dataset, but we assume that these are small enough and distributed evenly among the nodes to not significantly influence any conclusions drawn.
 
-\todo{Write about how the implementation was done}
+For measuring bandwidth utilization between nodes, our method of using \texttt{tcpdump} is not entirely satisfactory, as there's no way to report actual \emph{consumed} bandwidth by the application. This is due to the traffic control features of the Linux kernel lying above where \texttt{libpcap}, the library that performs packet capture for \texttt{tcpdump}, listens in the network stack, meaning any incoming bandwidth reported will be before the rate limiting performed by \texttt{tc}. Thus, \texttt{tcpdump} cannot report the bandwidth actually consumed by application, only what was actually received by the network interface. Nonetheless, the bandwidth \emph{sent} by each node is what was actually sent by the application, but there's no guarantee that the node was actually capable of consuming it all. This is good enough for us though, as we can aggregate the data sent by all nodes to determine how saturated a given node's network link is.
+
+While the method itself is application-agnostic, configuring nodes the way we do is not suitable for testing other architectures, such as the ones used by Hangouts and Skype. This is unfortunate, as a performance comparison between the different architectures would have been very interesting, but without running a local instance of the architecture under test, there's no way to achieve the internode latencies we desire. This follows from observing that if node A sends her video stream to a Google server, there's no way for her to signal to Google that when the stream is broadcast to nodes B and C, B's stream should be delayed by $x$ms, and the stream to C should be delayed $y$ms. It's also not possible for B and C to apply this latency on the receiving side, as they'd have to split the incoming stream for Google into separate streams for each of the transmitting nodes, which would require both getting access to the DTLS keys used by the web browser to encrypt the traffic, and being capable of splitting the stream and rejoining it again without interfering with the browser.
 
 
 \section{Method}\label{sec:method}
-
-* display latency (can be subtracted)
-* display refresh rates (is averaged out (hopefully))
-* camera processing times is included in the diff from what's recorded on screen
-* chrome devtools echoes browser processing time to be close to ~50ms.
 
 (screensharing scrapped due to framerate artifically limited too severly, did not run any custom code since the solution needed to be (relatively) service agnostic, and could not modify code since it would need to be tagged in the video stream somehow. Some for appear.in, would need to be included in the sdp stream, and extracted -> way too much work).
 

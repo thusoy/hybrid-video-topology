@@ -3,6 +3,45 @@
 
 In this chapter we'll present our solution to the problem.
 
+
+\section{Cost Function}
+
+The cost of utilizing a given network link is a function of the link's utilization, which is given by the classic queuing delay formula, $1/(1 - \mu/\lambda)$. As can be seen in \autoref{fig:utility-latency}, this function is not linear, and can thus not be used directly in our objective function. Nonetheless, we can achieve the same goal -- punishing over-utilization of individual links -- by approximating the function with a piecewise linear graph. The following algorithm partitions a set of slots into a set of edges:
+
+\todo{Insert partitioning-algo here}
+
+Based on this formula, we can formulate the cost multiplier of a link as $1 + k/(\mu - \lambda)$, where $k$ is a customizable parameter for how heavily link saturation should be punished. In our experiments, $k=10$ seems appropriate. This cost function can be seen in \autoref{fig:utility-latency}. We then partion this function into a small set of piecewise linear intervals, which we can model as parallell edges between two nodes, with different capacities and costs. Keeping this set small limits the number of variables in the resulting matrix, and thus keeps processing times reasonably low.
+
+\begin{tikzpicture}
+    \begin{axis}[
+        xlabel={\% utilization of link},
+        ylabel={Cost multiplier},
+        xmin=0,
+        ymin=1,
+        ymax=3,
+        xmax=100]
+
+    \addplot+[domain=0:99]{1 + 10/(100 - x)};
+    \label{fig:utility-latency}
+    \end{axis}
+\end{tikzpicture}
+
+
+\begin{center}
+    \label{tab:utilization-to-cost}
+    \begin{tabular}{| l | l |}
+    \hline
+    \textbf{Link utilization} & \textbf{Cost multiplier} \\ \hline
+    0--50\% & 1.2 \\ \hline
+    51--75\% & 1.40 \\ \hline
+    76--80\% & 1.50 \\ \hline
+    81--90\% & 2.00 \\ \hline
+    \end{tabular}
+\end{center}
+
+Using this partitioning as a guide, we can map any number of slots on a physical link into a set of edges $E$ in our graph where $|E| <= 4$.
+
+
 \section{Modelling}
 
 With some prior knowledge of graph algorithms, it might be an easy first guess to look at our sample topologies and see a certain similarity to a flow problem -- edges have capacities, there's a set of sources, a set of sinks, and we want to maximize \emph{something}. However, there's a couple of things that make it hard to solve directly as a traditional flow problem, particularly that we don't have a single source and a single sink, but lots of them. Trying to model it as a single-source, single-sink problem quickly leads you to discover the limitations of that model, where you realize that if you actually solved, how would you be able to tell which node is generating flow on a given edge? Clearly, we need a way to distinguish node A's video from node B's video. And we need to make sure that all nodes receive video from every other node, not just maximum bitrate of \emph{any} video.
@@ -90,6 +129,12 @@ One alternative way to model the problem, is to skip the node splitting step of 
 \section{The Algorithm}
 
 Given the model, how do you efficiently find the "best" topology?
+
+
+\section{Implementation}\label{sec:implementation}
+
+\todo{Write about how the implementation was done}
+
 
 \section{Tuning}
 
