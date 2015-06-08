@@ -24,9 +24,18 @@ To configure the cluster according to the different test cases, we utilized the 
 
 Thus, applying a given test case is completely independent of the actual network utilized in the test cluster, keeping all intelligence on the nodes themselves. This removed the need for expensive routers or having to customize the application code, thus making the method application agnostic and applicable to any peer-to-peer solution, not just appear.in.
 
-In contrast to most other video conferencing solutions, appear.in displays a node's own video stream just as big as the other streams in the conversation. This enables us to get a sense of how much time the browser spends processing the incoming video stream, as we can estimate this as the difference between the local timestamp and the timestamp of your own video stream as displayed in the browser. Since we're not benchmarking CPU usage in these tests, we can subtract this difference from the observed latencies between the other nodes, to only look at latencies originating in the network stack.
+In contrast to most other video conferencing solutions, appear.in displays a node's own video stream just as big as the other streams in the conversation. This enables us to get a sense of how much time the browser spends processing the incoming video stream, as we can estimate this as the difference between the local timestamp and the timestamp of your own video stream as displayed in the browser. Since we're not benchmarking CPU usage in these tests, we can subtract this difference from the observed latencies between the other nodes, to only look at latencies originating in the network stack. Hence, all latencies reported in this thesis are lower than the actual observed end-to-end latencies by 50--70ms.
 
 Ideally, testing would be automated and not require a running graphical environment, to allow it to be tested using remote servers. This could be possible using \texttt{node-webrtc}\footnote{\url{https://github.com/js-platform/node-webrtc}} or running a browser in a fake framebuffer like \texttt{Xvfb}\footnote{\url{http://www.x.org/releases/X11R7.6/doc/man/man1/Xvfb.1.xhtml}} and faking out a media stream\footnote{Chrome: \texttt{-{}-use-fake-device-for-media-stream}, Firefox: \texttt{getUserMedia(\{fake: true, <...>\})}. More info at \url{http://images.tmcnet.com/expo/webrtc-conference/presentations/san-jose-14/D3-2_Testing_v2_2.pdf}}. It is thus probably possible to automate this, but was considered out of scope for this thesis.
+
+Firefox was chosen for these experiments due to its support for user stylesheets, which the Chrome team for some reason has abandoned support for in later versions. appear.in mirrors your own video stream when displayed back to yourself, probably since that's how most people are used to seeing themselves, but this is suboptimal when we want to retain some sanity while manually interpreting numbers shown this way. For browsers with support for user stylesheets, the fix is a simple matter of writing a stylesheet that flips your own image back\cprotect\footnote{For Firefox, this would mean putting the following in \texttt{~/.mozilla/firefox/<user-profile>/chrome/userContent.css}:
+\begin{lstlisting}[language=CSS]
+@-moz-document domain(appear.in) {
+    div.local-client {
+        transform: scaleX(-1);
+    }
+}
+\end{lstlisting}}. When working with several machines, having the option to deploy changes like this to all machines with one single file without any other configuration changes is enormously gratifying.
 
 
 \section{Caveats}
@@ -451,12 +460,10 @@ In the final test without traffic shaping, we step it up to seven nodes in the c
 \end{figure}
 
 
-
-
 \todo[inline]{[minor] If time, define custom color set for graphing, based possibly either on solarized or http://clrs.cc/}
-\todo{Gather some metrics from running the implementation in a prod environment}
 
-For our first test case, "Asia", the bandwidth utilized by each node is shown in \autoref{fig:asia-bitrate}.
+
+For our first test case, "Asia", the results are shown in \autoref{fig:asia-bitrate}. We can tell that even though node B transmits 0.5Mbps to each of the other nodes, neither of them receive recent data frequent enough to keep an acceptable conversation with node B. The good thing is that even though node B suffers greatly in this case, the flow between A and C is unaffected.
 
 \begin{figure}
     \centering
@@ -468,8 +475,11 @@ For our first test case, "Asia", the bandwidth utilized by each node is shown in
             ylabel=Bitrate (bps),
             xtick=data,
             width=\textwidth,
+            bar width=8,
             symbolic x coords={A,B,C},
-            enlargelimits=0.15
+            enlargelimits=0.15,
+            major grid style=dashed,
+            xmajorgrids
             ]
             %% Traffic received by A
             \addplot+[error bars/.cd,y dir=both, y explicit]
@@ -507,8 +517,11 @@ For our first test case, "Asia", the bandwidth utilized by each node is shown in
             xtick=data,
             ymax=1000,
             width=\textwidth,
+            bar width=8,
             symbolic x coords={A,B,C},
             enlargelimits=0.15,
+            major grid style=dashed,
+            xmajorgrids,
             nodes near coords=\raisebox{.3cm}{\pgfmathprintnumber{\pgfplotspointmeta}}
             ]
 
@@ -535,9 +548,11 @@ For our first test case, "Asia", the bandwidth utilized by each node is shown in
         \end{tikzpicture}
         \subcaption{Outgoing latencies for each node}
     \end{subfigure}
-    \caption{Test results for the "asia" test case.}
+    \caption{Test results for the "asia" test case. The actual numbers for the out-of-bounds latencies are, from left to right, 25000, 47000, 47000 and 24000.}
     \label{fig:asia-bitrate}
 \end{figure}
+
+Next up we have the "standup" test case, as seen in \autoref{fig:standup}. The key challenge in this case node D, with only 6Mbps available on the downlink, slightly upped by node C with 8Mbps. Node C doesn't have any troubles in this test, but node D is completely satured, receiving 2.1Mbps from each of the other three nodes. Even though node D sends to its fullest capacity, hardly anything of this is correctly received by the other nodes.
 
 \begin{figure}
     \centering
@@ -549,7 +564,7 @@ For our first test case, "Asia", the bandwidth utilized by each node is shown in
             ylabel=Bitrate (bps),
             xtick=data,
             width=\textwidth,
-            bar width=10,
+            bar width=8,
             height=240,
             symbolic x coords={A,B,C,D},
             enlargelimits=0.15
@@ -599,7 +614,7 @@ For our first test case, "Asia", the bandwidth utilized by each node is shown in
             xtick=data,
             width=\textwidth,
             ymax=1000,
-            bar width=10,
+            bar width=8,
             height=240,
             symbolic x coords={A,B,C,D},
             enlargelimits=0.15,
@@ -640,6 +655,7 @@ For our first test case, "Asia", the bandwidth utilized by each node is shown in
         \subcaption{Outgoing latencies for each node}
     \end{subfigure}
     \caption{Test results for the "standup" test case.}
+    \label{fig:standup}
 \end{figure}
 
 
