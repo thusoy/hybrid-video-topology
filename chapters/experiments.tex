@@ -9,7 +9,14 @@ To benchmark appear.in, our WebRTC-based video conferencing solution of choice, 
 
 WebRTC doesn't expose any \glspl{api} for accessing latency of a given stream, thus we had to improvise how to measure this. We settled for a solution based on having each node broadcast a timestamp in its video stream, which each receiving node could then compare to their local time. As long as all the clocks are syncronized against the same NTP servers, they should be more than accurate enough to measure the different latencies observed in the system.
 
-Practically this was accomplished by having each computer film a timer running on a separate computer, and run the same timer locally. A screenshot was taken regularly through the test run, enabling extraction of the time as sent by each of the other nodes later.
+Practically this was accomplished by having each computer film a timer running on a separate computer, and run the same timer locally. A screenshot was taken regularly through the test run, enabling extraction of the time as sent by each of the other nodes later. See \autoref{fig:example-screenshot} for an example of how the screenshots looked.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=.7\textwidth]{example-screenshot}
+    \caption{An example screenshot from a test run on node A. The nodes are, from top left and clockwise, A, C, B and D. We can see from the difference between the local timestamp and A's own video stream that there's about 75ms of processing time in the browser before the image is sent (if we round A up to the almost visible 50.021 timestamp), and that the latencies from the other nodes are 31ms, 93ms and 93ms for B, C, and D, respectively.}
+    \label{fig:example-screenshot}
+\end{figure}
 
 Bandwidth usage was measured by running \texttt{tcpdump} throughout the test run, and later extracting sent and received data with \texttt{tshark}.
 
@@ -19,7 +26,7 @@ Thus, applying a given test case is completely independent of the actual network
 
 In contrast to most other video conferencing solutions, appear.in displays a node's own video stream just as big as the other streams in the conversation. This enables us to get a sense of how much time the browser spends processing the incoming video stream, as we can estimate this as the difference between the local timestamp and the timestamp of your own video stream as displayed in the browser. Since we're not benchmarking CPU usage in these tests, we can subtract this difference from the observed latencies between the other nodes, to only look at latencies originating in the network stack.
 
-Ideally, testing would be automated and not require a running graphical environment, to allow it to be tested using remote servers. This could be possible using \texttt{node-webrtc}\footnote{\url{https://github.com/js-platform/node-webrtc}} or running a browser in a fake framebuffer like \texttt{Xvfb}\footnote{\url{http://www.x.org/releases/X11R7.6/doc/man/man1/Xvfb.1.xhtml}} and faking out a media stream\footnote{Chrome and Firefox have different ways to this, look it up for your browser}. It is thus probably possible to automate this, but was considered out of scope for this thesis.
+Ideally, testing would be automated and not require a running graphical environment, to allow it to be tested using remote servers. This could be possible using \texttt{node-webrtc}\footnote{\url{https://github.com/js-platform/node-webrtc}} or running a browser in a fake framebuffer like \texttt{Xvfb}\footnote{\url{http://www.x.org/releases/X11R7.6/doc/man/man1/Xvfb.1.xhtml}} and faking out a media stream\footnote{Chrome: \texttt{-{}-use-fake-device-for-media-stream}, Firefox: \texttt{getUserMedia(\{fake: true, <...>\})}. More info at \url{http://images.tmcnet.com/expo/webrtc-conference/presentations/san-jose-14/D3-2_Testing_v2_2.pdf}}. It is thus probably possible to automate this, but was considered out of scope for this thesis.
 
 
 \section{Caveats}
