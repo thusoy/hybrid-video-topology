@@ -367,7 +367,8 @@ In the final test without traffic shaping, we step it up to seven nodes in the c
             bar width=3,
             height=240,
             enlargelimits=0.10,
-            nodes near coords=\raisebox{.3cm}{\pgfmathprintnumber{\pgfplotspointmeta}}
+            major grid style=dashed,
+            ymajorgrids
             ]
 
             \addplot+[error bars/.cd,y dir=both, y explicit]
@@ -754,7 +755,8 @@ For our first test case, "Asia", the bandwidth utilized by each node is shown in
             bar width=3,
             height=240,
             enlargelimits=0.10,
-            nodes near coords=\raisebox{.3cm}{\pgfmathprintnumber{\pgfplotspointmeta}}
+            major grid style=dashed,
+            ymajorgrids
             ]
 
             \addplot+[error bars/.cd,y dir=both, y explicit]
