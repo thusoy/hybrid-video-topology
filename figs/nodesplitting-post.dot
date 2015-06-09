@@ -1,0 +1,16 @@
+digraph postnodesplitting {
+    aint [label="A int"];
+    aext [label="A ext"];
+    bext [label="B ext"];
+    bint [label="B int"];
+
+    aint -> aext [label="5Mbit"];
+    aext -> aint [label="20Mbit"];
+
+    aext -> bext [label="8ms"];
+    bext -> aext [label="7ms"];
+
+    bint -> bext [label="15Mbit"];
+    bext -> bint [label="30Mbit"];
+    {rank=same aint aext bint bext}
+}

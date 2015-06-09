@@ -52,41 +52,22 @@ This time around, imagine that we have a separate flow problem for each \emph{pa
 
 One other thing we notice from our initial graph compared to traditional flow problems is that we notice that we have \emph{node constraints} in the initial graph, while flow problems only work on \emph{edge constraints}. To accommodate this, we split each node into two parts, hereafter called the external and internal part, as illustrated in \autoref{fig:node-splitting}.
 
-\todo[inline]{Insert node splitting figure}
-\begin{figure}[ht!]
-\centering
-    \digraph{nodesplittingpre}{
-        edge [dir=none];
-        rankdir=LR;
-        a [label="A (20/5)"];
-        b [label="B (30/15)"];
-
-        a -> b [label="8ms"];
-        b -> a [label="7ms"];
-    }
-    \caption{Initial problem}
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{nodesplitting-pre}
+        \subcaption{Original problem}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{nodesplitting-post}
+        \subcaption{Problem after node splitting}
+    \end{subfigure}
+    \caption{How node splitting works}
+    \label{fig:node-splitting}
 \end{figure}
-
-\begin{figure}[ht!]
-\centering
-    \digraph{nodesplittingpost}{
-        rankdir=LR;
-        aext [label="A ext"];
-        aint [label="A int"];
-        bext [label="B ext"];
-        bint [label="B int"];
-
-        aint -> aext [label="5Mbit"];
-        aext -> aint [label="20Mbit"];
-
-        aext -> bext [label="8ms"];
-        bext -> aext [label="7ms"];
-
-        bint -> bext [label="15Mbit"];
-        bext -> bint [label="30Mbit"];
-    }
-    \caption{Problem after node splitting}
-\end{figure}\todo{[minor]: Make both arrows bendy?}
 
 
 \subsection{Alternative model}

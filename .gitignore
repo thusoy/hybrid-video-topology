@@ -19,6 +19,7 @@
 *.xdy
 .vagrant
 figs/*converted-to.pdf
+figs/*.eps
 main.log
 main.pdf
 report.pdf

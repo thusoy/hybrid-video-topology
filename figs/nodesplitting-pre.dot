@@ -1,0 +1,9 @@
+digraph nodesplittingpre {
+    edge [dir=none];
+    rankdir=LR;
+    a [label="A (20/5)"];
+    b [label="B (30/15)"];
+
+    a -> b [label="8ms"];
+    b -> a [label="7ms"];
+}
