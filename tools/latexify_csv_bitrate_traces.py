@@ -9,10 +9,10 @@ import socket
 import yaml
 from collections import defaultdict, namedtuple
 
-def main(data_files, cutoff=0):
+def main(data_files, samples=60):
     role_map = load_role_map()
     ip_map = create_ip_to_role_map(role_map)
-    results = read_data_sets(data_files, cutoff, ip_map)
+    results = read_data_sets(data_files, samples, ip_map)
     properties = summarize_results(results)
     latexify_properties(properties)
 
@@ -30,22 +30,23 @@ def create_ip_to_role_map(role_map):
     return ips
 
 
-def read_data_sets(data_files, cutoff, ip_map):
+def read_data_sets(data_files, samples, ip_map):
     results = defaultdict(lambda: defaultdict(list))
     for data_file in data_files:
         with open(data_file) as fh:
             reader = csv.DictReader(fh)
             for row in reader:
-                if float(row['Interval start']) < cutoff:
-                    continue
+                row.pop('Interval start')
                 for column_name, value in row.items():
-                    if column_name == 'Interval start':
-                        continue
                     ip = column_name.split('==')[1]
                     role = ip_map[ip]
                     filename = os.path.basename(data_file)
                     sending_role = filename[0].upper()
                     results[sending_role][role].append(float(value)*8)
+    # Truncate all values to the last samples
+    for sender, receivers in results.items():
+        for receiver, values in receivers.items():
+            results[sender][receiver] = values[-samples:]
     return results
 
 
@@ -58,14 +59,14 @@ def summarize_results(results):
             stdev = statistics.pstdev(values) if values else 0
             mean = statistics.mean(values) if values else 0
             if sender != receiver:
-                print('Num measurements {} -> {}: {}'.format(sender, receiver, len(values)))
+                print('Num measurements {} -> {}: {}'.format(sender, receiver,
+                len(values)), file=sys.stderr)
             properties[receiver][sender] = BitrateProperties(mean, stdev)
     return properties
 
 
-def latexify_properties(properties):
+def latexify_properties(properties, indent_level=0):
     indent_unit = ' '*4
-    indent_level = 3
     indent = indent_unit*indent_level
     for receiver in sorted(properties):
         print('{}%% Traffic received by {}'.format(indent, receiver))
@@ -78,12 +79,13 @@ def latexify_properties(properties):
                 end='')
 
         print('};\n')
+    print('\\legend{{{}}}'.format(', '.join(sorted(properties))))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('files', nargs='+')
-    parser.add_argument('-c', '--cutoff', default=60, type=int,
+    parser.add_argument('-n', '--samples', default=60, type=int,
         help='Limit the statistics to only from this time and outwards')
     args = parser.parse_args()
-    main(args.files, args.cutoff)
+    main(args.files, args.samples)

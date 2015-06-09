@@ -4,6 +4,7 @@
 *.aux
 *.bbl
 *.blg
+*.cpt
 *.glg
 *.glo
 *.gls
@@ -20,6 +21,7 @@
 .vagrant
 figs/*converted-to.pdf
 figs/*.eps
+data/**/*.tex
 main.log
 main.pdf
 report.pdf
