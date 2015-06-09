@@ -9,6 +9,7 @@ import statistics
 import csv
 import sys
 from collections import defaultdict
+import functools
 
 
 def main(input_file):
@@ -24,21 +25,24 @@ def get_latencies(input_file):
     #         ]
     #     }
     # }
-    latencies = defaultdict(lambda: defaultdict(list))
+    latencies = defaultdict(functools.partial(defaultdict, list))
     with open(input_file) as fh:
         reader = csv.DictReader(fh)
         for row in reader:
             timestamp = row.pop('Timestamp')
             local_time = float(row.pop('Local time'))
+            receiver = row.pop('Measurer')
             receiver_max = 0
-            receiver = None
             for role, value in row.items():
                 value = float(value)
                 if value > receiver_max:
-                    receiver = role
                     receiver_max = value
                 if value > (local_time if local_time > 1 else local_time + 60):
                     print('OBS: Possible erroneous reading at {}, local time was {:.3f}, measured value {:.3f}'.format(timestamp, local_time, float(value)))
+            if any(float(value) for value in row.values() if float(value) > float(row[receiver])):
+                print('Receiver not having highest reading, double check data for {} at {}'.format(
+                    receiver, timestamp))
+                sys.exit(1)
             row.pop(receiver)
             for sender, value in row.items():
                 if value:
