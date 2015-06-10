@@ -7,7 +7,7 @@ app = Flask(__name__)
 @app.route('/collect', methods=['POST'])
 def collect():
     data = request.get_json()
-    if all(key in data for key in ('receiver', 'sender', 'data')):
+    if data and all(key in data for key in ('receiver', 'sender', 'data')):
         with open(app.config['TARGET'], 'a') as target:
             target.write(request.data + '\n')
         return 'Thank you'

@@ -87,41 +87,29 @@ rtcPeerConnection.getStats(function(result) {
                             packetsLost: res.packetsLost,
                             rtt: res.googRtt,
                             packetsSent: res.packetsSent,
+                            currentDelayMs: res.googCurrentDelayMs,
                             bytesSent: res.bytesSent
                         });
                     }
-
-                    if (res.googCodecName == 'VP8') {
-                        if (!globalObject.video.prevBytesSent)
-                            globalObject.video.prevBytesSent = res.bytesSent;
-
-                        var bytes = res.bytesSent - globalObject.video.prevBytesSent;
-                        globalObject.video.prevBytesSent = res.bytesSent;
-
-                        var kilobytes = bytes / 1024;
-
+                    if (res.googFrameHeightReceived) {
                         result.video = merge(result.video, {
-                            availableBandwidth: kilobytes.toFixed(1),
-                            googFrameHeightInput: res.googFrameHeightInput,
-                            googFrameWidthInput: res.googFrameWidthInput,
-                            googCaptureQueueDelayMsPerS: res.googCaptureQueueDelayMsPerS,
-                            rtt: res.googRtt,
+                            found: 1,
+                            bytesReceived: res.bytesReceived,
+                            captureStartNtpTimeMs: res.googCaptureStartNtpTimeMs,
+                            currentDelayMs: res.googCurrentDelayMs,
+                            decodeMs: res.googDecodeMs,
+                            frameRateDecoded: res.googFrameRateDecoded,
+                            frameRateOutput: res.googFrameRateOutput,
+                            frameRateReceived: res.googFrameRateReceived,
+                            jitterBufferMs: res.googJitterBufferMs,
+                            maxDecodeMs: res.googMaxDecodeMs,
+                            minPlayoutDelayMs: res.googMinPlayoutDelayMs,
+                            nacksSent: res.googNacksSent,
+                            renderDelayMs: res.googRenderDelayMs,
+                            targetDelayMs: res.googTargetDelayMs,
                             packetsLost: res.packetsLost,
-                            packetsSent: res.packetsSent,
-                            googEncodeUsagePercent: res.googEncodeUsagePercent,
-                            googCpuLimitedResolution: res.googCpuLimitedResolution,
-                            googNacksReceived: res.googNacksReceived,
-                            googFrameRateInput: res.googFrameRateInput,
-                            googPlisReceived: res.googPlisReceived,
-                            googViewLimitedResolution: res.googViewLimitedResolution,
-                            googCaptureJitterMs: res.googCaptureJitterMs,
-                            googAvgEncodeMs: res.googAvgEncodeMs,
-                            googFrameHeightSent: res.googFrameHeightSent,
-                            googFrameRateSent: res.googFrameRateSent,
-                            googBandwidthLimitedResolution: res.googBandwidthLimitedResolution,
-                            googFrameWidthSent: res.googFrameWidthSent,
-                            googFirsReceived: res.googFirsReceived,
-                            bytesSent: res.bytesSent
+                            packetsReceived: res.packetsReceived,
+                            transportId: res.transportId,
                         });
                     }
 
@@ -212,17 +200,60 @@ rtcPeerConnection.getStats(function(result) {
 function printStats() {
     var rtcmanager = angular.element(document.body).injector().get('RTCManager');
     var peerConnections = rtcmanager.getPeerConnections();
+    var printedIpMaps = 0;
+    console.log("Starting stats collection");
+
     for (var i = 0; i < peerConnections.length; i++) {
         var peerConnection = peerConnections[i];
         getStats(peerConnection, function (result) {
-            var rtt = result.audio.rtt;
-            if (rtt) {
-                console.log(result.connectionType.remote.ipAddress + ": " + rtt);
+            var rtt = result.audio.rtt,
+                bw = result.video.availableBandwidth;
+            if (printedIpMaps < peerConnections.length && result.connectionType) {
+                var trackId = null;
+                $.each(result.results, function (key) {
+                    var res = result.results[key];
+                    if (res.googFrameRateReceived) {
+                        trackId = res.googTrackId;
+                        return false;
+                    }
+                });
+                console.log(trackId + ': ' + result.connectionType.remote.ipAddress);
+                printedIpMaps += 1;
             }
-        }, 5000);
+            if (rtt) {
+                var senderip =  result.connectionType.remote.ipAddress,
+                    myip = result.connectionType.local.ipAddress;
+                senderip = senderip.slice(0, senderip.indexOf(':'));
+                myip = myip.slice(0, myip.indexOf(':'));
+                var report = {
+                    sender: senderip,
+                    receiver: myip,
+                    data: {
+                        timestamp: new Date().getTime(),
+                        rtt: rtt,
+                        delayAudio: result.audio.currentDelayMs,
+                        delayVideo: result.video.currentDelayMs,
+                        audio: result.audio,
+                        video: result.video,
+                    }
+                }
+                $.ajax('https://collect.thusoy.com/collect', {
+                    type: 'POST',
+                    data: JSON.stringify(report),
+                    contentType: "application/json",
+                    success: function () {
+                        console.log("stats sent succesfully");
+                    },
+                    error: function (jqxhr, status, errorThrown) {
+                        console.log("Posting stats to collector failed: " + status + "; " + errorThrown);
+                    }
+                });
+            } else {
+                console.log(result);
+            }
+        }, 10000);
     }
-    setTimeout(printStats, 3000);
 }
 
 
-printStats();
+setTimeout(printStats, 5000);
