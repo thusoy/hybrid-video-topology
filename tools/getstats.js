@@ -54,8 +54,6 @@ rtcPeerConnection.getStats(function(result) {
             video: {}
         };
 
-        var nomore = false;
-
         getPrivateStats();
 
         function getPrivateStats() {
@@ -64,9 +62,6 @@ rtcPeerConnection.getStats(function(result) {
                     audio: {},
                     video: {},
                     results: results,
-                    nomore: function () {
-                        nomore = true;
-                    }
                 };
 
                 for (var i = 0; i < results.length; ++i) {
@@ -143,11 +138,6 @@ rtcPeerConnection.getStats(function(result) {
                 }
 
                 callback(result);
-
-                // second argument checks to see, if target-user is still connected.
-                if (!nomore) {
-                    typeof interval != undefined && interval && setTimeout(getPrivateStats, interval || 1000);
-                }
             });
         }
 
@@ -251,8 +241,9 @@ function printStats() {
             } else {
                 console.log(result);
             }
-        }, 10000);
+        });
     }
+    setTimeout(printStats, 10000);
 }
 
 
