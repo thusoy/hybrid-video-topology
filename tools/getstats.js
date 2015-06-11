@@ -91,7 +91,7 @@ rtcPeerConnection.getStats(function(result) {
                             bytesSent: res.bytesSent
                         });
                     }
-                    if (res.googFrameHeightReceived) {
+                    if (res.googFrameHeightReceived || res.googFrameRateReceived) {
                         result.video = merge(result.video, {
                             found: 1,
                             bytesReceived: res.bytesReceived,
@@ -220,7 +220,7 @@ function printStats() {
                 console.log(trackId + ': ' + result.connectionType.remote.ipAddress);
                 printedIpMaps += 1;
             }
-            if (rtt) {
+            if (result.video.googFrameRateReceived) {
                 var senderip =  result.connectionType.remote.ipAddress,
                     myip = result.connectionType.local.ipAddress;
                 senderip = senderip.slice(0, senderip.indexOf(':'));
