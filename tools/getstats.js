@@ -86,10 +86,11 @@ rtcPeerConnection.getStats(function(result) {
                             bytesSent: res.bytesSent
                         });
                     }
-                    if (res.googFrameHeightReceived || res.googFrameRateReceived) {
+                    if (res.googFrameHeightReceived || res.googFrameRateReceived || res.googCodecName =='VP8') {
                         result.video = merge(result.video, {
                             found: 1,
                             bytesReceived: res.bytesReceived,
+                            bytesSent: res.bytesSent,
                             captureStartNtpTimeMs: res.googCaptureStartNtpTimeMs,
                             currentDelayMs: res.googCurrentDelayMs,
                             decodeMs: res.googDecodeMs,
@@ -105,6 +106,26 @@ rtcPeerConnection.getStats(function(result) {
                             packetsLost: res.packetsLost,
                             packetsReceived: res.packetsReceived,
                             transportId: res.transportId,
+                            adaptationChanges: res.googAdaptationChanges,
+                            avgEncodeMs: res.googAvgEncodeMs,
+                            captureJitterMs: res.googCaptureJitterMs,
+                            captureQueueDelayMsPerS: res.googCaptureQueueDelayMsPerS,
+                            googCodecName: res.googCodecName,
+                            cpuLimitedResolution: res.googCpuLimitedResolution,
+                            encodeUsagePercent: res.googEncodeUsagePercent,
+                            firsReceived: res.googFirsReceived,
+                            frameHeightInput: res.googFrameHeightInput,
+                            frameHeightSent: res.googFrameHeightSent,
+                            frameRateInput: res.googFrameRateInput,
+                            frameRateSent: res.googFrameRateSent,
+                            frameWidthInput: res.googFrameWidthInput,
+                            frameWidthSent: res.googFrameWidthSent,
+                            nacksReceived: res.googNacksReceived,
+                            plisReceived: res.googPlisReceived,
+                            rtt: res.googRtt,
+                            trackId: res.googTrackId,
+                            viewLimitedResolution: res.googViewLimitedResolution,
+                            packetsSent: res.packetsSent,
                         });
                     }
 
