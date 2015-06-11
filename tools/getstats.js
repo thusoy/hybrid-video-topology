@@ -187,10 +187,10 @@ rtcPeerConnection.getStats(function(result) {
     }
 })();
 
+var _printedIpMaps = 0;
 function printStats() {
     var rtcmanager = angular.element(document.body).injector().get('RTCManager');
     var peerConnections = rtcmanager.getPeerConnections();
-    var printedIpMaps = 0;
     console.log("Starting stats collection");
 
     for (var i = 0; i < peerConnections.length; i++) {
@@ -198,7 +198,7 @@ function printStats() {
         getStats(peerConnection, function (result) {
             var rtt = result.audio.rtt,
                 bw = result.video.availableBandwidth;
-            if (printedIpMaps < peerConnections.length && result.connectionType) {
+            if (_printedIpMaps < peerConnections.length && result.connectionType) {
                 var trackId = null;
                 $.each(result.results, function (key) {
                     var res = result.results[key];
@@ -208,7 +208,7 @@ function printStats() {
                     }
                 });
                 console.log(trackId + ': ' + result.connectionType.remote.ipAddress);
-                printedIpMaps += 1;
+                _printedIpMaps += 1;
             }
             if (result.video.found) {
                 var senderip =  result.connectionType.remote.ipAddress,
@@ -231,9 +231,6 @@ function printStats() {
                     type: 'POST',
                     data: JSON.stringify(report),
                     contentType: "application/json",
-                    success: function () {
-                        console.log("stats sent succesfully");
-                    },
                     error: function (jqxhr, status, errorThrown) {
                         console.log("Posting stats to collector failed: " + status + "; " + errorThrown);
                     }
@@ -243,7 +240,7 @@ function printStats() {
             }
         });
     }
-    setTimeout(printStats, 10000);
+    setTimeout(printStats, 1000);
 }
 
 
