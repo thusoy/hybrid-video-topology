@@ -67,7 +67,8 @@ rtcPeerConnection.getStats(function(result) {
                 for (var i = 0; i < results.length; ++i) {
                     var res = results[i];
 
-                    if (res.googCodecName == 'opus') {
+                    if (res.googCodecName == 'opus' && res.googCurrentDelayMs) {
+                        // Incoming audio
                         if (!globalObject.audio.prevBytesSent)
                             globalObject.audio.prevBytesSent = res.bytesSent;
 
