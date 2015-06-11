@@ -220,7 +220,7 @@ function printStats() {
                 console.log(trackId + ': ' + result.connectionType.remote.ipAddress);
                 printedIpMaps += 1;
             }
-            if (result.video.googFrameRateReceived) {
+            if (result.video.found) {
                 var senderip =  result.connectionType.remote.ipAddress,
                     myip = result.connectionType.local.ipAddress;
                 senderip = senderip.slice(0, senderip.indexOf(':'));
