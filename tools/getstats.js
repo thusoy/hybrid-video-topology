@@ -191,7 +191,6 @@ var _printedIpMaps = 0;
 function printStats() {
     var rtcmanager = angular.element(document.body).injector().get('RTCManager');
     var peerConnections = rtcmanager.getPeerConnections();
-    console.log("Starting stats collection");
 
     for (var i = 0; i < peerConnections.length; i++) {
         var peerConnection = peerConnections[i];
@@ -244,4 +243,5 @@ function printStats() {
 }
 
 
+console.log("Starting stats collection in 5s");
 setTimeout(printStats, 5000);
