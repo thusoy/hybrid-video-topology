@@ -1,20 +1,3 @@
-// Last time updated at May 23, 2015, 08:32:23
-// Latest file can be found here: https://cdn.webrtc-experiment.com/getStats.js
-// Muaz Khan     - www.MuazKhan.com
-// MIT License   - www.WebRTC-Experiment.com/licence
-// Source Code   - https://github.com/muaz-khan/getStats
-// ___________
-// getStats.js
-// an abstraction layer runs top over RTCPeerConnection.getStats API
-// cross-browser compatible solution
-// http://dev.w3.org/2011/webrtc/editor/webrtc.html#dom-peerconnection-getstats
-/*
-getStats(function(result) {
-    result.connectionType.remote.ipAddress
-    result.connectionType.remote.candidateType
-    result.connectionType.transport
-});
-*/
 // Last time updated at Sep 16, 2014, 08:32:23
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/getStats.js
