@@ -5,18 +5,20 @@
     timestamp,a->b,a->c,a->d,... pairs, compute median and stdev,
     output to latex.
 """
+
+import argparse
 import statistics
 import csv
 import sys
 from collections import defaultdict
 
 
-def main(input_file):
-    latencies = get_latencies(input_file)
+def main(input_file, ignore_suspicious=False):
+    latencies = get_latencies(input_file, ignore_suspicious)
     statistical_properties = get_statistical_properties(latencies)
     latexify_properties(statistical_properties)
 
-def get_latencies(input_file):
+def get_latencies(input_file, ignore_suspicious):
     # {
     #     'A': {
     #         'B': [
@@ -42,11 +44,14 @@ def get_latencies(input_file):
             if any(float(value) for value in row.values() if float(value) > float(row[receiver])):
                 print('Receiver not having highest reading, double check data for {} at {}'.format(
                     receiver, timestamp), file=sys.stderr)
-                sys.exit(1)
+                if ignore_suspicious:
+                    print('--force was used, ignoring...', file=sys.stderr)
+                else:
+                    sys.exit(1)
             row.pop(receiver)
             for sender, value in row.items():
                 if value:
-                    latency = int(1000*(float(receiver_max) - float(value)))
+                    latency = int(1000*(float(local_time) - float(value)))
                     if latency < 0:
                         print('Invalid reading between {} and {}: {} and {} (negative diff)'.format(
                             receiver, sender, receiver_max, value), file=sys.stderr)
@@ -98,4 +103,9 @@ def latexify_properties(properties, indent_level=0):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input_file')
+    parser.add_argument('-f', '--force', help='Ignore suspicious values',
+        action='store_true', default=False)
+    args = parser.parse_args()
+    main(args.input_file, ignore_suspicious=args.force)
