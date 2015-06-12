@@ -1,0 +1,151 @@
+{
+    "0nvM": {
+        "componentId": "1434128425692322 (id=31 url=https://appear.in/thusoy): stream1/audio", 
+        "id": "0nvM", 
+        "localCandidateId": "xnjR", 
+        "mozPriority": 36028792774082050, 
+        "nominated": false, 
+        "remoteCandidateId": "UIdl", 
+        "selected": false, 
+        "state": "failed", 
+        "timestamp": 1434128931969.551, 
+        "type": "candidatepair"
+    }, 
+    "K/Qq": {
+        "candidateType": "relayed", 
+        "componentId": "1434128425692322 (id=31 url=https://appear.in/thusoy): stream1/audio", 
+        "id": "K/Qq", 
+        "ipAddress": "52.28.31.180", 
+        "portNumber": 55001, 
+        "timestamp": 1434128931969.551, 
+        "transport": "udp", 
+        "type": "remotecandidate"
+    }, 
+    "U2Ud": {
+        "componentId": "1434128425692322 (id=31 url=https://appear.in/thusoy): stream1/audio", 
+        "id": "U2Ud", 
+        "localCandidateId": "xnjR", 
+        "mozPriority": 35499927647813630, 
+        "nominated": true, 
+        "remoteCandidateId": "K/Qq", 
+        "selected": false, 
+        "state": "succeeded", 
+        "timestamp": 1434128931969.551, 
+        "type": "candidatepair"
+    }, 
+    "UIdl": {
+        "candidateType": "relayed", 
+        "componentId": "1434128425692322 (id=31 url=https://appear.in/thusoy): stream1/audio", 
+        "id": "UIdl", 
+        "ipAddress": "52.28.31.180", 
+        "portNumber": 52810, 
+        "timestamp": 1434128931969.551, 
+        "transport": "udp", 
+        "type": "remotecandidate"
+    }, 
+    "Ueas": {
+        "candidateType": "host", 
+        "componentId": "1434128425692322 (id=31 url=https://appear.in/thusoy): stream1/audio", 
+        "id": "Ueas", 
+        "ipAddress": "129.241.208.71", 
+        "portNumber": 37563, 
+        "timestamp": 1434128931969.551, 
+        "transport": "udp", 
+        "type": "remotecandidate"
+    }, 
+    "akLl": {
+        "componentId": "1434128425692322 (id=31 url=https://appear.in/thusoy): stream1/audio", 
+        "id": "akLl", 
+        "localCandidateId": "xnjR", 
+        "mozPriority": 36028796968386050, 
+        "nominated": false, 
+        "remoteCandidateId": "Ueas", 
+        "selected": false, 
+        "state": "failed", 
+        "timestamp": 1434128931969.551, 
+        "type": "candidatepair"
+    }, 
+    "c/Fg": {
+        "candidateType": "host", 
+        "componentId": "1434128425692322 (id=31 url=https://appear.in/thusoy): stream1/audio", 
+        "id": "c/Fg", 
+        "ipAddress": "129.241.209.248", 
+        "mozLocalTransport": "udp", 
+        "portNumber": 51128, 
+        "timestamp": 1434128931969.551, 
+        "transport": "udp", 
+        "type": "localcandidate"
+    }, 
+    "dZIE": {
+        "componentId": "1434128425692322 (id=31 url=https://appear.in/thusoy): stream1/audio", 
+        "id": "dZIE", 
+        "localCandidateId": "c/Fg", 
+        "mozPriority": 9114756780654461000, 
+        "nominated": true, 
+        "remoteCandidateId": "Ueas", 
+        "selected": true, 
+        "state": "succeeded", 
+        "timestamp": 1434128931969.551, 
+        "type": "candidatepair"
+    }, 
+    "kHLQ": {
+        "componentId": "1434128425692322 (id=31 url=https://appear.in/thusoy): stream1/audio", 
+        "id": "kHLQ", 
+        "localCandidateId": "c/Fg", 
+        "mozPriority": 35499931875541504, 
+        "nominated": false, 
+        "remoteCandidateId": "K/Qq", 
+        "selected": false, 
+        "state": "failed", 
+        "timestamp": 1434128931969.551, 
+        "type": "candidatepair"
+    }, 
+    "outbound_rtcp_audio_-1": {
+        "bytesReceived": 168704, 
+        "id": "outbound_rtcp_audio_-1", 
+        "isRemote": true, 
+        "jitter": 40.363, 
+        "mediaType": "audio", 
+        "mozRtt": 8841, 
+        "packetsLost": 16975, 
+        "packetsReceived": 5272, 
+        "remoteId": "outbound_rtp_audio_-1", 
+        "ssrc": "1190506958", 
+        "timestamp": 1434128926756.661, 
+        "type": "inboundrtp"
+    }, 
+    "outbound_rtp_audio_-1": {
+        "bytesSent": 1433075, 
+        "id": "outbound_rtp_audio_-1", 
+        "isRemote": false, 
+        "mediaType": "audio", 
+        "packetsSent": 25214, 
+        "remoteId": "outbound_rtcp_audio_-1", 
+        "ssrc": "1190506958", 
+        "timestamp": 1434128931969.551, 
+        "type": "outboundrtp"
+    }, 
+    "xnjR": {
+        "candidateType": "relayed", 
+        "componentId": "1434128425692322 (id=31 url=https://appear.in/thusoy): stream1/audio", 
+        "id": "xnjR", 
+        "ipAddress": "52.28.31.180", 
+        "mozLocalTransport": "tcp", 
+        "portNumber": 63030, 
+        "timestamp": 1434128931969.551, 
+        "transport": "udp", 
+        "type": "localcandidate"
+    }, 
+    "y53S": {
+        "componentId": "1434128425692322 (id=31 url=https://appear.in/thusoy): stream1/audio", 
+        "id": "y53S", 
+        "localCandidateId": "c/Fg", 
+        "mozPriority": 107557525913469440, 
+        "nominated": false, 
+        "remoteCandidateId": "UIdl", 
+        "selected": false, 
+        "state": "failed", 
+        "timestamp": 1434128931969.551, 
+        "type": "candidatepair"
+    }
+}
