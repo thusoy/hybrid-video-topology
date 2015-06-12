@@ -46,10 +46,13 @@ def get_readings(input_file, ip_map, field, start_time):
             readings[sending_role][measuring_role].append(total_delay)
     return readings
 
-def get_statistics_from_reading(readings):
+def get_statistics_from_reading(readings, limit):
     stats = collections.defaultdict(dict)
     for sender, receivers in readings.items():
         for receiver, values in receivers.items():
+            values = values[-limit:]
+            print('{} -> {} computed over {} values'.format(
+                sender, receiver, len(values)), file=sys.stderr)
             mean = statistics.mean(values)
             stdev = statistics.stdev(values, xbar=mean)
             stats[sender][receiver] = (mean, stdev)
@@ -85,5 +88,6 @@ if __name__ == '__main__':
     parser.add_argument('input_file')
     parser.add_argument('-f', '--field', default='currentDelayMs')
     parser.add_argument('-s', '--start-time', type=int)
+    parser.add_argument('-n', '--limit', default=120, type=int)
     args = parser.parse_args()
-    main(args.input_file, args.field, args.start_time)
+    main(args.input_file, args.field, args.limit, args.start_time)
