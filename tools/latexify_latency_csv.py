@@ -7,10 +7,13 @@
 """
 
 import argparse
+import functools
 import statistics
 import csv
 import sys
 from collections import defaultdict
+
+stderr = functools.partial(print, file=sys.stderr)
 
 
 def main(input_file, ignore_suspicious=False):
@@ -39,13 +42,13 @@ def get_latencies(input_file, ignore_suspicious):
                 if value > receiver_max:
                     receiver_max = value
                 if value > (local_time if local_time > 1 else local_time + 60):
-                    print('OBS: Possible erroneous reading at {}, local time was {:.3f}, measured value {:.3f}'.format(
-                        timestamp, local_time, float(value)), file=sys.stderr)
+                    stderr('OBS: Possible erroneous reading at {}, local time was {:.3f}, measured value {:.3f}'.format(
+                        timestamp, local_time, float(value)))
             if any(float(value) for value in row.values() if float(value) > float(row[receiver])):
-                print('Receiver not having highest reading, double check data for {} at {}'.format(
-                    receiver, timestamp), file=sys.stderr)
+                stderr('Receiver not having highest reading, double check data for {} at {}'.format(
+                    receiver, timestamp))
                 if ignore_suspicious:
-                    print('--force was used, ignoring...', file=sys.stderr)
+                    stderr('--force was used, ignoring...')
                 else:
                     sys.exit(1)
             row.pop(receiver)
@@ -53,8 +56,8 @@ def get_latencies(input_file, ignore_suspicious):
                 if value:
                     latency = int(1000*(float(local_time) - float(value)))
                     if latency < 0:
-                        print('Invalid reading between {} and {}: {} and {} (negative diff)'.format(
-                            receiver, sender, receiver_max, value), file=sys.stderr)
+                        stderr('Invalid reading between {} and {}: {} and {} (negative diff)'.format(
+                            receiver, sender, receiver_max, value))
                         sys.exit(1)
                     latencies[receiver][sender].append((timestamp, latency))
     return latencies
@@ -73,9 +76,8 @@ def get_statistical_properties(latencies):
             mean = statistics.mean(values)
             stdev = statistics.stdev(values)
             if any(value for value in values if abs(value - mean) > 2*stdev):
-                print('OBS: Large offset at {}'.format(
-                    str([(timestamp, value) for timestamp, value in measurements if abs(value - mean) > stdev])),
-                    file=sys.stderr)
+                stderr('OBS: Large offset at {}'.format(
+                    str([(timestamp, value) for timestamp, value in measurements if abs(value - mean) > stdev])))
 
             # Ignore stdev if mean is too large to effectively visualize, as the error bars
             # are just in the way
