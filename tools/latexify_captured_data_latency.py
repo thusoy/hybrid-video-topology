@@ -27,19 +27,20 @@ def get_readings(input_file, ip_map, field):
             actual_measurer = reading['actual_sender'].split(':')[-1] # Extract Ipv4 from ipv6
             if actual_measurer != reading['receiver']:
                 print('Was TURNed through AWS!', file=sys.stderr)
-            value = reading['data'].get('delayAudio',
-                reading['data']['video'].get('currentDelayMs'))
-            if not value:
-                # print('No {} found between {} and {} at {}. Available fields: {}'.format(
-                    # field, measuring_role, sending_role, reading['data']['timestamp'],
-                    # ', '.join(reading['data']['video'])),
-                    # file=sys.stderr)
-                continue
-            else:
-                pass
-#                print('Found between {} and {}: {}'.format(
-#                    measuring_role, sending_role, value))
-            readings[sending_role][measuring_role].append(int(value))
+            delay_components = (
+                int(reading['data']['video']['currentDelayMs']),
+                max(
+                    int(reading['data']['video']['minPlayoutDelayMs']),
+                    (
+                        int(reading['data']['video']['decodeMs']) +
+                        int(reading['data']['video']['renderDelayMs']) +
+                        int(reading['data']['video']['jitterBufferMs'])
+                    )
+                )
+            )
+            total_delay = sum(delay_components)
+
+            readings[sending_role][measuring_role].append(total_delay)
     return readings
 
 def get_statistics_from_reading(readings):
