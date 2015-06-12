@@ -10,18 +10,21 @@ import sys
 import yaml
 
 
-def main(input_file, field):
+def main(input_file, field, limit, start_time):
     role_map = load_role_map()
     ip_map = create_ip_to_role_map(role_map)
-    readings = get_readings(input_file, ip_map, field)
-    stats = get_statistics_from_reading(readings)
+    readings = get_readings(input_file, ip_map, field, start_time)
+    stats = get_statistics_from_reading(readings, limit)
     print_latexified_stats(stats)
 
-def get_readings(input_file, ip_map, field):
+def get_readings(input_file, ip_map, field, start_time):
     readings = collections.defaultdict(lambda: collections.defaultdict(list))
     with open(input_file) as fh:
         for line in fh:
             reading = json.loads(line.strip())
+            read_time = int(reading['data']['timestamp'])/1000
+            if start_time and read_time < start_time:
+                continue
             measuring_role = ip_map[reading['receiver']]
             sending_role = ip_map[reading['sender']]
             actual_measurer = reading['actual_sender'].split(':')[-1] # Extract Ipv4 from ipv6
@@ -81,5 +84,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('input_file')
     parser.add_argument('-f', '--field', default='currentDelayMs')
+    parser.add_argument('-s', '--start-time', type=int)
     args = parser.parse_args()
-    main(args.input_file, args.field)
+    main(args.input_file, args.field, args.start_time)
