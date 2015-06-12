@@ -355,3 +355,96 @@ Next up we have the "standup" test case, as seen in \autoref{fig:standup}. The k
     \caption{Test results for the "friends" test case}
     \label{fig:friends}
 \end{figure}
+
+
+However sobering the Firefox results are, it's unlikely they provide the full story of WebRTC. After all, it's widely deployed and in use by lots of different providers, if this was the expected results it would likely not have gained much traction. Thus, to have a point of comparison, we re-ran the tests using Chrome, but instead of the very manual and labor-intensive method of filming timestamps, used the \texttt{getStats} API to extract the relevant data. This data is provided by the underlying \gls{rtcp}-implementation in the browser.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Latency (ms),
+            xtick=data,
+            width=\textwidth,
+            bar width=8,
+            height=240,
+            ymax=150,
+            symbolic x coords={A,B,C,D},
+            enlargelimits=0.15
+            ]
+            \input{data/appear.in-capture-vanilla-3p/latency-timer.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Latencies measured by filming a timer}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Latency (ms),
+            xtick=data,
+            width=\textwidth,
+            ymax=150,
+            bar width=8,
+            height=240,
+            symbolic x coords={A,B,C,D},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-capture-vanilla-3p/latency-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Latencies reported by \texttt{getStats}}
+    \end{subfigure}
+    \caption{Timer broadcasting and getStats compared for three nodes without traffic shaping. Note that the timer broadcasting has only 6 samples, while \texttt{getStats} has 120.}
+    \label{fig:standup}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Latency (ms),
+            xtick=data,
+            width=\textwidth,
+            bar width=8,
+            height=240,
+            ymax=300,
+            symbolic x coords={A,B,C,D},
+            enlargelimits=0.15
+            ]
+            \input{data/appear.in-capture-asia/latency-timer.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Latencies measured by filming a timer}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Latency (ms),
+            xtick=data,
+            width=\textwidth,
+            ymax=300,
+            bar width=8,
+            height=240,
+            symbolic x coords={A,B,C,D},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-capture-asia/latency-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Latencies reported by \texttt{getStats}}
+    \end{subfigure}
+    \caption{Timer broadcasting and getStats compared for the asia test case. Note that the timer broadcasting has only 6 samples, while \texttt{getStats} has 120.}
+    \label{fig:standup}
+\end{figure}

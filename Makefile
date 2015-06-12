@@ -2,17 +2,28 @@
 TEXFILE = main
 
 # Fix reference file and compile source
-default: full
+default: latex
 
-latencies:
-	find data -type d -name "appear.in*" | while read datadir; do target_name=$$(basename $$datadir); echo "Calculating latencies from $$target_name"; ./tools/latexify_latency_csv.py $$datadir/$$target_name-latency.csv > $$datadir/latency.tex; done
 
-bitrates:
-	find data -type d -name "appear.in*" | while read datadir; do ./tools/latexify_csv_bitrate_traces.py $$datadir/*-bitrates.csv > $$datadir/bitrate.tex; done
+all: render-data latex
+
 
 render-data: latencies bitrates
 
-full:
+
+latencies:
+	find data -type d -name "appear.in*" ! -name "*capture*" | while read datadir; do target_name=$$(basename $$datadir); echo "Calculating latencies from $$target_name"; ./tools/latexify_latency_csv.py $$datadir/$$target_name-latency.csv > $$datadir/latency.tex; done
+	export SOURCE=appear.in-capture-vanilla-3p; ./tools/latexify_latency_csv.py -f data/$$SOURCE/$$SOURCE.csv > data/$$SOURCE/latency-timer.tex
+	export SOURCE=appear.in-capture-vanilla-3p; ./tools/latexify_captured_data_latency.py data/$$SOURCE/$$SOURCE.dat > data/$$SOURCE/latency-getstats.tex
+	export SOURCE=appear.in-capture-asia; ./tools/latexify_latency_csv.py -f data/$$SOURCE/$$SOURCE.csv > data/$$SOURCE/latency-timer.tex
+	export SOURCE=appear.in-capture-asia; ./tools/latexify_captured_data_latency.py data/$$SOURCE/$$SOURCE.dat > data/$$SOURCE/latency-getstats.tex
+
+
+bitrates:
+	find data -type d -name "appear.in*" ! -name "*capture*" | while read datadir; do ./tools/latexify_csv_bitrate_traces.py $$datadir/*-bitrates.csv > $$datadir/bitrate.tex; done
+
+
+latex:
 	dot -Teps figs/nodesplitting-post.dot -o figs/nodesplitting-post.eps
 	dot -Teps figs/nodesplitting-pre.dot -o figs/nodesplitting-pre.eps
 	pdflatex --shell-escape $(TEXFILE) && \
