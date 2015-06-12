@@ -53,11 +53,16 @@ def get_statistics_from_reading(readings):
 
 
 def print_latexified_stats(stats):
-    for sender in sorted(stats):
-        for receiver in sorted(stats):
+    indent_unit = ' '*4
+    for receiver in sorted(stats):
+        print('\\addplot+[error bars/.cd,y dir=both, y explicit]\ncoordinates{', end='')
+        for sender in sorted(stats):
             mean, stdev = stats[sender].get(receiver, (0, 0))
-            print('{} -> {}: {} +- (0.0, {})'.format(
-                sender, receiver, mean, stdev))
+            print('\n{}({},{}) +- (0.0, {})'.format(
+                indent_unit, sender, mean, stdev), end='')
+        print('};\n')
+    print('\\legend{{{}}}'.format(', '.join(sorted(stats))))
+
 
 def load_role_map():
     rolemap = os.path.join(os.path.dirname(__file__), 'rolemap.yml')
