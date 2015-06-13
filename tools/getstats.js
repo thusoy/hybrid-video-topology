@@ -205,7 +205,7 @@ rtcPeerConnection.getStats(function(result) {
                         result.video.bandwidth = parseBandwidthEstimationReport(report);
                     } else if (isConnectionInUse) {
                         // report.googActiveConnection means either STUN or TURN is used.
-                        result.connectionType = parseConnectionReport(report);
+                        result.connection = parseConnectionReport(report);
                     }
                 }
                 if (result.video.incoming.id !== undefined &&
