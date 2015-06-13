@@ -278,13 +278,11 @@ function printStats() {
                 console.log(result);
                 _printedIpMaps += 1;
             }
-            var report = {
-                timestamp: new Date().getTime(),
-                data: result,
-            }
+            delete result['results'];
+            result.timestamp = new Date().getTime();
             $.ajax('https://collect.thusoy.com/collect', {
                 type: 'POST',
-                data: JSON.stringify(report),
+                data: JSON.stringify(result),
                 contentType: "application/json",
                 error: function (jqxhr, status, errorThrown) {
                     console.log("Posting stats to collector failed: " + status + "; " + errorThrown);
