@@ -208,7 +208,15 @@ rtcPeerConnection.getStats(function(result) {
                         result.connectionType = parseConnectionReport(report);
                     }
                 }
-                callback(result);
+                if (result.video.incoming.id !== undefined &&
+                    result.video.outgoing.id !== undefined &&
+                    result.audio.incoming.id !== undefined &&
+                    result.audio.outgoing.id !== undefined) {
+                    callback(result);
+                } else {
+                    console.log("Failed to find all properties of getStats results, try again...");
+                    console.log(reports);
+                }
             });
         }
 
