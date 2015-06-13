@@ -32,7 +32,7 @@ def get_readings(input_file, ip_map, field, start_time):
             sending_ip = sending_address.split(':')[0]
             sending_role = ip_map[sending_ip]
             actual_measurer = reading['actual_sender'].split(':')[-1] # Extract Ipv4 from ipv6
-            if actual_measurer != sending_ip:
+            if actual_measurer != measuring_ip:
                 print('Was TURNed through AWS!', file=sys.stderr)
             delay_components = (
                 int(reading['video']['incoming']['currentDelayMs']),
