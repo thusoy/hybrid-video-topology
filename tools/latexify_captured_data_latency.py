@@ -18,7 +18,8 @@ def main(input_file, field, limit, start_time):
     print_latexified_stats(stats)
 
 def get_readings(input_file, ip_map, field, start_time):
-    readings = collections.defaultdict(lambda: collections.defaultdict(list))
+    incoming_readings = collections.defaultdict(lambda: collections.defaultdict(list))
+    outgoing_readings = collections.defaultdict(lambda: collections.defaultdict(list))
     with open(input_file) as fh:
         for line in fh:
             reading = json.loads(line.strip())
@@ -36,20 +37,30 @@ def get_readings(input_file, ip_map, field, start_time):
                 print('Was TURNed through AWS!', file=sys.stderr)
             delay_components = (
                 int(reading['video']['incoming']['currentDelayMs']),
-                max(
-                    int(reading['video']['incoming']['minPlayoutDelayMs']),
-                    (
-                        int(reading['video']['incoming']['decodeMs']) +
-                        int(reading['video']['incoming']['renderDelayMs']) +
-                        int(reading['video']['incoming']['jitterBufferMs'])
-                    )
-                ),
+                int(reading['video']['incoming']['decodeMs']),
+                int(reading['video']['incoming']['renderDelayMs']),
+                int(reading['video']['incoming']['jitterBufferMs'])
                 # TODO: fetch outgoing latencies like outgoingqueue and encode
                 # time as well
             )
+            outgoing_delay = (
+                int(reading['video']['outgoing']['avgEncodeMs']),
+                int(reading['video']['outgoing']['captureJitterMs']),
+                int(reading['video']['outgoing']['avgEncodeMs']),
+            )
             total_delay = sum(delay_components)
+            total_outgoing_delay = sum(outgoing_delay)
 
-            readings[sending_role][measuring_role].append(total_delay)
+            incoming_readings[sending_role][measuring_role].append(total_delay)
+            outgoing_readings[measuring_role][sending_role].append(total_outgoing_delay)
+
+    readings = collections.defaultdict(lambda: collections.defaultdict(list))
+    for sender in incoming_readings:
+        for receiver in outgoing_readings:
+            for incoming, outgoing in zip(incoming_readings[sender][receiver], outgoing_readings[receiver][sender]):
+                total_delay = incoming + outgoing
+                # print('{} ({} + {})'.format(total_delay, incoming, outgoing))
+                readings[sender][receiver].append(total_delay)
     return readings
 
 def get_statistics_from_reading(readings, limit):
