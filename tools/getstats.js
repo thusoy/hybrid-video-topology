@@ -208,6 +208,8 @@ rtcPeerConnection.getStats(function(result) {
                         result.connection = parseConnectionReport(report);
                     }
                 }
+
+                // TODO: This chrashes if the node just left the conversation
                 if (result.video.incoming.id !== undefined &&
                     result.video.outgoing.id !== undefined &&
                     result.audio.incoming.id !== undefined &&
