@@ -278,22 +278,18 @@ function printStats() {
                 console.log(result);
                 _printedIpMaps += 1;
             }
-            if (result.video) {
-                var report = {
-                    timestamp: new Date().getTime(),
-                    data: result,
-                }
-                $.ajax('https://collect.thusoy.com/collect', {
-                    type: 'POST',
-                    data: JSON.stringify(report),
-                    contentType: "application/json",
-                    error: function (jqxhr, status, errorThrown) {
-                        console.log("Posting stats to collector failed: " + status + "; " + errorThrown);
-                    }
-                });
-            } else {
-                console.log(result);
+            var report = {
+                timestamp: new Date().getTime(),
+                data: result,
             }
+            $.ajax('https://collect.thusoy.com/collect', {
+                type: 'POST',
+                data: JSON.stringify(report),
+                contentType: "application/json",
+                error: function (jqxhr, status, errorThrown) {
+                    console.log("Posting stats to collector failed: " + status + "; " + errorThrown);
+                }
+            });
         });
     }
     setTimeout(printStats, 1000);
