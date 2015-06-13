@@ -258,7 +258,6 @@ rtcPeerConnection.getStats(function(result) {
     }
 })();
 
-var _printedIpMaps = 0;
 function printStats() {
     var rtcmanager = angular.element(document.body).injector().get('RTCManager');
     var peerConnections = rtcmanager.getPeerConnections();
@@ -266,18 +265,6 @@ function printStats() {
     for (var i = 0; i < peerConnections.length; i++) {
         var peerConnection = peerConnections[i];
         getStats(peerConnection, function (result) {
-            if (_printedIpMaps < peerConnections.length && result.connectionType) {
-                var trackId = null;
-                $.each(result.results, function (key) {
-                    var res = result.results[key];
-                    if (res.googFrameRateReceived) {
-                        trackId = res.googTrackId;
-                        return false;
-                    }
-                });
-                console.log(result);
-                _printedIpMaps += 1;
-            }
             delete result['results'];
             result.timestamp = new Date().getTime();
             $.ajax('https://collect.thusoy.com/collect', {
@@ -292,7 +279,6 @@ function printStats() {
     }
     setTimeout(printStats, 1000);
 }
-
 
 console.log("Starting stats collection in 5s");
 setTimeout(printStats, 5000);
