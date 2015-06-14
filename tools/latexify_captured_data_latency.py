@@ -23,25 +23,24 @@ def get_readings(input_file, ip_map, field, start_time):
     with open(input_file) as fh:
         for line in fh:
             reading = json.loads(line.strip())
-            read_time = int(reading['timestamp'])/1000
+            read_time = int(reading['data']['timestamp'])/1000
             if start_time and read_time < start_time:
                 continue
-            measuring_address = reading['connection']['local']['ipAddress']
-            measuring_ip = measuring_address.split(':')[0] # Strip port
-            measuring_role = ip_map[measuring_ip]
-            sending_address = reading['connection']['remote']['ipAddress']
-            sending_ip = sending_address.split(':')[0]
-            sending_role = ip_map[sending_ip]
+            measuring_role = ip_map[reading['receiver']]
+            sending_role = ip_map[reading['sender']]
             actual_measurer = reading['actual_sender'].split(':')[-1] # Extract Ipv4 from ipv6
-            if actual_measurer != measuring_ip:
+            if actual_measurer != reading['receiver']:
                 print('Was TURNed through AWS!', file=sys.stderr)
             delay_components = (
-                int(reading['video']['incoming']['currentDelayMs']),
-                int(reading['video']['incoming']['decodeMs']),
-                int(reading['video']['incoming']['renderDelayMs']),
-                int(reading['video']['incoming']['jitterBufferMs'])
-                # TODO: fetch outgoing latencies like outgoingqueue and encode
-                # time as well
+                int(reading['data']['video']['currentDelayMs']),
+                max(
+                    int(reading['data']['video']['minPlayoutDelayMs']),
+                    (
+                        int(reading['data']['video']['decodeMs']) +
+                        int(reading['data']['video']['renderDelayMs']) +
+                        int(reading['data']['video']['jitterBufferMs'])
+                    )
+                )
             )
             outgoing_delay = (
                 int(reading['video']['outgoing']['avgEncodeMs']),
