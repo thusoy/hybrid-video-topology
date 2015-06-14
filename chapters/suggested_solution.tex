@@ -47,7 +47,7 @@ These different cases will be discussed in the following paragraphs, before we a
 
 \section{Perceived Gain From Bandwidth}
 
-Increasing the bitrate of video is subject to diminishing returns, increasing the bitrate from 1Mbps to 2Mpbs yields a bigger return for the user than going from 4Mbps to 5Mbps. x264, the H.264 encoder powering applications like VLC\footnote{\url{http://www.videolan.org/developers/x264.html}}, HandBrake\footnote{\url{https://handbrake.fr/}} and ffmpeg\footnote{\url{https://trac.ffmpeg.org/wiki/Encode/H.264}}, uses an exponential scale for the relationship between bitrate and perceived quality\footnote{\url{https://trac.ffmpeg.org/wiki/Encode/H.264\#crf}}, as illustrated in \autoref{fig:bitrate-quality}.
+Increasing the bitrate of video is subject to diminishing returns, increasing the bitrate from 1Mbps to 2Mpbs yields a bigger return for the user than going from 4Mbps to 5Mbps. x264, the H.264 encoder powering applications like VLC\footnote{\url{http://www.videolan.org/developers/x264.html}}, HandBrake\footnote{\url{https://handbrake.fr/}} and ffmpeg\footnote{\url{https://trac.ffmpeg.org/wiki/Encode/H.264}}, uses an exponential scale for the relationship between bitrate and perceived quality\footnote{\url{https://trac.ffmpeg.org/wiki/Encode/H.264\#crf}}, as illustrated in \autoref{fig:bitrate-quality}.\todo{make pretty}
 
 \begin{figure}
     \centering
@@ -69,28 +69,39 @@ Increasing the bitrate of video is subject to diminishing returns, increasing th
     \label{fig:bitrate-quality}
 \end{figure}
 
+With a linear gain from increased bandwidth, bumping traffic from a given node from 4Mbps to 5Mbps would yield the same return as bumping another node from 1Mbps to 2Mbps, and thus the algorithm would be unlikely to find a fair allocation of bandwidth. Encoding diminishing returns into the objective function ensures that everyone will be allocated a fair share, and still allows nodes with excess bandwidth to grow further than more constrained nodes.
+
+\todo{Figure out how to actually get this into the objective}
+
 
 \section{Link Utilization}
 
-The cost of utilizing a given network link is a function of the link's utilization, which is given by the classic queuing delay formula, $1/(1 - \mu/\lambda)$. As can be seen in \autoref{fig:utility-latency}, this function is not linear, and can thus not be used directly in our objective function. Nonetheless, we can achieve the same goal -- punishing over-utilization of individual links -- by approximating the function with a piecewise linear graph. The following algorithm partitions a set of slots into a set of edges:
+The cost of utilizing a given network link is a function of the link's utilization, which is given by the queuing delay formula, $1/(1 - \mu/\lambda)$. As can be seen in \autoref{fig:utility-latency}, this function is not linear, and can thus not be used directly in our objective function. Nonetheless, we can achieve the same goal -- punishing over-utilization of individual links -- by approximating the function with a piecewise linear function. Conceptually, we can imagine that instead of a single link going into a node, there's a \emph{set} of links to each node, with exponentially increasing costs. Thus a 8Mbps link might be divided into four links of 2Mbps, with exponentially increasing costs.
+
+Assuming that the weighting between the segments follows the queuing delay formula given above, the ratio between the extra punishment for using the last 10\% of a link and the gain from increasing bandwidth by those extra 10\% can be tuned by implementations. This ratio would basically be a measure of how heavily to hit the network to gain maximum quality. To avoid excessive packet loss, link utilization should probably not exceed 90\%, which can also be achieved by under-reporting the actual bandwidth to the algorithm. What the effects of that would be, compared to increasing the ratio towards more heavily punishing excessive link utilization, is unknown and requires more study to say anything conclusive about.
 
 \todo{Insert partitioning-algo here}
 
 Based on this formula, we can formulate the cost multiplier of a link as $1 + k/(\mu - \lambda)$, where $k$ is a customizable parameter for how heavily link saturation should be punished. In our experiments, $k=10$ seems appropriate. This cost function can be seen in \autoref{fig:utility-latency}. We then partion this function into a small set of piecewise linear intervals, which we can model as parallell edges between two nodes, with different capacities and costs. Keeping this set small limits the number of variables in the resulting matrix, and thus keeps processing times reasonably low.
 
-\begin{tikzpicture}
-    \begin{axis}[
-        xlabel={\% utilization of link},
-        ylabel={Cost multiplier},
-        xmin=0,
-        ymin=1,
-        ymax=3,
-        xmax=100]
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            xlabel={\% utilization of link},
+            ylabel={Cost multiplier},
+            xmin=0,
+            ymin=1,
+            ymax=3,
+            xmax=100]
 
-    \addplot+[domain=0:99]{1 + 10/(100 - x)};
+        \addplot+[domain=0:99]{1 + 10/(100 - x)};
+        \label{fig:utility-latency}
+        \end{axis}
+    \end{tikzpicture}
+    \caption{How packet delay grows as a function of link utilization for network links. Packet delay for us is equivalent to cost, which thus has to be approximated in an implementation.}
     \label{fig:utility-latency}
-    \end{axis}
-\end{tikzpicture}
+\end{figure}
 
 
 \begin{center}
