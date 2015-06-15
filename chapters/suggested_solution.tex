@@ -170,6 +170,27 @@ One alternative way to model the problem, is to skip the node splitting step of 
 \end{figure}
 
 
+\section{Repeaters}\label{sec:repeaters}
+
+This is all well and good, but solving our problem as we've posed it so far will only yield us something very close to what browsers figure out by trial and failure today. However, where today's solutions are topology-bound, we can go beyond those limitations, and use our established technique on slightly modified flow networks.
+
+One thing we note with pure peer-to-peer topologies, is that required bandwidth in and out grows linearly with $n$, which quickly saturates constrained nodes. Going pure peer-to-peer is most often optimal in terms of latency, but if the necessary bandwidth is not available, we want to have the option to fall back to relaying some -- but not necessarily all -- nodes some unconstrained repeater. This repeater could be provided by the service provider in a datacenter somewhere, or could be one of the other nodes in the conversation with excess bandwidth available\footnote{These are the nodes Skype referred to as "supernodes"}. We have assumed that repeaters are provided in datacenters for now, but the constraints can easily be adapted to accomodate nodes as repeaters in a conversation.
+
+Formulating the constraints get a bit weird for repeaters, as they \emph{do not} conserve either bandwidth or commodities. We say that repeaters can \emph{mangle} commodities, which means it can receive the commodity $k$ sent from node A to node B, and can send it as commodity $k$ to B, but it can also send it as commodity $m$ to node C, assuming $m$ is the commodity sent by node A to node C. This is less awkward if the alternative model suggested in \section{sec:alternative-model} is implemented, but there was only time to implement one model for this thesis, so that is left as excercise for the reader.
+
+There is some constraints on repeaters though, namely that the incoming amount of one commodity has to be equal to the outgoing amount of all other commodities from the same source. Practically speaking, repeaters can not change the bitrate of incoming video, either up or down. That way, a repeater is a pure IO-bound device, which does not require much else than a fast Internet connection to be operated.
+
+Note that since commodities are routed independently in our flow network, it's possible for a node to use a repeater only for outgoing traffic, but still receive incoming traffic directly from its peers. This will probably often be the case, as many consumer connections are still highly asymmetric in inbound/outbound capacity.
+
+\section{Transcoders}
+
+Another unit that can be added to the flow network is a transcoder, which is like a repeater in that it has practically unconstrained bandwidth in and out, but also has the capability to transcode incoming video. If node A only has 2Mbps upload capacity, and node B is a desktop with 10Mbps downlink, and node C is a phone with only 1 Mbps downlink, A can send its full 2Mbps video stream to a transcoder, which can then forward the full 2Mbps stream to node B, but transcode the stream down to a leaner 1Mbps stream for node C. That way A is able to fully utilize its upload capacity, while the receivers get a stream best utilizing their downlink capacity.
+
+Transcoders are more costly to run than transcoders, due to much heavier compute operations required to transcode video in realtime. They will typically be nodes with specialized hardware for video encoding, such as Intel processors with Quick Sync\footnote{Intel's hardware-accelerated H.264 encoder, first introduced in the Sandy Brigde family of CPUs}, GPUs, or other hardware built for real-time streaming.
+
+Constraint-wise, a transcoder performs the same commodity mangling as repeaters, but can output commodities of arbitrary bitrates less than or equal to the source commodity.
+
+
 \section{The Algorithm}
 
 Given the model, how do you efficiently find the "best" topology?
