@@ -3,7 +3,11 @@
 
 \section{Concluding Remarks}\label{sec:conclusions}
 
-\todo{Write conclusions}
+Traditional peer-to-peer systems require all nodes in a conversation to have upload and download capacity of at least $(n-1) \times b$, where $n$ is the number of users in a conversation, and $b$ the minimal bitrate of a video stream. This requirement grows linearly with the number of users in a conversation, quickly becoming a limiting factor. Other solutions like Skype and Google Hangouts route all calls through the service provider's datacenters, sacrificing latency for an upload requirement of only $b$. The solution presented in this thesis merges the best of these properties, allowing users in a conversations with sufficient resources to route all their calls in a peer-to-peer to manner, while directing only constrained users through datacenters, or through other peers with excess resources.
+
+In case a node does not have sufficient bandwidth for receiving $(n-1)$ streams of $BW_{min}$, the routing algorithm will fail. In case this happens, a smart system could fall back to a \gls{vas}-based system. However, in the case where the node has sufficient bandwidth for receiving \emph{some} streams, but not all, the user could be presented with an interface that allows prioritizing certain nodes for always showing continous presence, while the rest share a \gls{vas}-link to the node. Extending the system to accomodate both a VAS node and respecting commodity preferences was considered out of scope for this paper, but is a topic for further research.
+
+Further fallback is also possible, in the cases where either upload or download is less than $b$. If this is the case, the user could be prompted to join the conversation as a voice-only participant, enabling the service to smoothly accomodate all devices with bandwidth larger than 30-40kbps in both directions.
 
 
 \section{Future Work}\label{sec:future_work}
@@ -21,4 +25,3 @@ As discussed in \autoref{sec:dynamic-conversations}, conversations are unlikely 
 
 \todo{Write about future work}
 
-\todo[inline]{In case a node does not have sufficient bandwidth for receiving $(n-1)$ streams of $BW_{min}$, the routing algorithm will fail. In case this happens, a smart system could fall back to a \gls{vas}-based system. However, in the case where the node has sufficient bandwidth for receiving \emph{some} streams, but not all, the user could be presented with an interface that allows prioritizing certain nodes for always showing continous presence, while the rest share a \gls{vas}-link to the node. Extending the system to accomodate both a VAS node and respecting commodity preferences was considered out of scope for this paper, but is a topic for further research.}
