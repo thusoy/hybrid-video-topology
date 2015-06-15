@@ -12,6 +12,11 @@ Develop toolkit for more automated test suites, to enable tests to be run more f
 
 Run tests against Hangout and Skype, to see how well they stack up.
 
+\subsection{CPU limits}
+
+Bandwidth is not the only property limiting our performance in the propsed system, nodes also need to have enough CPU-time available to both encode all outgoing video streams and decode all incoming ones. This was not considered for these first tests of a dynamic topology system, but should be considered for future work, as on a cell phone, CPUs are much more limited than desktop computers. The system could also detect if users are depleting their battery very quickly, and prompt the user whether to optimize for performance, which will only last for another 10 minutes of conversation, or slightly degrade performance by routing video through a repeater/transcoder to reduce local CPU consumption to last another 20 minutes.
+
+
 \todo{Write about future work}
 
 \todo[inline]{In case a node does not have sufficient bandwidth for receiving $(n-1)$ streams of $BW_{min}$, the routing algorithm will fail. In case this happens, a smart system could fall back to a \gls{vas}-based system. However, in the case where the node has sufficient bandwidth for receiving \emph{some} streams, but not all, the user could be presented with an interface that allows prioritizing certain nodes for always showing continous presence, while the rest share a \gls{vas}-link to the node. Extending the system to accomodate both a VAS node and respecting commodity preferences was considered out of scope for this paper, but is a topic for further research.}
