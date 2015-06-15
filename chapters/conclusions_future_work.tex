@@ -16,12 +16,15 @@ Develop toolkit for more automated test suites, to enable tests to be run more f
 
 Run tests against Hangout and Skype, to see how well they stack up.
 
-\subsection{CPU limits}
+\subsection{Implementation}
 
-Bandwidth is not the only property limiting our performance in the propsed system, nodes also need to have enough CPU-time available to both encode all outgoing video streams and decode all incoming ones. This was not considered for these first tests of a dynamic topology system, but should be considered for future work, as on a cell phone, CPUs are much more limited than desktop computers. The system could also detect if users are depleting their battery very quickly, and prompt the user whether to optimize for performance, which will only last for another 10 minutes of conversation, or slightly degrade performance by routing video through a repeater/transcoder to reduce local CPU consumption to last another 20 minutes.
+The system has not been tested in any actual conversations and is incapable of running any actual conversations in the current state. Developing a full proof of concept and evaluating whether the performance is sufficient for wider deployment is a large task that remains.
 
 As discussed in \autoref{sec:dynamic-conversations}, conversations are unlikely to be static, and will probably in many cases greatly change topology as the conversation progresses. This is inevitable for conversations with more than two participants, as the system will first solve for a $n=2$ system, and then later have to solve for a $n=3$ system when the next node joins. The system as proposed in this paper is competely oblivious to the state of a conversation, it simply takes in a configuration of nodes, and outputs an efficient routing of commodites. Adapting the system to support either changesets to an existing topology, maybe prioritizing not interrupting existing connections when new nodes enter a conversation, or just recomputing from scratch, will both require both the room and the nodes to listen to notifications from others about topology changes. Incorporating this into the system in a transparent way for the user remains to be done in future work.
 
 
-\todo{Write about future work}
+\subsection{Other Limiting Factors}
 
+Bandwidth was the only limiting factor we included in our system for this thesis, but there's a ton of other variables that could influence desired topology, such as CPU, battery, screen size, link packet loss, link jitter, and user profiles ("Only do pure peer to peer, confidential call").
+
+None of these factors were considered for these first tests of a dynamic topology system, but should be considered for future work. Decisions could be based on data, but allow user overrides, such as prompting the user whether to optimize for performance, which will kill the battery in 10 minutes, or slightly degrade performance by routing video through a repeater/transcoder to reduce local CPU consumption to last another 20 minutes. Or just take the decision and silently notify the user. The degree of user autonomy in these cases are left to implementations to decide.
