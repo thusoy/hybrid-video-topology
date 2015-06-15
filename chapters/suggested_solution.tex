@@ -40,6 +40,18 @@ As \gls{lp} is a well-known and very general technique that's effective to a vas
 
 Then there's the issue of the \emph{something} we wanted to maximize in the problem. If you want to consider the full picture with users influenced by mood, context and lots of other human factors that come into play, this is a complex topic that could warrant several papers on its own. In this thesis we'll simplify the problem to only consider two factors that influence our decision: bandwidth and latency. Thus, our reformulated problem is to \emph{maximize} bandwidth of each commodity at a \emph{minimal} latency. Formulated for each node in a conversation, this becomes our \emph{objective function}. The weighting between the two can be parametrized and left for implementations to decide.
 
+Given those factors, our problem is solved by finding a solution to the problem in \autoref{eq:objective}, where $x^k$ is a matrix with the amount of commodity $k$ transmitted on each edge, $c(i, j)$ is a cost function for the edge between $i$ and $j$, and $g_i$ is a vector of how much each device has to gain from receiving something. The gain is reflected in the device types, a phone will require less bandwidth to satisfy the user than a desktop computer with a large display will, thus introducing the gain makes sure the system will allocate bandwidth to each device's potential and capability. $s_k$ and $t_k$ is the source and sink for commodity $k$, $d_k$ is the gain. $u_{i, j}$ is the capacity of the link between $i$ and $j$.
+
+\begin{gather}\label{eq:objective}
+    max \sum_{k \in K} (d_{t_k} \sum_{w \in V} log(x_{w, t_k}^k) - \sum_e 1 + 1/(u_e - x_e^k))\\
+    \text{subject to} \nonumber \\
+    \sum_{k \in K} \sum_{(i, j) \in E} x_{i, j}^k = 0, \qquad{} i, j \neq s_k, t_k \\ \label{eq:bwlim}
+    \sum_i \sum_j (\sum_{k \in K}x_{i, j}^k) < u_{i, j}
+\end{gather}
+
+
+In plain English: For each commodity, maximize the gain of sending that commodity to it's receiver, minus the link cost sending said commodity induces, while all nodes conserve bandwidth except the source and sink for a commodity (\autoref{eq:bqlim}) and no link exceeds its capacity. The observant reader will note that we require each sink to receive each commodity, instead of having each source send each commodity. We'll come back to this decision in \autoref{sec:repeaters}
+
 In any case, this raises some other issues that has to be handled. The objective function has to be linear to be solved as a linear program, but several of our parameters are non-linear. Perceived gain from increasing bandwidth is non-linear, the cost of link utilization is non-linear, and perceived gain from reducing latency is probably non-linear. However, all of these can be approximated arbitrarily close by a piecewise linear function, as illustrated in \todo{Insert example of piecewise linear functions}. This too can be parametrized, as either the number of pieces to divide into or as the maximum deviation from the true allowed.
 
 These different cases will be discussed in the following paragraphs, before we arrive at our final objective function.
