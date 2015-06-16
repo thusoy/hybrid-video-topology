@@ -49,7 +49,7 @@ Taking several samples to improve accuracy leads us to another weakness, which i
 \begin{figure}
     \centering
     \includegraphics[width=.7\textwidth]{blurred-capture}
-    \caption{A screenshot where a node has sent two overlaying timestamps. In this case interpreted as 10.106, which is reasonable as it's close to a 33ms increase from the previous 10.075.}
+    \caption{A screenshot where a node has sent two overlaying timestamps. In this case interpreted as 10.106, which is reasonable as it's close to the expected 33ms increase from the previous 10.075.}
     \label{fig:blurred-capture}
 \end{figure}
 
@@ -257,7 +257,7 @@ For our first test case, ``Asia'', the results are shown in \autoref{fig:asia-bi
         \end{tikzpicture}
         \subcaption{Outgoing latencies for each node}
     \end{subfigure}
-    \caption{Test results for the ``asia'' test case. The actual numbers for the out-of-bounds latencies are, from left to right, 25000, 47000, 47000 and 24000.}
+    \caption{Test results for the ``asia'' test case. The out-of-bounds latencies are are all larger than 24s.}
     \label{fig:asia-bitrate}
 \end{figure}
 
