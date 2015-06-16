@@ -3,6 +3,16 @@
 
 In this chapter we'll first discuss some technical aspect of video conferencing that affect how we reason about solving the challenges, before performing we try to benchmark existing solutions to see how they perform in our example conversations.
 
+\section{WebRTC}
+
+This thesis is largely inspired by the efforts of the \gls{w3c} in standardizing \gls{webrtc}, a technology which enables direct browser-to-browser communication. Building on \gls{webrtc}, services like Telenor Digital's appear.in and Telefonica's Hello have come to life, ushering in a new age of communication that does not depend on the traditional GSM infrastructure, but is fueled by faster Internet connections and more and more capable smartphones.
+
+It's interesting to note that many of the largest WebRTC communication platforms (like appear.in and Hello, as mentioned) we've seen so far have been developed by the largest players in the traditional communication field, and not from any independent outsider. The big telephone companies do have capabilities other actors don't enjoy, such as being able to freely route calls back over GSM as a fallback solution in case a person is not reachable online, but this has not been a selling point for the services so far. The services have also largely been focused on video conferencing, even though the technology is equally well-suited for pure voice conversations or text-based communication.
+
+In any case, the hard part of the problem is video conferencing, as the demands on the user equipement and connection is far greater than what will ever be excercised by voice or text. Group conversations on appear.in is today artificially limited to 8 people, but often the parties in the conversation will experience practical limits below this due to insufficient bandwidth or CPUs not capable of encoding enough parallel video streams.
+
+The dynamic routing scheme proposed in this thesis is largely independent of underlying technology, but is intended to be built on top of \gls{webrtc}. The requirements to implement the suggested solution is that the platform allows clients to establish connections with a given starting bitrate (which WebRTC allows through modifying the SDP offer), and that streams can be routed arbitrarily. As connections have to be established in an ad-hoc way out-of-band in WebRTC, as long as the parties involved all share session keys, this should also be feasible.
+
 
 \section{A technical look at video conferencing}
 
