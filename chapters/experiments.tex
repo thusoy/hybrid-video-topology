@@ -333,9 +333,9 @@ Next up we have the ``standup'' test case, as seen in \autoref{fig:standup}. The
         \begin{tikzpicture}
         \begin{axis}[
             ybar,
-            compat=newest,
+            ymode=log,
+            axis x line=bottom,
             ylabel=Latency (ms),
-            ymax=1000,
             xtick=data,
             width=\textwidth,
             symbolic x coords={A,B,C,D,E,F,G},
@@ -351,7 +351,31 @@ Next up we have the ``standup'' test case, as seen in \autoref{fig:standup}. The
         \subcaption{Outgoing latencies for each node}
     \end{subfigure}
     \caption{Test results for the ``friends'' test case, log scale}
-    \label{fig:friends}
+    \label{fig:friends-log}
+\end{figure}
+
+Last out is the ``friends'' test case. As there's a lot of data points for this case, the results have been split in two; one logarithmic view giving a rough overview of how the nodes performed (\autoref{fig:friends-log}), and one cropped view, where only edges with latency less than 500ms is included (\autoref{fig:friends-lin}).
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+    \begin{axis}[
+        ybar,
+        ylabel=Latency (ms),
+        xtick=data,
+        width=\textwidth,
+        symbolic x coords={A,B,C,D,E,F,G},
+        bar width=3,
+        height=240,
+        enlargelimits=0.15,
+        major grid style=dashed,
+        ymajorgrids
+        ]
+        \input{data/appear.in-friends/latency-lin.tex}
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Outgoing latencies for the ``friends'' test case, results below 500ms only, linear scale}
+    \label{fig:friends-lin}
 \end{figure}
 
 
