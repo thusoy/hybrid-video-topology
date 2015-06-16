@@ -26,10 +26,10 @@ bitrates:
 latex:
 	dot -Teps figs/nodesplitting-post.dot -o figs/nodesplitting-post.eps
 	dot -Teps figs/nodesplitting-pre.dot -o figs/nodesplitting-pre.eps
-	pdflatex --shell-escape $(TEXFILE) && \
+	pdflatex -draftmode --shell-escape $(TEXFILE) && \
 	bibtex $(TEXFILE) && \
 	makeglossaries $(TEXFILE) && \
-	pdflatex --shell-escape $(TEXFILE) && \
+	pdflatex -draftmode --shell-escape $(TEXFILE) && \
 	pdflatex --shell-escape $(TEXFILE) && \
 	cp $(TEXFILE).pdf report.pdf
 
