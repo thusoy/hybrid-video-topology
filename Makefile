@@ -20,7 +20,7 @@ latencies:
 
 captured-latencies:
 	find data -type d -name "*-capture-*" | while read datadir; do target=$$(basename "$$datadir"); ./tools/latexify_captured_data_latency.py data/$$target/$$target.dat > data/$$target/latency-getstats.tex; done
-
+	find data -type d -name "*-final-*" | while read datadir; do target=$$(basename "$$datadir"); ./tools/latexify_captured_data_latency.py --new-format data/$$target/$$target.dat > data/$$target/latency-getstats.tex; done
 
 bitrates:
 	find data -type d -name "appear.in*" ! -name "*capture*" ! -name "*final*" | while read datadir; do ./tools/latexify_csv_bitrate_traces.py $$datadir/*-bitrates.csv > $$datadir/bitrate.tex; done
