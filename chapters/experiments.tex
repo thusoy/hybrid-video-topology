@@ -213,7 +213,7 @@ In the final test without traffic shaping, we step it up to seven nodes in the c
 \todo[inline]{[minor] If time, define custom color set for graphing, based possibly either on solarized or http://clrs.cc/}
 
 
-For our first test case, "Asia", the results are shown in \autoref{fig:asia-bitrate}. We can tell that even though node B transmits 0.5Mbps to each of the other nodes, neither of them receive recent data frequent enough to keep an acceptable conversation with node B. The good thing is that even though node B suffers greatly in this case, the flow between A and C is unaffected.
+For our first test case, ``Asia'', the results are shown in \autoref{fig:asia-bitrate}. We can tell that even though node B transmits 0.5Mbps to each of the other nodes, neither of them receive recent data frequent enough to keep an acceptable conversation with node B. The good thing is that even though node B suffers greatly in this case, the flow between A and C is unaffected.
 
 \begin{figure}
     \centering
@@ -259,11 +259,11 @@ For our first test case, "Asia", the results are shown in \autoref{fig:asia-bitr
         \end{tikzpicture}
         \subcaption{Outgoing latencies for each node}
     \end{subfigure}
-    \caption{Test results for the "asia" test case. The actual numbers for the out-of-bounds latencies are, from left to right, 25000, 47000, 47000 and 24000.}
+    \caption{Test results for the ``asia'' test case. The actual numbers for the out-of-bounds latencies are, from left to right, 25000, 47000, 47000 and 24000.}
     \label{fig:asia-bitrate}
 \end{figure}
 
-Next up we have the "standup" test case, as seen in \autoref{fig:standup}. The key challenge in this case node D, with only 6Mbps available on the downlink, slightly upped by node C with 8Mbps. Node C doesn't have any troubles in this test, but node D is completely satured, receiving 2.1Mbps from each of the other three nodes. Even though node D sends to its fullest capacity, hardly anything of this is correctly received by the other nodes. Since there doesn't seem to be any
+Next up we have the ``standup'' test case, as seen in \autoref{fig:standup}. The key challenge in this case node D, with only 6Mbps available on the downlink, slightly upped by node C with 8Mbps. Node C doesn't have any troubles in this test, but node D is completely satured, receiving 2.1Mbps from each of the other three nodes. Even though node D sends to its fullest capacity, hardly anything of this is correctly received by the other nodes, as can be seen from the latencies incurred. This probably implies that among the data Firefox is actually putting onto the wire, not enough of it reaches the destinations unfragmented, and thus the receiver is incapable of recontructing a complete frame to show to the user.
 
 \begin{figure}
     \centering
@@ -305,7 +305,7 @@ Next up we have the "standup" test case, as seen in \autoref{fig:standup}. The k
         \end{tikzpicture}
         \subcaption{Outgoing latencies for each node}
     \end{subfigure}
-    \caption{Test results for the "standup" test case.}
+    \caption{Test results for the ``standup'' test case.}
     \label{fig:standup}
 \end{figure}
 
@@ -352,7 +352,7 @@ Next up we have the "standup" test case, as seen in \autoref{fig:standup}. The k
         \end{tikzpicture}
         \subcaption{Outgoing latencies for each node}
     \end{subfigure}
-    \caption{Test results for the "friends" test case}
+    \caption{Test results for the ``friends'' test case, log scale}
     \label{fig:friends}
 \end{figure}
 
