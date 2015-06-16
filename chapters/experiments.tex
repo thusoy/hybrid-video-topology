@@ -354,7 +354,11 @@ Next up we have the ``standup'' test case, as seen in \autoref{fig:standup}. The
     \label{fig:friends-log}
 \end{figure}
 
-Last out is the ``friends'' test case. As there's a lot of data points for this case, the results have been split in two; one logarithmic view giving a rough overview of how the nodes performed (\autoref{fig:friends-log}), and one cropped view, where only edges with latency less than 500ms is included (\autoref{fig:friends-lin}).
+\todo{Decide whether to group cases together, or bitrates/latencies with/without traffic shaping}
+
+Last out is the ``friends'' test case. As there's a lot of data points for this case, the results have been split in two; one logarithmic view giving a rough overview of how the nodes performed (\autoref{fig:friends-log}), and one cropped view, where only edges with latency less than 500ms is included (\autoref{fig:friends-lin}). As we can see from the linear chart, there's only four nodes that observe latencies below 500ms, and not even all of those can reasonably be expected to be able to hold a conversation. A and B can talk together; A and E can talk, although a little more strained with latencies around 400ms. B and E can not talk, as B doesn't receive E's stream in reasonable time; B and F however \emph{can} talk together.
+
+To summarize, out of 42 pairs of nodes in the test case, only three of them is able to communicate bidirectionally. In practice, this is a conversation all parties abandon immediately, as it's useless.
 
 \begin{figure}
     \centering
@@ -374,12 +378,59 @@ Last out is the ``friends'' test case. As there's a lot of data points for this 
         \input{data/appear.in-friends/latency-lin.tex}
     \end{axis}
     \end{tikzpicture}
-    \caption{Outgoing latencies for the ``friends'' test case, results below 500ms only, linear scale}
+    \caption{Observed latencies in the ``friends'' test case, results below 500ms only, linear scale}
     \label{fig:friends-lin}
 \end{figure}
 
+\todo[inline]{Add example chart with guide for how to read values. What's depicted over A is the latency from those nodes TO A.}
 
-However sobering the Firefox results are, it's unlikely they provide the full story of WebRTC. After all, it's widely deployed and in use by lots of different providers, if this was the expected results it would likely not have gained much traction. Thus, to have a point of comparison, we re-ran the tests using Chrome, but instead of the very manual and labor-intensive method of filming timestamps, used the \texttt{getStats} API to extract the relevant data. This data is provided by the underlying \gls{rtcp}-implementation in the browser.
+However sobering the Firefox results are, it's unlikely they provide the full story of WebRTC. After all, WebRTC is relatively widely deployed for such a young technology and in use by lots of different providers, if this was the expected results it would likely not have gained much traction. Thus, to have a point of comparison, we re-ran the tests using Chrome, but instead of the very manual and labor-intensive method of filming timestamps, used the \texttt{getStats} API to extract the relevant data. The browser extracts these data from the \gls{rtcp}-stream present between each pair of nodes, which contains control signals for the \gls{rtp} stream.
+
+
+\subsection{getStats}
+
+The relevant values offered by the \texttt{getStats}-API on Chrome\footnote{Documentation is very lacking for the \texttt{getStats}-API, as the specification is not completed yet, so the most reliable reference is the source: \url{https://chromium.googlesource.com/external/webrtc/+/master/talk/app/webrtc/statstypes.cc}} is:
+
+\subsubsection{Audio Receive}
+\begin{itemize}
+    \item bytesReceived (\texttt{``16983''})
+    \item googCodecName (\texttt{``opus''})
+    \item googCurrentDelayMs (\texttt{``100''})
+    \item googJitterBufferMs (\texttt{``43''})
+    \item googJitterReceived (\texttt{``0''})
+    \item googPreferredJitterBufferMs (\texttt{``20''})
+    \item packetsLost (\texttt{``0''})
+    \item packetsReceived (\texttt{``179''})
+\end{itemize}
+
+\subsubsection{Video Send}
+\begin{itemize}
+    \item bytesSent (\texttt{``106680''})
+    \item googAvgEncodeMs (\texttt{``8''})
+    \item googCaptureJitterMs (\texttt{``24''})
+    \item googCaptureQueueDelayMsPerS (\texttt{``0''})
+    \item googCodecName (\texttt{``VP8''})
+    \item googBandwidthLimitedResolution (\texttt{``false''})
+    \item googCpuLimitedResolution (\texttt{``false''})
+    \item googViewLimitedResolution (\texttt{``false''})
+    \item googRtt (\texttt{``81''})
+    \item packetsLost (\texttt{``0''})
+    \item packetsSent (\texttt{``131''})
+\end{itemize}
+
+\subsubsection{Video Receive}
+\begin{itemize}
+    \item bytesReceived (\texttt{``74557''})
+    \item googCurrentDelayMs (\texttt{``25''})
+    \item googDecodeMs (\texttt{``2''})
+    \item googJitterBufferMs (\texttt{``11''})
+    \item googMaxDecodeMs (\texttt{``4''})
+    \item googMinPlayoutDelayMs (\texttt{``0''})
+    \item googRenderDelayMs (\texttt{``10''})
+    \item googTargetDelayMs (\texttt{``25''})
+    \item packetsLost (\texttt{``0''})
+    \item packetsReceived (\texttt{``109''})
+\end{itemize}
 
 \begin{figure}
     \centering
@@ -469,4 +520,150 @@ However sobering the Firefox results are, it's unlikely they provide the full st
     \end{subfigure}
     \caption{Timer broadcasting and getStats compared for the asia test case. Note that the timer broadcasting has only 6 samples, while \texttt{getStats} has 80.}
     \label{fig:standup}
+\end{figure}
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ymax=950,
+            ylabel=Latency (ms),
+            xtick=data,
+            width=\textwidth,
+            symbolic x coords={A,B,C,D,E,F,G},
+            bar width=3,
+            height=240,
+            enlargelimits=0.10,
+            major grid style=dashed,
+            ymajorgrids
+            ]
+            \input{data/appear.in-capture-vanilla-7p/latency-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Latencies measured without traffic shaping, seven nodes}
+    \end{subfigure}
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ymax=950,
+            ylabel=Latency (ms),
+            xtick=data,
+            width=\textwidth,
+            symbolic x coords={A,B,C,D,E,F,G},
+            bar width=3,
+            height=240,
+            enlargelimits=0.10,
+            major grid style=dashed,
+            ymajorgrids
+            ]
+            \input{data/appear.in-capture-friends/latency-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Latencies observed with traffic shaping, ``friends'' test case}
+    \end{subfigure}
+    \caption{Observed latencies in a conversation with seven nodes, with and without traffic shaping}
+    \label{fig:vanilla-7p-getstats}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ymax=950,
+            ylabel=Latency (ms),
+            xtick=data,
+            width=\textwidth,
+            symbolic x coords={A,B,C,D,E,F,G},
+            bar width=3,
+            height=240,
+            enlargelimits=0.10,
+            major grid style=dashed,
+            ymajorgrids
+            ]
+            \input{data/appear.in-final-vanilla-7p/latency-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Latencies measured without traffic shaping, seven nodes}
+    \end{subfigure}
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ymax=950,
+            ylabel=Latency (ms),
+            xtick=data,
+            width=\textwidth,
+            symbolic x coords={A,B,C,D,E,F,G},
+            bar width=3,
+            height=240,
+            enlargelimits=0.10,
+            major grid style=dashed,
+            ymajorgrids
+            ]
+            \input{data/appear.in-final-friends/latency-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Latencies observed with traffic shaping, ``friends'' test case}
+    \end{subfigure}
+    \caption{Observed latencies in a conversation with seven nodes, with and without traffic shaping FINAL DATA}
+    \label{fig:vanilla-7p-getstats}
+\end{figure}
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ymax=950,
+            ylabel=Latency (ms),
+            xtick=data,
+            width=\textwidth,
+            symbolic x coords={A,B,C,D,E,F,G},
+            bar width=8,
+            height=240,
+            enlargelimits=0.15,
+            major grid style=dashed,
+            ymajorgrids
+            ]
+            \input{data/appear.in-capture-standup/latency-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Latencies measured without traffic shaping, seven nodes}
+    \end{subfigure}
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ymax=950,
+            ylabel=Latency (ms),
+            xtick=data,
+            width=\textwidth,
+            symbolic x coords={A,B,C,D,E,F,G},
+            bar width=8,
+            height=240,
+            enlargelimits=0.15,
+            major grid style=dashed,
+            ymajorgrids
+            ]
+            \input{data/appear.in-final-standup/latency-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Latencies observed with traffic shaping, ``standup'' test case}
+    \end{subfigure}
+    \caption{Observed latencies in a conversation with seven nodes, with and without traffic shaping FINAL VS CAPTURE}
+    \label{fig:vanilla-7p-getstats}
 \end{figure}
