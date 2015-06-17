@@ -121,3 +121,8 @@ Networking and algorithms related to networking is not a new topic, by any stret
 During this thesis we will borrow heavily from previous work on networking and graph algorithms in general, and flow algorithms in particular. Many algorithmic problems can be solved as a linear program, which as a problem was first solved by Fourier in 1827\cite{sierksma2001linear}. Another solution, the simplex method, was first introduced by G.B. Dantzig in 1947\cite{sierksma2001linear}, and was first introduced to me in \cite{ahuja1988network} by Ahuja, Magnanti and Orlin, and serves as the basis for much of our suggested solution. The simplex method has been widely adopted for its ease of implementation on computers, and years of exponential growth of computer performance has made increasingly large problem sets solvable in realistic time.
 
 Now that we've established the problem domain and have some grasp of the main challenges, let's see where we are today.
+
+
+\section{Disclaimer}
+
+This thesis does not try to measure or optimize for audio transmission, as that's a much simpler problem that can practically always be completed by sending the same stream to all nodes in the conversation. There's always only one stream to encode, it doesn't noticably affect available bandwidth, and it's already widely deployed. However, results we achieve for video can also be applied to audio streams if the environment is very heavily constrained or further optimization is required, it's just not the focus of this thesis.
