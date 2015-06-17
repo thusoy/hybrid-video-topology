@@ -1,0 +1,23 @@
+\chapter{Extracting \texttt{getStats} data}
+
+Data extraction from the browsers while running the tests consisted of two parts: A JavaScript file that was injected into the browser extracting the actual data, and a webserver running outside the test cluster storing the captured data for analysis.
+
+Since the data directly from \texttt{getStats} is overly verbose and a bit hard to navigate, some cleanup is performed in the browser before shipping it off to storage, to have as small an impact on the test bandwidth as possible. If no influence of analytics is desired, a local web server could have been spawned on each node running in the test, preventing any external data usage during the duration of the test. The data could then be collected later. This was not considered necessary for these tests, as the overhead of relatively small JSON posted over HTTP is very small compared to streaming live video.
+
+The JavaScript was injected into Chrome using ``Custom JavaScript for websites''\footnote{Available here: \url{https://chrome.google.com/webstore/detail/custom-javascript-for-web/poakhlngfciodnhlhhgnaaelnpjljija}}. The script was configured to dump statistics to the external server every second.
+
+\inputminted[
+    linenos,
+    numbersep=5pt,
+    frame=lines,
+    framesep=2mm]
+    {javascript}{tools/getstats.js}
+
+The web server code storing the incomng data is quite simple. It performs some very basic sanity checking of the incoming data, and appends it to a file in a customizable location. It uses the Flask python framework\footnote{Available here: \url{http://flask.pocoo.org/}}.
+
+\inputminted[
+    linenos,
+    numbersep=5pt,
+    frame=lines,
+    framesep=2mm]
+    {python}{tools/statserver.py}
