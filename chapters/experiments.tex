@@ -5,13 +5,9 @@ In this chapter we'll benchmark a WebRTC-based video conferencing solution for o
 
 \section{Test Setup}
 
-To benchmark appear.in, our WebRTC-based video conferencing solution of choice, we have utilized a small cluster of desktop computers with web cameras, running the most recent versions of Mozilla Firefox\footnote{Version 36.0.4, latest version as of 2015.06.05 when the tests were run} and Google Chrome\footnote{Version 41.0.2272.101, latest version as of 2015.06.11 when the tests were run}. The goal of the benchmark is to get a sense of how the application performs with regard to latency and bandwidth usage in our different test scenarios, and from that data observe how resources are shared among the nodes in a conversation.
+To benchmark appear.in, our WebRTC-based video conferencing solution of choice, we have utilized a small cluster of desktop computers with web cameras, running the most recent versions of Mozilla Firefox\footnote{Version 36.0.4, latest version as of 2015.06.05 when the tests were run} and Google Chrome\footnote{Version 41.0.2272.101, latest version as of 2015.06.11 when the tests were run}. These two browsers was chosen since they collectively represent 85\% of the browser market (according to \cite{browser-stats}), and are powered by two different underlying engines. The goal of the benchmark is to get a sense of how the browsers -- and by extension, appear.in -- performs with regard to latency and bandwidth usage in our different test scenarios, and from that data observe how resources are shared among the nodes in a conversation.
 
-\todo{Measurements were done in two different ways, as the experiment was first intended to be platform-agnostic, to allow comparison between traditional MCU-based topologies and peer-to-peer topologies, but as it turned out to be infeasible to test the MCU-based solutions, a pure WebRTC solution would have been optimal. SKRIV FERDIG! Inkluder hvordan js ble injisert for å dumpe getStats til ekstern server.}
-
-WebRTC doesn't expose any \glspl{api} for accessing latency of a given stream, thus we had to improvise how to measure this. We settled for a solution based on having each node broadcast a timestamp in its video stream, which each receiving node could then compare to their local time. As long as all the clocks are syncronized against the same NTP servers, they should be more than accurate enough to measure the different latencies observed in the system.
-
-Practically this was accomplished by having each computer film a timer running on a separate computer, and run the same timer locally. A screenshot was taken regularly through the test run, enabling extraction of the time as sent by each of the other nodes later. See \autoref{fig:example-screenshot} for an example of how the screenshots looked.
+Since the test covers two different browsers who do not share a common API (more on this later), measurements were done in two different ways. For Firefox, who do not expose timing data of WebRTC-streamms, a browser-external way of measuring end-to-end latencies was necessary. For this we synchronzed all the clocks in the cluster to the same \gls{NTP} server, and set another independent node -- also synced to the same time server -- to run a timer. Each of the nodes in the test filmed this timer, and with the same timer running locally in a terminal, the end-to-end latency could be extracted by taking regular screenshots, and finding the difference between the local timer and the timer as sent by the other nodes. See \autoref{fig:example-screenshot} for an example of how the screenshots looked.
 
 \begin{figure}
     \centering
@@ -21,6 +17,42 @@ Practically this was accomplished by having each computer film a timer running o
 \end{figure}
 
 Bandwidth usage was measured by running \texttt{tcpdump} throughout the test run, and later extracting sent and received data with \texttt{tshark}.
+
+For the Chrome tests, this was a bit simpler and less manual, as Chrome do provider timing data through the \texttt{getStats} API. Firefox also supports \texttt{getStats}, but does not return as much data as Chrome does, even though the data is assumed to be available internally in the browser.
+
+\subsection{getStats}
+
+The relevant values offered by the \texttt{getStats}-API on Chrome\footnote{Documentation is very lacking for the \texttt{getStats}-API, as the specification is not completed yet, so the most reliable reference is the source: \url{https://chromium.googlesource.com/external/webrtc/+/master/talk/app/webrtc/statstypes.cc}} is:
+
+\subsubsection{Video Send}
+\begin{itemize}
+    \setlength\itemsep{.5em}
+    \item bytesSent (\texttt{``106680''})
+    \item googAvgEncodeMs (\texttt{``8''})
+    \item googCaptureJitterMs (\texttt{``24''})
+    \item googCaptureQueueDelayMsPerS (\texttt{``0''})
+    \item googCodecName (\texttt{``VP8''})
+    \item googBandwidthLimitedResolution (\texttt{``false''})
+    \item googCpuLimitedResolution (\texttt{``false''})
+    \item googViewLimitedResolution (\texttt{``false''})
+    \item googRtt (\texttt{``81''})
+    \item packetsLost (\texttt{``0''})
+    \item packetsSent (\texttt{``131''})
+\end{itemize}
+
+\subsubsection{Video Receive}
+\begin{itemize}
+    \item bytesReceived (\texttt{``74557''})
+    \item googCurrentDelayMs (\texttt{``25''})
+    \item googDecodeMs (\texttt{``2''})
+    \item googJitterBufferMs (\texttt{``11''})
+    \item googMaxDecodeMs (\texttt{``4''})
+    \item googMinPlayoutDelayMs (\texttt{``0''})
+    \item googRenderDelayMs (\texttt{``10''})
+    \item googTargetDelayMs (\texttt{``25''})
+    \item packetsLost (\texttt{``0''})
+    \item packetsReceived (\texttt{``109''})
+\end{itemize}
 
 To configure the cluster according to the different test cases, we utilized the Linux traffic control utility \texttt{tc}, which is capable of rate-limiting incoming and outgoing traffic, as well as delaying traffic destined for certain hosts. A small script was developed to act as a glue layer between a representation of a network and \texttt{tc}, making configuration repeatable and easily parametrized. The script is included in \autoref{chp:apply-case}.
 
@@ -74,6 +106,8 @@ While the method itself is application-agnostic, configuring nodes the way we do
 To get a sense of how appear.in performs under optimal conditions, a test run was performed with 3, 4 and 7 nodes in a conversation, without any traffic shaping. We would expect both bandwidth and latencies to be fairly even among all the nodes, as the only thing different between them is the time they entered the conversation. Since they were given some time to stabilize before the measurements was started, some fairness should have been achieved.
 
 As we see in \autoref{fig:vanilla-3p}, bitrates between the nodes are identical, as expected. From the latency measurements there seems to be a slight inclination towards the latest arriving node having somewhat higher latencies outgoing, but the difference is negligible in practice.
+
+\subsection{Mozilla Firefox}
 
 \begin{figure}
     \centering
@@ -384,53 +418,9 @@ To summarize, out of 42 pairs of nodes in the test case, only three of them is a
 
 \todo[inline]{Add example chart with guide for how to read values. What's depicted over A is the latency from those nodes TO A.}
 
-However sobering the Firefox results are, it's unlikely they provide the full story of WebRTC. After all, WebRTC is relatively widely deployed for such a young technology and in use by lots of different providers, if this was the expected results it would likely not have gained much traction. Thus, to have a point of comparison, we re-ran the tests using Chrome, but instead of the very manual and labor-intensive method of filming timestamps, used the \texttt{getStats} API to extract the relevant data. The browser extracts these data from the \gls{rtcp}-stream present between each pair of nodes, which contains control signals for the \gls{rtp} stream.
+\subsection{Google Chrome}
 
-
-\subsection{getStats}
-
-The relevant values offered by the \texttt{getStats}-API on Chrome\footnote{Documentation is very lacking for the \texttt{getStats}-API, as the specification is not completed yet, so the most reliable reference is the source: \url{https://chromium.googlesource.com/external/webrtc/+/master/talk/app/webrtc/statstypes.cc}} is:
-
-\subsubsection{Audio Receive}
-\begin{itemize}
-    \item bytesReceived (\texttt{``16983''})
-    \item googCodecName (\texttt{``opus''})
-    \item googCurrentDelayMs (\texttt{``100''})
-    \item googJitterBufferMs (\texttt{``43''})
-    \item googJitterReceived (\texttt{``0''})
-    \item googPreferredJitterBufferMs (\texttt{``20''})
-    \item packetsLost (\texttt{``0''})
-    \item packetsReceived (\texttt{``179''})
-\end{itemize}
-
-\subsubsection{Video Send}
-\begin{itemize}
-    \item bytesSent (\texttt{``106680''})
-    \item googAvgEncodeMs (\texttt{``8''})
-    \item googCaptureJitterMs (\texttt{``24''})
-    \item googCaptureQueueDelayMsPerS (\texttt{``0''})
-    \item googCodecName (\texttt{``VP8''})
-    \item googBandwidthLimitedResolution (\texttt{``false''})
-    \item googCpuLimitedResolution (\texttt{``false''})
-    \item googViewLimitedResolution (\texttt{``false''})
-    \item googRtt (\texttt{``81''})
-    \item packetsLost (\texttt{``0''})
-    \item packetsSent (\texttt{``131''})
-\end{itemize}
-
-\subsubsection{Video Receive}
-\begin{itemize}
-    \item bytesReceived (\texttt{``74557''})
-    \item googCurrentDelayMs (\texttt{``25''})
-    \item googDecodeMs (\texttt{``2''})
-    \item googJitterBufferMs (\texttt{``11''})
-    \item googMaxDecodeMs (\texttt{``4''})
-    \item googMinPlayoutDelayMs (\texttt{``0''})
-    \item googRenderDelayMs (\texttt{``10''})
-    \item googTargetDelayMs (\texttt{``25''})
-    \item packetsLost (\texttt{``0''})
-    \item packetsReceived (\texttt{``109''})
-\end{itemize}
+Now to the Chrome tests.
 
 \begin{figure}
     \centering
@@ -631,7 +621,7 @@ The relevant values offered by the \texttt{getStats}-API on Chrome\footnote{Docu
             ylabel=Latency (ms),
             xtick=data,
             width=\textwidth,
-            symbolic x coords={A,B,C,D,E,F,G},
+            symbolic x coords={A,B,C,D},
             bar width=8,
             height=240,
             enlargelimits=0.15,
@@ -652,7 +642,7 @@ The relevant values offered by the \texttt{getStats}-API on Chrome\footnote{Docu
             ylabel=Latency (ms),
             xtick=data,
             width=\textwidth,
-            symbolic x coords={A,B,C,D,E,F,G},
+            symbolic x coords={A,B,C,D},
             bar width=8,
             height=240,
             enlargelimits=0.15,
