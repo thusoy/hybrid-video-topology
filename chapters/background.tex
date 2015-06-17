@@ -35,7 +35,7 @@ The naïve approach to encoding the videostreams is to encode the raw stream fro
 
 \section{The current providers}
 
-Now that we have established our example conversations, we can turn to see how they'll behave in the solutions available today. The most popular video conferencing solutions available today are:
+The most popular video conferencing solutions available today are:\todo{Source!}
 
 \begin{center}
 	\label{tab:existing-solutions}
@@ -49,7 +49,7 @@ Now that we have established our example conversations, we can turn to see how t
 	\end{tabular}
 \end{center}
 
-Notably absent here is FaceTime, Apple's videochat service bundled with their devices. FaceTime's absence in this thesis is due to the lack of support for more than two people in a conversation, which makes the optimal topology question embarassingly easy to answer, and the lack of support on non-Apple devices, which makes the service uninteresting.
+Notably absent here is FaceTime, Apple's videochat service bundled with their devices. FaceTime's absence in this thesis is due to the lack of support for more than two people in a conversation, which makes the optimal topology question embarassingly easy to answer, and the lack of support on non-Apple devices, which makes the service uninteresting to us.
 
 We also note that Mozilla just entered the market in collaboration with Telefonica with their Hello service, bundled with recent versions of Firefox\footnote{https://www.mozilla.org/en-US/firefox/hello/}. Hello however essentially provides the same service as appear.in, just bundled with the browser. Thus anything we say about appear.in applies to Firefox Hello as well, and we'll therefore not consider them separately. This author will however congratulate Mozilla and Telefonica on their endeavor to make communication more open and available to anyone.
 
@@ -68,8 +68,6 @@ To use Google Hangouts it requires you to setup a public Google+ profile, which 
 
 In our test scenarios, Google Hangouts performs like this:
 
-\todo[inline]{Get test data from hangouts}
-
 
 \subsection{Skype}
 
@@ -77,12 +75,83 @@ Skype is probably the most well-known of the solutions we're looking at, being t
 
 Skype requires a standalone application to run, which is available on pretty much every platform out there, including Windows, Mac, Linux, Android, iOS, Windows Phone, BlackBerry, most tablets, TVs, gaming consoles and more. The benefit is close access to hardware and GPUs for more efficient video encoding, the downside is the lack of open protocols and standardization.
 
-Skype performance summarized:
-
-\todo[inline]{Add skype test data}
-
-
 \todo{Which providers do we have today and what sort of topologies do they use? What are their pros and cons?}
+
+
+\section{Test Cases}
+
+To narrow down the problem scope a little, we'll define some example conversations we can work on, and assume that if we can efficiently serve these setups, we can serve most others as well. A summary of the test cases are given in \autoref{tab:example-conversations}. Note that these are intended to be hard cases, with at least one node being more constrained than the others. \autoref{fig:test-cases} illustrates the test cases graphically with the all the inter-node latencies.
+
+\begin{center}
+    \label{tab:example-conversations}
+    \begin{tabular}{| l | l | l |}
+    \hline
+    \textbf{Case name} & \textbf{Number of nodes} & \textbf{Description} \\ \hline
+    Traveller & 3 & Two people with decent connections between them, one remote with high latency and severely restricted bandwidth to the others. \\ \hline
+    Standup & 4 & Two people on desktop machines with wired connections, one laptop and one tablet on wifi. \\ \hline
+    Friends & 7 & Group split in two locations, each subgroup having short latencies internally, but larger latencies to the other group. Heterogenous bandwidths across the board. \\ \hline
+    \end{tabular}
+\end{center}
+
+Are there any trivial cases we can ignore? As long as there's only two people in a conversation, and they have fairly low latency between each other and sufficient bandwidth, peer-to-peer is the optimal choice in all cases. Initially, it might seem like this would indeed be the case in all conversations with two participants, and not just the good-bandwidth, small-latency onces. However, this is not the case. To illustrate why, consider a conversation between two people, one in Europe and one in Asia. The latency between them is ~350ms. They both have fairly acceptable bandwidth, with 3Mbps each, which should be plenty to sustain an acceptable video link between them. This, however, is not the case, as the bandwidth between them is far more limited due to the long distance and many hops through publicly routed networks. However, each of the peers has a datacenter of a distributed VPS provider nearby, to which they can utilize their full bandwidth. And these distributed VPS providers tend to have established high-quality routes between their own datacenters, backed by \glspl{sla} and with all the bells and whistles you don't get on your private Internet connection.
+
+The available bandwidth between the two datacenters is thus far greater than what can be achieved directly between the two peers. Because of this, their video link can be improved by routing their traffic through the datacenters, thus enabling each peer to utilize the full bandwidth of their connection.\footnote{This is backed by a simple experiment, using DigitalOcean as our VPS provider. From a 100Mbit university connection in Norway, sustained datarates to their Singapore datacenter varied greatly, measuring 90kBps, 3,7MBps, 1,9MBps and 2,58MBps for each test. However, from their Amsterdam datacenter, a consistent throughput of 24,6MBps was measured} Do however note that the latency is close to unchanged from routing through the datacenters, only sustained bandwidth between the peers is improved (and probably packet loss).
+
+These conversations are not extensive, but should cover enough corner cases to be able to highlight the pros and cons of the different topologies. The examples cover the low-latency, few peers conversations; the bandwidth-challenged cases; the high-latency conversations; and the very hetrogenous device conversations, where one or more party is severly challenged in terms of either bandwidth or latency.
+
+We assume that the backend networks are not saturated, and that each user is bandwidth-constrained only by their connection. By extension, the maximum bandwidth attainable between any pair of nodes in our network is the lesser of the upload bandwidth of the sending party and the download bandwidth of the receiving party. However, latency has to be defined for any pair of the nodes in the network, as this is mostly determined by their geographical location in relation to each other. To best illustrate the physical topology, we can draw each scenario as a complete graph:
+
+\begin{figure}
+    \begin{subfigure}{\textwidth}
+        \centering
+        \digraph{exampleconvchat}{
+            edge [dir=none];
+            rankdir=LR;
+            a [label="A (20/5)"];
+            b [label="B (30/15)"];
+
+            a -> b [label="8ms"];
+        }
+        \subcaption{Example conversation ``traveller''.}\label{fig:example-conv-chat}
+    \end{subfigure}
+
+    \begin{subfigure}{\textwidth}
+        \centering
+        \digraph{exampleconvcasual}{
+            edge [dir=none];
+            rankdir=LR;
+            a [label="A (10/2)"];
+            b [label="B (30/5)"];
+            c [label="C (2/1)"];
+
+            a -> b [label="5ms"];
+            a -> c [label="10ms"];
+            b -> c [label="15ms"];
+        }
+        \caption{Example conversation ``standup''}\label{fig:example-conv-casual}
+    \end{subfigure}
+
+    \begin{subfigure}{\textwidth}
+        \centering
+        \digraph{exampleconvbusiness}{
+            edge [dir=none];
+            a [label="A (50/50)"];
+            b [label="B (50/50)"];
+            c [label="C (50/50)"];
+            d [label="D (30/30)"];
+
+            a -> b [label="2ms"];
+            a -> c [label="2ms"];
+            a -> d [label="150ms"];
+            b -> c [label="2ms"];
+            b -> d [label="150ms"];
+            c -> d [label="150ms"];
+        }
+        \caption{Example conversation ``friends''}\label{fig:example-conv-business}
+    \end{subfigure}
+    \caption{The different test cases}
+    \label{fig:test-cases}
+\end{figure}
 
 
 
