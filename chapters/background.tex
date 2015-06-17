@@ -14,15 +14,17 @@ In any case, the hard part of the problem is video conferencing, as the demands 
 The dynamic routing scheme proposed in this thesis is largely independent of underlying technology, but is intended to be built on top of \gls{webrtc}. The requirements to implement the suggested solution is that the platform allows clients to establish connections with a given starting bitrate (which WebRTC allows through modifying the SDP offer), and that streams can be routed arbitrarily. As connections have to be established in an ad-hoc way out-of-band in WebRTC, as long as the parties involved all share session keys, this should also be feasible.
 
 
-\section{A technical look at video conferencing}
+\section{A Technical Look at Video Conferencing}
 
-\subsection{Codecs}
+\subsection{Hardware}
 
-\todo[inline]{Write about the future of H.264/VP9, SVC, hardware acceleration, etc}
+\todo{Write about what hardware performs encoding. CPU for VP8, hardware-accel for H264, GPU potential, custom machinery (ala cisco)}
+
 
 \subsection{CPU limitations}
 
-The naïve approach to encoding the videostreams is to encode the raw stream from the web camera into several client-optimized streams for transmission. Using VP8, this is the only way to do it. However, H.264 can be encoded in a \gls{svc} manner, which makes it possible to extract different bandwidth-streams from a single stream. With VP8 this is sadly not possible, and the only alternative is to utilize a \gls{sfu}, a technique where several streams are sent to the same endpoint, which can then select which of the streams to forward to the different endpoints. This is not as efficient as sending only a single stream however, and the encoding step is also costlier on the CPU.
+The naïve approach to encoding video is to encode the raw stream from the web camera into several client-optimized streams for transmission. Using VP8, this is the only way to do it. However, H.264 can be encoded in a \gls{svc} manner, which makes it possible to extract different bandwidth-streams from a single stream. With VP8 this is sadly not possible, and the only alternative is to utilize a \gls{sfu}, a technique where several streams are sent to the same endpoint, which can then select which of the streams to forward to the different endpoints. This is not as efficient as sending only a single stream however, and the encoding step is also costlier on the CPU.
+
 
 \subsection{Continuous Presence}
 
@@ -30,12 +32,10 @@ The naïve approach to encoding the videostreams is to encode the raw stream fro
 
 \todo[inline]{Write about Continuous Presence (multiple parties on-screen at the same time), and how that limits the different topologies}
 
-\todo[inline]{Could the problem be avoided by not using continuous presence for challenged parties? Like only receiving a single stream from the talking party, and get some sort of indication from the network who is talking? Uploads would still have to be solved though..}
-
 
 \section{The current providers}
 
-The most popular video conferencing solutions available today are:\todo{Source!}
+A selection of widely-known video conferencing solutions today, with significantly different network architectures are summarized in the following table.
 
 \begin{center}
 	\label{tab:existing-solutions}
@@ -51,31 +51,40 @@ The most popular video conferencing solutions available today are:\todo{Source!}
 
 Notably absent here is FaceTime, Apple's videochat service bundled with their devices. FaceTime's absence in this thesis is due to the lack of support for more than two people in a conversation, which makes the optimal topology question embarassingly easy to answer, and the lack of support on non-Apple devices, which makes the service uninteresting to us.
 
-We also note that Mozilla just entered the market in collaboration with Telefonica with their Hello service, bundled with recent versions of Firefox\footnote{https://www.mozilla.org/en-US/firefox/hello/}. Hello however essentially provides the same service as appear.in, just bundled with the browser. Thus anything we say about appear.in applies to Firefox Hello as well, and we'll therefore not consider them separately. This author will however congratulate Mozilla and Telefonica on their endeavor to make communication more open and available to anyone.
+We also note that Mozilla just entered the market in collaboration with Telefonica with their Hello service, bundled with recent versions of Firefox\footnote{https://www.mozilla.org/en-US/firefox/hello/}. Hello however essentially provides the same service as appear.in, just bundled with the browser. Thus anything we say about appear.in applies to Firefox Hello as well (and all other peer-to-peer WebRTC services), and we'll therefore not consider them separately. This author will however congratulate Mozilla and Telefonica on their endeavor to make communication more open and available to anyone.
 
 Let's take a more detailed look at these services.
 
 \subsection{appear.in}
 
-\todo{Write appear.in background}
+appear.in is a free peer-to-peer service built on WebRTC that does not require sign-ups or installation of addons to your browser. Due to the WebRTC requirement the service is available to anyone using a recent version of either Google Chrome, Mozilla Firefox or Opera, while the OS-provided browsers (Internet Explorer and Safari) have notably not implemented WebRTC yet.
+
+\todo[inline]{Write a bit more about appear.in architecture: linear scaling, contionus presence, ease of testing due to no signups, limit of 8 people}
 
 
 \subsection{Google Hangouts}
 
 Google Hangouts is alongside appear.in the only other service based in the browser. Hangouts is a merge of several earlier Google communication solutions like Google Talk, Google+ Messenger and the Hangouts feature from Google+. The service uses a Google-provided \gls{mcu}, and VP8/9 over WebRTC as video transport\todo{Find a source to verify this}. A conversation is limited to 10 people.
 
-To use Google Hangouts it requires you to setup a public Google+ profile, which makes the barrier of entry significantly higher than for some of the other services tested in this thesis. It also requires installing the Hangouts extension for video conferencing to work.
-
-In our test scenarios, Google Hangouts performs like this:
+To use Google Hangouts it requires you to setup a public Google+ profile, which makes the barrier of entry significantly higher than for some of the other services tested in this thesis. It also requires installing the Hangouts extension for video conferencing to work. Since you cannot do video hangouts with yourself, this necessitates managing as many Google accounts as you need nodes in your conversation, and call management is a true \gls{pita} compared to the simplicity of appear.in, where creating or joining a conversation is a simple matter of visiting a URL.
 
 
 \subsection{Skype}
 
-Skype is probably the most well-known of the solutions we're looking at, being the first to offer free video conferencing for personal use. Skype was also among the first to provide a VoIP solution interoperating with \gls{pstn}, easing the barrier of entry for new users. The original Skype topology was peer-to-peer, routing streams through PCs with Skype installed that had the app running, using a proprietary closed-source protocol. After the Microsoft aquisition Skype ditched the peer-to-peer design to a Microsoft MCU-backed solution, justified as a means to improve performance and security for users. A Skype conversation has a soft limit on five people for the best user experience, hard limited to 10 users.
+Skype is probably the most well-known of the solutions we're looking at, being among the first to offer free video conferencing for personal use. Skype was also among the first to provide a VoIP solution interoperating with \gls{pstn}, easing the barrier of entry for new users. The original Skype topology was peer-to-peer, routing streams through PCs with Skype installed that had the app running, using a proprietary closed-source protocol. After the Microsoft aquisition Skype ditched the peer-to-peer design to a Microsoft MCU-backed solution, justified as a means to improve performance and security for users. A Skype conversation has a soft limit on five people for the best user experience, hard limited to 10 users.
 
-Skype requires a standalone application to run, which is available on pretty much every platform out there, including Windows, Mac, Linux, Android, iOS, Windows Phone, BlackBerry, most tablets, TVs, gaming consoles and more. The benefit is close access to hardware and GPUs for more efficient video encoding, the downside is the lack of open protocols and standardization.
+Skype requires a standalone application to run, which is available on pretty much every platform out there, including Windows, Mac, Linux, Android, iOS, Windows Phone, BlackBerry, most tablets, TVs, gaming consoles and more. The benefit is close access to hardware and GPUs for more efficient video encoding, the downside is the lack of open protocols, standardization and transparency.
 
-\todo{Which providers do we have today and what sort of topologies do they use? What are their pros and cons?}
+
+\subsection{Cisco}
+
+\todo{Write about Cisco}
+
+\subsection{Performance Summary}
+
+The following table summarizes where the limits for each provider is at the moment.
+
+\todo[inline]{Add performance chart as where providers fit on a bwup/bwdown spectrum}
 
 
 \section{Test Cases}
@@ -83,10 +92,11 @@ Skype requires a standalone application to run, which is available on pretty muc
 To narrow down the problem scope a little, we'll define some example conversations we can work on, and assume that if we can efficiently serve these setups, we can serve most others as well. A summary of the test cases are given in \autoref{tab:example-conversations}. Note that these are intended to be hard cases, with at least one node being more constrained than the others. \autoref{fig:test-cases} illustrates the test cases graphically with the all the inter-node latencies.
 
 \begin{center}
+    \captionof{table}{Test Cases}
     \label{tab:example-conversations}
-    \begin{tabular}{| l | l | l |}
+    \begin{tabular}{| l | l | p{7cm} |}
     \hline
-    \textbf{Case name} & \textbf{Number of nodes} & \textbf{Description} \\ \hline
+    \textbf{Case name} & \textbf{$n$} & \textbf{Description} \\ \hline
     Traveller & 3 & Two people with decent connections between them, one remote with high latency and severely restricted bandwidth to the others. \\ \hline
     Standup & 4 & Two people on desktop machines with wired connections, one laptop and one tablet on wifi. \\ \hline
     Friends & 7 & Group split in two locations, each subgroup having short latencies internally, but larger latencies to the other group. Heterogenous bandwidths across the board. \\ \hline
@@ -146,22 +156,13 @@ We assume that the backend networks are not saturated, and that each user is ban
             b -> c [label="2ms"];
             b -> d [label="150ms"];
             c -> d [label="150ms"];
+
+            {rank=same; a b}
+            {rank=same; c d}
         }
         \caption{Example conversation ``friends''}\label{fig:example-conv-business}
     \end{subfigure}
     \caption{The different test cases}
     \label{fig:test-cases}
 \end{figure}
-
-
-
-\section{Where we want to be}
-
-\todo{What is the intended outcome of this work?}
-
-
-\section{Related Work}
-
-\todo{What other work in this area have we learned from and built upon?}
-
-A study at Chalmers in 2014\cite{tree-topology-webrtc} investigated the feasibility of utilizing normal nodes in a video conference as supernodes, routing traffic from less powerful nodes through these nodes to reduce network load. The authors conclude that such a solution is feasible given proper supernode selection, which gives even greater possibilities for a solution utilizing dynamic topologies like presented in this thesis. Pushing as much traffic as possible over client-provided supernodes lowers the cost for the provider, and enables better quality for the users since peers can be closer to each other than to the closest data center.
+\todo{Make actual test cases}

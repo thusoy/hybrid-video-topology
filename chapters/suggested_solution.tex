@@ -53,12 +53,12 @@ Given those factors, our problem is solved by finding a solution to the problem 
 \begin{gather}\label{eq:objective}
     max \sum_{k \in K} (d_{t_k} \sum_{w \in V} log(x_{w, t_k}^k) - \sum_e 1 + 1/(u_e - x_e^k))\\
     \text{subject to} \nonumber \\
-    \sum_{k \in K} \sum_{(i, j) \in E} x_{i, j}^k = 0, \qquad{} i, j \neq s_k, t_k \\ \label{eq:bwlim}
-    \sum_i \sum_j (\sum_{k \in K}x_{i, j}^k) < u_{i, j}
+    \sum_{k \in K} \sum_{(i, j) \in E} x_{i, j}^k = 0, \qquad{} i, j \neq s_k, t_k \label{eq:flow-conservation} \\
+    \sum_i \sum_j (\sum_{k \in K}x_{i, j}^k) < u_{i, j} \label{eq:bwlim}
 \end{gather}
 
 
-In plain English: For each commodity, maximize the gain of sending that commodity to it's receiver, minus the link cost sending said commodity induces, while all nodes conserve bandwidth except the source and sink for a commodity (\autoref{eq:bqlim}) and no link exceeds its capacity. The observant reader will note that we require each sink to receive each commodity, instead of having each source send each commodity. We'll come back to this decision in \autoref{sec:repeaters}
+In plain English: For each commodity, maximize the gain of sending that commodity to it's receiver, minus the link cost sending said commodity induces, while all nodes conserve bandwidth except the source and sink for a commodity (\autoref{eq:flow-conservation}) and that no link exceeds its capacity (\autoref{eq:bwlim}). The observant reader will note that we require each sink to receive each commodity, instead of having each source send each commodity. We'll come back to this decision in \autoref{sec:repeaters}
 
 In any case, this raises some other issues that has to be handled. The objective function has to be linear to be solved as a linear program, but several of our parameters are non-linear. Perceived gain from increasing bandwidth is non-linear, the cost of link utilization is non-linear, and perceived gain from reducing latency is probably non-linear. However, all of these can be approximated arbitrarily close by a piecewise linear function, as illustrated in \todo{Insert example of piecewise linear functions}. This too can be parametrized, as either the number of pieces to divide into or as the maximum deviation from the true allowed.
 
@@ -67,7 +67,7 @@ These different cases will be discussed in the following paragraphs, before we a
 
 \section{Perceived Gain From Bandwidth}
 
-Increasing the bitrate of video is subject to diminishing returns, increasing the bitrate from 1Mbps to 2Mpbs yields a bigger return for the user than going from 4Mbps to 5Mbps. x264, the H.264 encoder powering applications like VLC\footnote{\url{http://www.videolan.org/developers/x264.html}}, HandBrake\footnote{\url{https://handbrake.fr/}} and ffmpeg\footnote{\url{https://trac.ffmpeg.org/wiki/Encode/H.264}}, uses an exponential scale for the relationship between bitrate and perceived quality\footnote{\url{https://trac.ffmpeg.org/wiki/Encode/H.264\#crf}}, as illustrated in \autoref{fig:bitrate-quality}.\todo{make pretty}
+Increasing the bitrate of video is subject to diminishing returns, increasing the bitrate from 1Mbps to 2Mpbs yields a bigger return for the user than going from 4Mbps to 5Mbps. x264, the H.264 encoder powering applications like VLC\footnote{\url{http://www.videolan.org/developers/x264.html}}, HandBrake\footnote{\url{https://handbrake.fr/}} and ffmpeg\footnote{\url{https://trac.ffmpeg.org/wiki/Encode/H.264}}, uses an exponential scale for the relationship between bitrate and perceived quality\footnote{\url{https://trac.ffmpeg.org/wiki/Encode/H.264\#crf}}, as illustrated in \autoref{fig:bitrate-quality}.
 
 \begin{figure}
     \centering
@@ -78,20 +78,24 @@ Increasing the bitrate of video is subject to diminishing returns, increasing th
             ylabel={Quality},
             xmin=0,
             ymin=0,
-            inner axis line style={=>}
+            x axis line style={->},
+            ticks=none,
+            major x tick style = {opacity=1},
+            minor tick length=0pt,
+            axis x line=bottom,
         ]
 
-        \addplot+[domain=0:51]{6*ln(x)};
+        \addplot+[domain=0:51, mark=none]{6*ln(x)};
         \end{axis}
     \end{tikzpicture}
 
-    \caption{The relationship between bitrate and quality in the x264 project}
+    \caption{The logarithmic relationship between bitrate and quality in the x264 project}
     \label{fig:bitrate-quality}
 \end{figure}
 
 With a linear gain from increased bandwidth, bumping traffic from a given node from 4Mbps to 5Mbps would yield the same return as bumping another node from 1Mbps to 2Mbps, and thus the algorithm would be unlikely to find a fair allocation of bandwidth. Encoding diminishing returns into the objective function ensures that everyone will be allocated a fair share, and still allows nodes with excess bandwidth to grow further than more constrained nodes.
 
-\todo{Figure out how to actually get this into the objective}
+To illustrate how we model this, imagine that instead of node splitting like we did above, we're doing \emph{edge splitting}, replacing a single edge connecting to two nodes with a set of edges, which can have different capacities and costs. This results in a linear approximation like we saw in MISSING\_FIG\_FROM\_ABOVE.
 
 
 \section{Link Utilization}
@@ -146,7 +150,7 @@ Using this partitioning as a guide, we can map any number of slots on a physical
 One alternative way to model the problem, is to skip the node splitting step of the previous model, and instead connect nodes directly, but stay below bandwidth by adding constraints for the total sum going out from each node. Which model to choose is -- as in every engineering matter -- a question of priorities. The first model is a bit harder to comprehend initially, but results in fewer total edges than the latter model does when $n>3$, as can be seen in \autoref{fig:model-scaling}. Edge counts do not matter that much when $n$ is low as finding a solution will occur in trivial time anyway, but the difference might be substantial when n is larger. \todo{If performance ends up being an issue for larger graphs, add a note here about more research being needed into optimizing performance, as alternative models might be an avenue to explore for achieving that.}
 
 \begin{figure}
-\centering
+    \centering
     \begin{tikzpicture}
         \begin{axis}[
             xlabel={n},
@@ -157,7 +161,11 @@ One alternative way to model the problem, is to skip the node splitting step of 
             xmin=2,
             ymin=1,
             ymax=1000,
-            xmax=15]
+            xmax=15,
+            legend style={legend columns=1},
+            minor x tick num=0,
+            major x tick style = {opacity=1},
+            ]
 
         \addplot+[dashed, domain=2:15, mark=none, color=blue]{6*x*(x-1)};
         \addlegendentry{$en(n-1), e=6$}
@@ -173,7 +181,7 @@ One alternative way to model the problem, is to skip the node splitting step of 
         \label{fig:utility-latency}
         \end{axis}
     \end{tikzpicture}
-    \caption{How the number of edges in the graph scales for different modeling techniques.}
+    \caption{How the number of edges in the graph scales for different modeling techniques. Blue graph is the alternative model, red is the suggested one}
     \label{fig:model-scaling}
 \end{figure}
 
@@ -182,9 +190,9 @@ One alternative way to model the problem, is to skip the node splitting step of 
 
 This is all well and good, but solving our problem as we've posed it so far will only yield us something very close to what browsers figure out by trial and failure today. However, where today's solutions are topology-bound, we can go beyond those limitations, and use our established technique on slightly modified flow networks.
 
-One thing we note with pure peer-to-peer topologies, is that required bandwidth in and out grows linearly with $n$, which quickly saturates constrained nodes. Going pure peer-to-peer is most often optimal in terms of latency, but if the necessary bandwidth is not available, we want to have the option to fall back to relaying some -- but not necessarily all -- nodes some unconstrained repeater. This repeater could be provided by the service provider in a datacenter somewhere, or could be one of the other nodes in the conversation with excess bandwidth available\footnote{These are the nodes Skype referred to as "supernodes"}. We have assumed that repeaters are provided in datacenters for now, but the constraints can easily be adapted to accomodate nodes as repeaters in a conversation.
+One thing we note with pure peer-to-peer topologies, is that required bandwidth in and out grows linearly with $n$, which quickly saturates constrained nodes. Going pure peer-to-peer is most often optimal in terms of latency, but if the necessary bandwidth is not available, we want to have the option to fall back to relaying some -- but not necessarily all -- nodes some unconstrained repeater. This repeater could be provided by the service provider in a datacenter somewhere, or could be one of the other nodes in the conversation with excess bandwidth available\footnote{These are the nodes Skype referred to as ``supernodes''}. We have assumed that repeaters are provided in datacenters for now, but the constraints can easily be adapted to accomodate nodes as repeaters in a conversation.
 
-Formulating the constraints get a bit weird for repeaters, as they \emph{do not} conserve either bandwidth or commodities. We say that repeaters can \emph{mangle} commodities, which means it can receive the commodity $k$ sent from node A to node B, and can send it as commodity $k$ to B, but it can also send it as commodity $m$ to node C, assuming $m$ is the commodity sent by node A to node C. This is less awkward if the alternative model suggested in \section{sec:alternative-model} is implemented, but there was only time to implement one model for this thesis, so that is left as excercise for the reader.
+Formulating the constraints get a bit weird for repeaters, as they \emph{do not} conserve either bandwidth or commodities. We say that repeaters can \emph{mangle} commodities, which means it can receive the commodity $k$ sent from node A to node B, and can send it as commodity $k$ to B, but it can also send it as commodity $m$ to node C, assuming $m$ is the commodity sent by node A to node C. This is less awkward if the alternative model suggested in \autoref{sec:alternative-model} is implemented, but there was only time to implement one model for this thesis, so that is left as excercise for the reader.
 
 There is some constraints on repeaters though, namely that the incoming amount of one commodity has to be equal to the outgoing amount of all other commodities from the same source. Practically speaking, repeaters can not change the bitrate of incoming video, either up or down. That way, a repeater is a pure IO-bound device, which does not require much else than a fast Internet connection to be operated.
 
@@ -206,16 +214,11 @@ Constraint-wise, a transcoder performs the same commodity mangling as repeaters,
 However, in contrast to repeaters, transcoders have to access the contents of the calls to be able to transcode the signal. This will be the case until a homomorphic cryptosystem is available for video transcoding, which might be in a couple of years or it might be never. Here's crossing some fingers.
 
 
-\section{The Algorithm}
-
-Given the model, how do you efficiently find the "best" topology?
-
-
 \section{Implementation}\label{sec:implementation}
 
-\todo{Write about how the implementation was done}
+\todo[inline]{Write about how the implementation was done}
 
 
 \section{Tuning}
 
-How can the algorithm be tuned, and how was the parameters chosen?
+\todo[inline]{How can the algorithm be tuned, and how was the parameters chosen? (don't say random, don't say random, don't say random...)}
