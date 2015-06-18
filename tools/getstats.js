@@ -184,7 +184,7 @@ rtcPeerConnection.getStats(function(result) {
                     results: reports,
                 };
 
-                for (var i = 0; i < reports.length; ++i) {
+                for (var i = 0; i < reports.length; i++) {
                     var report = reports[i],
                         isIncomingAudio = report.audioOutputLevel !== undefined,
                         isOutgoingAudio = report.audioInputLevel !== undefined,
@@ -209,11 +209,7 @@ rtcPeerConnection.getStats(function(result) {
                     }
                 }
 
-                // TODO: This chrashes if the node just left the conversation
-                if (result.video.incoming.id !== undefined &&
-                    result.video.outgoing.id !== undefined &&
-                    result.audio.incoming.id !== undefined &&
-                    result.audio.outgoing.id !== undefined) {
+                if (result.connection !== undefined) {
                     callback(result);
                 } else {
                     console.log("Failed to find all properties of getStats results, try again...");
