@@ -233,27 +233,51 @@ github.com/muaz-khan/getStats, MIT license)
     }
 })();
 
-function printStats() {
-    var rtcmanager = angular.element(document.body).injector().get('RTCManager');
-    var peerConnections = rtcmanager.getPeerConnections();
-
-    for (var i = 0; i < peerConnections.length; i++) {
-        var peerConnection = peerConnections[i];
-        getStats(peerConnection, function (result) {
-            delete result['results'];
-            result.timestamp = new Date().getTime();
-            $.ajax('https://collect.thusoy.com/collect', {
-                type: 'POST',
-                data: JSON.stringify(result),
-                contentType: "application/json",
-                error: function (jqxhr, status, errorThrown) {
-                    console.log("Posting stats to collector failed: " + status + "; " + errorThrown);
-                }
-            });
+// appear.in-specific code starts here
+(function () {
+    function shipReports(reports) {
+        $.ajax('https://collect.thusoy.com/collect', {
+            type: 'POST',
+            data: JSON.stringify(reports),
+            contentType: "application/json",
+            error: function (jqxhr, status, errorThrown) {
+                console.log("Posting stats to collector failed: " + status + "; " + errorThrown);
+            }
         });
     }
-    setTimeout(printStats, 1000);
-}
 
-console.log("Starting stats collection in 5s");
-setTimeout(printStats, 5000);
+    function createReportAggregator() {
+        // Bundles all reports from the same time into a list that's shipped of
+        // to the collector at the same time. Uses a list of remotes currently
+        // collected, and ships of when the same remote appears again.
+        var remoteIps = [];
+        var currentReports = [];
+
+        return function (result) {
+            var remoteIp = result.connection.remote.ipAddress;
+            if (remoteIps.indexOf(remoteIp) != -1) {
+                // New set of connections coming, flush
+                shipReports(currentReports);
+                currentReports = [];
+                remoteIps = [];
+            }
+            remoteIps.push(remoteIp);
+            currentReports.push(result);
+        }
+    }
+
+    function printStats() {
+        var ngInjector = angular.element(document.body).injector();
+        var rtcmanager = ngInjector.get('RTCManager');
+        var peerConnections = rtcmanager.getPeerConnections();
+        for (var i = 0; i < peerConnections.length; i++) {
+            var peerConnection = peerConnections[i];
+            getStats(peerConnection, reportAggregator);
+        }
+        setTimeout(printStats, 1000);
+    }
+    var reportAggregator = aggregateReports();
+
+    console.log("Starting stats collection in 5s");
+    setTimeout(printStats, 5000);
+})();
