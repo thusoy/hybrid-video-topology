@@ -58,7 +58,7 @@ Given those factors, our problem is solved by finding a solution to the problem 
 \end{gather}
 
 
-In plain English: For each commodity, maximize the gain of sending that commodity to it's receiver, minus the link cost sending said commodity induces, while all nodes conserve bandwidth except the source and sink for a commodity (\autoref{eq:flow-conservation}) and that no link exceeds its capacity (\autoref{eq:bwlim}). The observant reader will note that we require each sink to receive each commodity, instead of having each source send each commodity. We'll come back to this decision in \autoref{sec:repeaters}
+In plain English: For each commodity, maximize the gain of sending that commodity to it's receiver, minus the link cost sending said commodity induces (\autoref{eq:objective}), while all nodes conserve bandwidth except the source and sink for a commodity (\autoref{eq:flow-conservation}) and that no link exceeds its capacity (\autoref{eq:bwlim}). The observant reader will note that we require each sink to receive each commodity, instead of having each source send each commodity. We'll come back to this decision in \autoref{sec:repeaters}
 
 In any case, this raises some other issues that has to be handled. The objective function has to be linear to be solved as a linear program, but several of our parameters are non-linear. Perceived gain from increasing bandwidth is non-linear, the cost of link utilization is non-linear, and perceived gain from reducing latency is probably non-linear. However, all of these can be approximated arbitrarily close by a piecewise linear function, as illustrated in \todo{Insert example of piecewise linear functions}. This too can be parametrized, as either the number of pieces to divide into or as the maximum deviation from the true allowed.
 
@@ -120,7 +120,6 @@ Based on this formula, we can formulate the cost multiplier of a link as $1 + k/
             xmax=100]
 
         \addplot+[domain=0:99]{1 + 10/(100 - x)};
-        \label{fig:utility-latency}
         \end{axis}
     \end{tikzpicture}
     \caption{How packet delay grows as a function of link utilization for network links. Packet delay for us is equivalent to cost, which thus has to be approximated in an implementation.}
@@ -145,7 +144,7 @@ Using this partitioning as a guide, we can map any number of slots on a physical
 
 
 
-\subsection{Alternative model}
+\subsection{Alternative model}\label{sec:alternative-model}
 
 One alternative way to model the problem, is to skip the node splitting step of the previous model, and instead connect nodes directly, but stay below bandwidth by adding constraints for the total sum going out from each node. Which model to choose is -- as in every engineering matter -- a question of priorities. The first model is a bit harder to comprehend initially, but results in fewer total edges than the latter model does when $n>3$, as can be seen in \autoref{fig:model-scaling}. Edge counts do not matter that much when $n$ is low as finding a solution will occur in trivial time anyway, but the difference might be substantial when n is larger. \todo{If performance ends up being an issue for larger graphs, add a note here about more research being needed into optimizing performance, as alternative models might be an avenue to explore for achieving that.}
 
