@@ -20,6 +20,12 @@ Bandwidth usage was measured by running \texttt{tcpdump} throughout the test run
 
 For the Chrome tests, this was a bit simpler and less manual, as Chrome do provider timing data through the \texttt{getStats} API. Firefox also supports \texttt{getStats}, but does not return as much data as Chrome does, even though the data is assumed to be available internally in the browser.
 
+\todo{Add note about order nodes enter conv.}
+
+\todo{How to read graph chart}
+
+\todo{How to read bandwidth}
+
 \subsection{getStats}
 
 The relevant values offered by the \texttt{getStats}-API on Chrome\footnote{Documentation is very lacking for the \texttt{getStats}-API, as the specification is not completed yet, so the most reliable reference is the source: \url{https://chromium.googlesource.com/external/webrtc/+/master/talk/app/webrtc/statstypes.cc}} is:
