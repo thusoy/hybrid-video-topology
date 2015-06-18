@@ -6,12 +6,11 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
-   width="604.65625"
-   height="301.1875"
+   width="625.29193"
+   height="326.78156"
    id="svg2"
    inkscape:version="0.48.5 r10040"
    sodipodi:docname="commcap.svg"
@@ -26,7 +25,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -39,8 +38,8 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1578"
-     inkscape:window-height="942"
+     inkscape:window-width="1920"
+     inkscape:window-height="1176"
      id="namedview950"
      showgrid="false"
      showguides="true"
@@ -49,21 +48,92 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:zoom="1.2026383"
-     inkscape:cx="357.0032"
-     inkscape:cy="189.33266"
-     inkscape:window-x="10"
-     inkscape:window-y="34"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="svg2" />
+     inkscape:zoom="2.4052766"
+     inkscape:cx="325.65922"
+     inkscape:cy="204.8797"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g6"
+     showborder="true"
+     borderlayer="true"
+     inkscape:showpageshadow="false" />
   <xhtml:style />
   <defs
-     id="defs4" />
+     id="defs4">
+    <marker
+       inkscape:stockid="Arrow2Send"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow2Send"
+       style="overflow:visible;">
+      <path
+         id="path4780"
+         style="fill-rule:evenodd;stroke-width:0.62500000;stroke-linejoin:round;"
+         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z "
+         transform="scale(0.3) rotate(180) translate(-2.3,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Send"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Send"
+       style="overflow:visible;">
+      <path
+         id="path4762"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;"
+         transform="scale(0.2) rotate(180) translate(6,0)" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       inkscape:stockid="InfiniteLineEnd"
+       id="InfiniteLineEnd"
+       refX="0"
+       refY="0"
+       orient="auto">
+      <g
+         id="g4982"
+         style="fill:#000000">
+        <circle
+           id="circle4984"
+           r="0.8"
+           cy="0"
+           cx="3" />
+        <circle
+           id="circle4986"
+           r="0.8"
+           cy="0"
+           cx="6.5" />
+        <circle
+           id="circle4988"
+           r="0.8"
+           cy="0"
+           cx="10" />
+      </g>
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow2Lend"
+       style="overflow:visible;">
+      <path
+         id="path4768"
+         style="fill-rule:evenodd;stroke-width:0.62500000;stroke-linejoin:round;"
+         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z "
+         transform="scale(1.1) rotate(180) translate(1,0)" />
+    </marker>
+  </defs>
   <g
      id="g6"
-     transform="translate(-140.03125,-235.03125)">
+     transform="matrix(0.91166961,0,0,0.82199266,-71.016319,-127.11819)">
     <g
-       id="g8">
+       id="g8"
+       transform="matrix(0.81208037,0,0,0.61501177,108.76417,193.21035)">
       <rect
          x="0"
          y="0"
@@ -73,7 +143,7 @@
          style="fill:#ffffff;stroke:none" />
     </g>
     <g
-       transform="translate(234,316)"
+       transform="translate(208.46208,298.80327)"
        id="g12">
       <g
          id="g14">
@@ -107,7 +177,7 @@
       </g>
     </g>
     <g
-       transform="translate(514,316)"
+       transform="translate(488.46208,298.80327)"
        id="g28">
       <g
          id="g30">
@@ -141,7 +211,7 @@
       </g>
     </g>
     <g
-       transform="translate(234,255)"
+       transform="translate(208.46208,237.80327)"
        id="g44">
       <g
          id="g46">
@@ -175,7 +245,7 @@
       </g>
     </g>
     <g
-       transform="translate(233,409.5286)"
+       transform="translate(207.46208,392.33187)"
        id="g60">
       <g
          id="g62">
@@ -209,7 +279,7 @@
       </g>
     </g>
     <g
-       transform="translate(514,409.5286)"
+       transform="translate(488.46208,392.33187)"
        id="g76">
       <g
          id="g78">
@@ -243,7 +313,7 @@
       </g>
     </g>
     <g
-       transform="translate(514,255.5)"
+       transform="translate(488.46208,238.30327)"
        id="g92">
       <g
          id="g94">
@@ -277,27 +347,7 @@
       </g>
     </g>
     <g
-       transform="translate(228.5,460.28571)"
-       id="g108">
-      <image
-         width="534"
-         height="59"
-         preserveAspectRatio="none"
-         xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAhYAAAA7CAYAAAAn6sMSAAABUElEQVR4nO3cMUoDQRiG4RUsFPRfbaxFvIFH0NbexisIwZlly9zESoSdxAsoeIHcQCwtbGwtY+cBJJoM+zzw9tPNB8tO0wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQLWmL9v7qcz30+yyaZZb6z4OAFCx6IbryGUZuSyjKwsDAwD4vcmwG2l2E7m8VzMwDvqH4zbNL6qsK+ft7XCmcReT4bTt5ycab3vp8ajt7w813prp3c6679M/VdPAaPPQ/xxSkiTV1aYNjEjlKvLwVGflObqy0MhL5TVyedOo+4hcPjXqvmLdF7xhAQBUoaZPIQDAhjIoAIBV8bspALA6HsgCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgH/1DTqA2eEKAGwgAAAAAElFTkSuQmCC"
-         id="image110" />
-    </g>
-    <g
-       transform="translate(202.8,211.6)"
-       id="g112">
-      <image
-         width="60"
-         height="283"
-         preserveAspectRatio="none"
-         xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAEbCAYAAACGIudIAAACMUlEQVR4nO3SsW0UURRG4YmX5Y5AbECCRAGUsR1Qg4MNLJDmjQldz7tGMnIJ24ELQCIhIEI08Eh20DqHeeLs+aI32T36ZxgkSZIkSZIkSZIkqZtxrvtxrvved6wmpjzGlMfed6xinOs+SrYo2S5i5ZjyuATjVz5f9yJWfrIufeWzdX/ElC2m05u68rLuWOqnP7/z8qatfL7u7lC3S/DpzVs5St4vi56+W5RswzAMZ4vf973yb7p92MR0d7071O0wPA3eHeo2prvr4fZh0/fIf+g8+CIYTGcwncF0BtMZTGcwncF0BtMZTGcwncF0BtNFyV9Rsr2avzzvfcsqouTPKNle3NSx9y2rMJjOYDqD6QymM5jOYDqD6QymM5jOYDqD6QymM5jOYDqD6QymM5jOYDqD6QymM5jOYDqD6QymM5jOYDqD6QymM5jOYDqD6QymM5jOYDqD6WLO71GybT58ft37llVEyW+nhd/0vmUVBtMZTGcwncF0BtMZTGcwncF0BtMZTGcwncF0BtMZTGcwncF0BtMZTGcwncF0BtMZTGcwncF0BtMZTGcwncF0BtMZTGcwncF0BtMZTGcwncF0UfJrlGzjVN/2vmUVY8nHKNme3dR3vW9ZhcF0BtMZTGcwncF0BtMZTGcwncF0BtMZTGcwncF0BtMZTGcwncF0BtMZTGcwncF0BtMZTGcwncF0BtMZTGcwncF0BtMZTGcw3eUFz/X9ONer+Fhf9r5F+s/9BpYpihuRdTFHAAAAAElFTkSuQmCC"
-         id="image114" />
-    </g>
-    <g
-       transform="translate(228.5,404.5286)"
+       transform="translate(202.96208,387.33187)"
        id="g116">
       <g
          id="g118">
@@ -317,7 +367,7 @@
       </g>
     </g>
     <g
-       transform="translate(338.5,241.89796)"
+       transform="translate(312.96208,224.70123)"
        id="g126">
       <g
          id="g128">
@@ -337,7 +387,7 @@
       </g>
     </g>
     <g
-       transform="translate(227.27143,310.92857)"
+       transform="matrix(0.99552873,0,0,1,202.87196,293.73184)"
        id="g136">
       <g
          id="g138">
@@ -357,7 +407,7 @@
       </g>
     </g>
     <g
-       transform="translate(509.5,242.7)"
+       transform="translate(483.96208,225.50327)"
        id="g146">
       <g
          id="g148">
@@ -377,7 +427,7 @@
       </g>
     </g>
     <g
-       transform="translate(516,270)"
+       transform="translate(490.46208,252.80327)"
        id="g156">
       <g
          id="g158">
@@ -451,7 +501,7 @@
       </g>
     </g>
     <g
-       transform="translate(216,439)"
+       transform="translate(190.46208,421.80327)"
        id="g196">
       <g
          id="g198">
@@ -575,7 +625,7 @@
       </g>
     </g>
     <g
-       transform="translate(346,348)"
+       transform="translate(320.46208,330.80327)"
        id="g240">
       <g
          id="g242">
@@ -824,7 +874,7 @@
       </g>
     </g>
     <g
-       transform="translate(366,439)"
+       transform="translate(340.46208,421.80327)"
        id="g318">
       <g
          id="g320">
@@ -988,7 +1038,7 @@
       </g>
     </g>
     <g
-       transform="translate(491,439)"
+       transform="translate(465.46208,421.80327)"
        id="g370">
       <g
          id="g372">
@@ -1152,7 +1202,7 @@
       </g>
     </g>
     <g
-       transform="translate(516,350)"
+       transform="translate(490.46208,332.80327)"
        id="g422">
       <g
          id="g424">
@@ -1401,7 +1451,7 @@
       </g>
     </g>
     <g
-       transform="translate(381,270)"
+       transform="translate(355.46208,252.80327)"
        id="g500">
       <g
          id="g502">
@@ -1505,7 +1555,7 @@
       </g>
     </g>
     <g
-       transform="translate(236,349)"
+       transform="translate(210.46208,331.80327)"
        id="g540">
       <g
          id="g542">
@@ -1814,7 +1864,7 @@
       </g>
     </g>
     <g
-       transform="translate(216,270)"
+       transform="translate(190.46208,252.80327)"
        id="g630">
       <g
          id="g632">
@@ -1978,7 +2028,7 @@
       </g>
     </g>
     <g
-       transform="translate(646,499)"
+       transform="translate(620.46208,481.80327)"
        id="g682">
       <g
          id="g684">
@@ -2237,7 +2287,7 @@
       </g>
     </g>
     <g
-       transform="translate(141,242)"
+       transform="translate(115.46208,224.80327)"
        id="g762">
       <g
          id="g764">
@@ -2476,7 +2526,7 @@
       </g>
     </g>
     <g
-       transform="translate(441,499)"
+       transform="translate(409.53363,478.26277)"
        id="g838">
       <g
          id="g840">
@@ -2511,7 +2561,7 @@
            x="69.483337"
            y="11"
            id="text860"
-           style="font-size:12px;font-style:normal;font-weight:700;line-height:14px;fill:#071e2d;stroke:none;font-family:Arial">n</text>
+           style="font-size:12px;font-style:normal;font-weight:700;line-height:14px;fill:#071e2d;stroke:none;font-family:Arial">n-1</text>
       </g>
       <g
          id="g862">
@@ -2520,7 +2570,7 @@
       </g>
     </g>
     <g
-       transform="translate(141,310)"
+       transform="translate(111.81381,292.29748)"
        id="g866">
       <g
          id="g868">
@@ -2555,7 +2605,7 @@
            x="69.483337"
            y="11"
            id="text888"
-           style="font-size:12px;font-style:normal;font-weight:700;line-height:14px;fill:#071e2d;stroke:none;font-family:Arial">n</text>
+           style="font-size:12px;font-style:normal;font-weight:700;line-height:14px;fill:#071e2d;stroke:none;font-family:Arial">n-1</text>
       </g>
       <g
          id="g890">
@@ -2564,7 +2614,7 @@
       </g>
     </g>
     <g
-       transform="translate(271,498)"
+       transform="translate(245.46208,480.80327)"
        id="g894">
       <g
          id="g896">
@@ -2608,7 +2658,7 @@
       </g>
     </g>
     <g
-       transform="translate(141,399)"
+       transform="translate(115.46208,381.80327)"
        id="g922">
       <g
          id="g924">
@@ -2651,5 +2701,23 @@
            id="g948" />
       </g>
     </g>
+    <path
+       style="fill:#2c6e6e;fill-opacity:1;stroke:#3784b1;stroke-width:2.08029771;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow1Send)"
+       d="m 207.6413,472.88073 0.9648,-259.57293 0.027,-7.52533"
+       id="path4741"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccc" />
   </g>
+  <rect
+     style="fill:none;stroke:none"
+     id="rect3952"
+     width="625.29193"
+     height="326.78156"
+     x="0"
+     y="0" />
+  <path
+     style="fill:none;stroke:#3784b1;stroke-width:1.80310297;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Send)"
+     d="m 117.38154,262.10563 463.14366,0"
+     id="path5570"
+     inkscape:connector-curvature="0" />
 </svg>
