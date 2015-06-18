@@ -26,7 +26,19 @@ The dynamic routing scheme proposed in this thesis is largely independent of und
 The naïve approach to encoding video is to encode the raw stream from the web camera into several client-optimized streams for transmission. Using VP8, this is the only way to do it. However, H.264 can be encoded in a \gls{svc} manner, which makes it possible to extract different bandwidth-streams from a single stream. With VP8 this is sadly not possible, and the only alternative is to utilize a \gls{sfu}, a technique where several streams are sent to the same endpoint, which can then select which of the streams to forward to the different endpoints. This is not as efficient as sending only a single stream however, and the encoding step is also costlier on the CPU.
 
 
-\subsection{Continuous Presence}
+\subsection{Continuous Presence vs. VAS}
+
+There are mainly two different ways to do video conferencing, Continuous presence and \gls{vas}. Continuous presence means that all parties in the conversation is visible to all other parties at the same time. \gls{vas} means that
+
+The \autoref{fig:service-possibilities} summarizes the possible services that can be provided for different amounts of available bandwidth. A minimal video unit is the smallest bitrate it makes sense to encode video in. This will be service dependent, but we can imagine a number around $\approx$500kbps will be reasonable.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{commcap}
+    \caption{The possible services for different upload/download bandwidths. A minimal video is the smallest bitrate where it makes sense to send video. Dark blue is what appear.in can provide today (audio only requires manual configuration), light blue is what's possible with the solution suggested later in this thesis.}
+    \label{fig:service-possibilities}
+\end{figure}
+
 
 \todo[inline]{Only do Continous Presence if the client has enough available bandwidth, ie $BW_{down}>(n-1)*BW_{min}$, otherwise fall back to \gls{vas} through an \gls{mcu}}
 
