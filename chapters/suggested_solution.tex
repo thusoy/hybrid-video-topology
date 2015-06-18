@@ -30,6 +30,7 @@ One other thing we notice from our initial graph compared to traditional flow pr
     \caption{How node splitting works}
     \label{fig:node-splitting}
 \end{figure}
+\todo{Mention splitting into external/internal}
 
 As we now have a well-specified way to go from a given conversation to a graph that can be solved by max-flow algorithms, the entire problem can be solved by joining all the different subproblems under the same resource constraints, and solve as a multi-commodity max-flow problem. This class of problems can be solved with \gls{lp}, which can be summarized in canonical form as in \autoref{eq:lp}
 
@@ -183,6 +184,7 @@ One alternative way to model the problem, is to skip the node splitting step of 
     \caption{How the number of edges in the graph scales for different modeling techniques. Blue graph is the alternative model, red is the suggested one}
     \label{fig:model-scaling}
 \end{figure}
+\todo{Explain n and e}
 
 
 \section{Repeaters}\label{sec:repeaters}
