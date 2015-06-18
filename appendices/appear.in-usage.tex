@@ -1,0 +1,57 @@
+\chapter{appear.in Usage Data}\label{chp:appear.in-usage}
+
+For this thesis, appear.in has been gratious enough to lend some insight into their user patterns.
+
+\section{Browser}
+
+Browser breakdown, by total sessions and new sessions.
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            table/col sep=comma,
+            x tick label style={rotate=45,anchor=east},
+            width=\linewidth,
+            height=6cm,
+            enlargelimits=0.15,
+            minor tick length=0pt,
+            xtick=data,
+            nodes near coords={\pgfmathprintnumber{\pgfplotspointmeta}},
+            xticklabels from table={data/analytics-appear.in/browsers-sessions.csv}{Browser},
+          ]
+
+            \addplot table[x=Browser,y=Sessions,x expr=\coordindex]{data/analytics-appear.in/browsers-sessions.csv};
+
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Breakdown of sessions on appear.in, browsers with more than 1\% from mid May to mid June 2015}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            table/col sep=comma,
+            x tick label style={rotate=45,anchor=east},
+            width=\linewidth,
+            height=6cm,
+            enlargelimits=0.15,
+            minor tick length=0pt,
+            xtick=data,
+            nodes near coords={\pgfmathprintnumber{\pgfplotspointmeta}},
+            xticklabels from table={data/analytics-appear.in/browsers-new-users.csv}{Browser},
+          ]
+
+            \addplot+table[
+                x=Browser,
+                y=New Users,
+                x expr=\coordindex,
+                ]{data/analytics-appear.in/browsers-new-users.csv};
+
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Breakdown of new users on appear.in by, browsers with more than 1\% from mid May to mid June 2015}
+\end{figure}
