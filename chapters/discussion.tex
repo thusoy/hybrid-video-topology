@@ -11,6 +11,25 @@ In this chapter we'll discuss the feasibility of implementing the suggested solu
 It must be noted, our custom algorithm will not be unjustly favored since it can access the additional forwarding nodes. Google Hangouts and Skype both utilize similar nodes, but their architecture and inner working is hidden from us due to the proprietary nature of these products, and thus they can not be modelled accurately. Only pure peer-to-peer WebRTC products like appear.in and Firefox Hello rely only on the client nodes, but they're both free to add any helpers themselves.
 
 
+\section{Finding Network Properties}
+
+The suggested solution is heavily reliant on having a fairly accurate representation of the actual capabilties of the network in a given conversation. Some of the properties we're looking for are relatively easy to establish, like latency between the nodes. If the service yields IP-addresses of all the participants when a new user joins, the user can ping those addresses and determine latency to all of them in hundreds of miliseconds.
+
+Bandwidth is notoriously trickier. The biggest problem for measuring bandwidth is that in general it takes a long time, something most users would be very annoyed if they had to do for every conversation. However, the suggested solution does not require you to know your exact bandwidth, and underestimates can work pretty well. Thus a rough test against the provider upon entering a conversation should yield usable results, but this is largely a hypothesis. More research into the effect of accurate bandwidth measurements would be needed to say anything conclusively on the matter.
+
+While tricky, I do assume that efficient ways of gathering this information can be found, and that they're not complete showstoppers for the suggested solution.
+
+
+\section{Who's the Boss}
+
+\todo[inline]{Write about who runs the LP solver}
+
+
+\section{NAT-traversal}
+
+\todo[inline]{Write about the feasability of the solution in the face of NATs}
+
+
 \section{Limits}
 
 \todo[inline]{Find upper limits for performance of the solution. How big networks?}
