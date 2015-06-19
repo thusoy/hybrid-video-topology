@@ -1,0 +1,41 @@
+digraph {
+    edge [dir=none];
+    a [label="A (15/15)"];
+    b [label="B (50/50)"];
+    c [label="C (14/8)"];
+    d [label="D (15/9)"];
+    e [label="E (30/20)"];
+    f [label="F (40/30)"];
+    g [label="G (9/4)"];
+    groupa [style=invisible, shape=point];
+    groupb [style=invisible, shape=point];
+
+    a -> b [label="2ms"];
+    a -> c [label="3ms"];
+    a -> groupa;
+
+    b -> c [label="2ms"];
+    b -> groupa;
+
+    c -> groupa;
+
+    groupa -> groupb [label="70ms"];
+
+    d -> e [label="4ms"];
+    d -> f [label="3ms"];
+    d -> g [label="4ms"];
+    d -> groupb;
+
+    e -> f [label="2ms"];
+    e -> g [label="5ms"];
+    e -> groupb;
+
+    f -> g [label="8ms"];
+    f -> groupb;
+
+    g -> groupb;
+
+    {rank=same; c a d e}
+    {rank=same; groupb groupa}
+    {rank=same; b f g}
+}

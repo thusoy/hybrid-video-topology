@@ -1,11 +1,20 @@
 digraph {
     edge [dir=none];
     rankdir=LR;
-    a [label="A (10/2)"];
-    b [label="B (30/5)"];
-    c [label="C (2/1)"];
+    a [label="A (30/20)"];
+    b [label="B (30/15)"];
+    c [label="C (8/6)"];
+    d [label="D (6/3)"]
 
     a -> b [label="5ms"];
-    a -> c [label="10ms"];
-    b -> c [label="15ms"];
+    a -> c [label="7ms"];
+    a -> d [label="47ms"];
+
+    b -> c [label="7ms"];
+    b -> d [label="50ms"];
+
+    c -> d [label="40ms"];
+
+    {rank=same; a b}
+    {rank=same; c d}
 }
