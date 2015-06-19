@@ -31,46 +31,54 @@ For Firefox, where the interpration of the results is a very tedious and laborso
 
 For all test cases the test was first run without any traffic shaping applied, so that the actual test results could be seen in comparison to results without any network limitations.
 
-\todo{How to read bandwidth}
 
 \subsection{getStats}
 
-The relevant values offered by the \texttt{getStats}-API on Chrome\footnote{Documentation is very lacking for the \texttt{getStats}-API, as the specification is not completed yet, so the most reliable reference is the source: \url{https://chromium.googlesource.com/external/webrtc/+/master/talk/app/webrtc/statstypes.cc}} is:
+The relevant values offered by the \texttt{getStats}-API on Chrome\footnote{Documentation is very poor for the \texttt{getStats}-API, as the specification is not completed yet, so the most reliable reference is the source: \url{https://chromium.googlesource.com/external/webrtc/+/master/talk/app/webrtc/statstypes.cc} and Firefox is presented in \autoref{tab:}. The values reported here were dumped from what's returned in the browser.} is:
 
-\subsubsection{Video Send}
-\begin{itemize}
-    \setlength\itemsep{.1em}
-    \setlength\parsep{0pt}
-    \setlength\parskip{0pt}
-    \item bytesSent (\texttt{``106680''})
-    \item googAvgEncodeMs (\texttt{``8''})
-    \item googCaptureJitterMs (\texttt{``24''})
-    \item googCaptureQueueDelayMsPerS (\texttt{``0''})
-    \item googCodecName (\texttt{``VP8''})
-    \item googBandwidthLimitedResolution (\texttt{``false''})
-    \item googCpuLimitedResolution (\texttt{``false''})
-    \item googViewLimitedResolution (\texttt{``false''})
-    \item googRtt (\texttt{``81''})
-    \item packetsLost (\texttt{``0''})
-    \item packetsSent (\texttt{``131''})
-\end{itemize}
+\begin{center}
+    \captionof{table}{Incoming video data}
+    \label{tab:incoming-video}
+    \begin{tabular}{| l | l |}
+        \hline
+        \textbf{Chrome} & \textbf{Firefox} \\ \hline
+        \multicolumn{2}{| c |}{bytesReceived:\texttt{str/int}} \\
+        \multicolumn{2}{| c |}{packetsLost:\texttt{str/int}} \\
+        \multicolumn{2}{| c |}{packetsReceived:\texttt{str/int}} \\ \hline
+        googCurrentDelayMs:\texttt{str} & jitter:\texttt{float} \\
+        googDecodeMs:\texttt{str} & mozRtt:\texttt{int} \\
+        googJitterBufferMs:\texttt{str} & \\
+        googMaxDecodeMs:\texttt{str} & \\
+        googMinPlayoutDelayMs:\texttt{str} & \\
+        googRenderDelayMs:\texttt{str} & \\
+        googTargetDelayMs:\texttt{str} & \\ \hline
+    \end{tabular}
+\end{center}
 
-\subsubsection{Video Receive}
-\begin{itemize}
-    \setlength\itemsep{.1em}
-    \setlength\parsep{0pt}
-    \setlength\parskip{0pt}
-    \item bytesReceived (\texttt{``74557''})
-    \item googCurrentDelayMs (\texttt{``25''})
-    \item googDecodeMs (\texttt{``2''})
-    \item googJitterBufferMs (\texttt{``11''})
-    \item googMaxDecodeMs (\texttt{``4''})
-    \item googMinPlayoutDelayMs (\texttt{``0''})
-    \item googRenderDelayMs (\texttt{``10''})
-    \item googTargetDelayMs (\texttt{``25''})
-    \item packetsLost (\texttt{``0''})
-    \item packetsReceived (\texttt{``109''})
-\end{itemize}
+\begin{center}
+    \captionof{table}{Outgoing video data}
+    \label{}
+    \begin{tabular}{| l | l |}
+        \hline
+        \textbf{Chrome} & \textbf{Firefox} \\ \hline
+        \multicolumn{2}{| c |}{bytesSent:\texttt{str/int}} \\
+        \multicolumn{2}{| c |}{packetsSent:\texttt{str/int}} \\ \hline
+        googAvgEncodeMs:\texttt{str} & bitrateMean:\texttt{float} \\
+        googCaptureJitterMs:\texttt{str} & bitrateStdDev:\texttt{float} \\
+        googCaptureQueueDelayMsPerS:\texttt{str} & droppedFrames:\texttt{int} \\
+        googCodecName:\texttt{str} & framerateMean:\texttt{float} \\
+        googBandwidthLimitedResolution:\texttt{str} & framerateStdDev:\texttt{float} \\
+        googCpuLimitedResolution:\texttt{str} & \\
+        googViewLimitedResolution:\texttt{str} & \\
+        googRtt:\texttt{str} & \\
+        packetsLost:\texttt{str} & \\ \hline
+    \end{tabular}
+\end{center}
+
+It's a bit sad to see that all of the values are casted to strings in Chrome. This is not the case on Firefox, where appropriate types are used. As we also see, all of the timing-related values we're interested are vendor-prefixed on Chrome, which hints to their unspecified nature. Note that both browsers report more data than what is shown here, this is only the data I consider to be relevant for our bandwidth and latency measurements (and link quality, thus the ones related to packet loss). Chrome is also very helpful in providing why resolution is limited (received resolution is present in the full data set), which could be incorporated into more advanced models.
+
+
+\subsection{Constraining Nodes}
 
 To configure the cluster according to the different test cases, we utilized the Linux traffic control utility \texttt{tc}, which is capable of rate-limiting incoming and outgoing traffic, as well as delaying traffic destined for certain hosts. A small script was developed to act as a glue layer between a representation of a network and \texttt{tc}, making configuration repeatable and easily parametrized. The script is included in \autoref{chp:apply-case}.
 
