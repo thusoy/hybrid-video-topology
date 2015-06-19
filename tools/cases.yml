@@ -70,37 +70,6 @@ standup:
             #'rep_eu': '130ms 2ms', # High-quality SLA-backed connection, how to specify?
             #'cost': '$.01/GB', # Roughly the cost pr GB at DigitalOcean
 
-sitdown:
-    nodes:
-        A:
-            downlink: 10Mbit
-            uplink: 10Mbit
-            class: desktop
-            B: 8ms 3ms
-            C: 10ms 2ms
-            D: 9ms 2ms
-        B:
-            downlink: 3Mbit
-            uplink: 2Mbit
-            class: mobile
-            A: 7ms 2ms
-            C: 9ms 2ms
-            D: 7ms 2ms
-        C:
-            downlink: 5Mbit
-            uplink: 2Mbit
-            class: laptop
-            A: 10ms 2ms
-            B: 9ms 2ms
-            D: 10ms 2ms
-        D:
-            downlink: 2Mbit
-            uplink: 1Mbit
-            class: mobile
-            A: 9ms 2ms
-            B: 8ms 2ms
-            C: 10ms 2ms
-
 friends:
     nodes:
         A:
