@@ -84,23 +84,15 @@ To configure the cluster according to the different test cases, we utilized the 
 
 Thus, applying a given test case is completely independent of the actual network utilized in the test cluster, keeping all intelligence on the nodes themselves. This removed the need for expensive routers or having to customize the application code, thus making the method application agnostic and applicable to any peer-to-peer solution, not just appear.in.
 
-In contrast to most other video conferencing solutions, appear.in displays a node's own video stream just as big as the other streams in the conversation. This enables us to get a sense of how much time the browser spends processing the incoming video stream, as we can estimate this as the difference between the local timestamp and the timestamp of your own video stream as displayed in the browser. Since we're not benchmarking CPU usage in these tests, we can subtract this difference from the observed latencies between the other nodes, to only look at latencies originating in the network stack. Hence, all latencies reported in this thesis are lower than the actual observed end-to-end latencies by 50--70ms.
 
-Ideally, testing would be automated and not require a running graphical environment, to allow it to be tested using remote servers. This could be possible using \texttt{node-webrtc}\footnote{\url{https://github.com/js-platform/node-webrtc}} or running a browser in a fake framebuffer like \texttt{Xvfb}\footnote{\url{http://www.x.org/releases/X11R7.6/doc/man/man1/Xvfb.1.xhtml}} and faking out a media stream\footnote{Chrome: \texttt{-{}-use-fake-device-for-media-stream}, Firefox: \texttt{getUserMedia(\{fake: true, <...>\})}. More info at \url{http://images.tmcnet.com/expo/webrtc-conference/presentations/san-jose-14/D3-2_Testing_v2_2.pdf}}. It is thus probably possible to automate this, but was considered out of scope for this thesis.
+\subsection{Automated Testing?}
 
-Firefox was chosen for these experiments due to its support for user stylesheets, which the Chrome team for some reason has abandoned support for in later versions. appear.in mirrors your own video stream when displayed back to yourself, probably since that's how most people are used to seeing themselves, but this is suboptimal when we want to retain some sanity while manually interpreting numbers shown this way. For browsers with support for user stylesheets, the fix is a simple matter of writing a stylesheet that flips your own image back\cprotect\footnote{For Firefox, this would mean putting the following in \texttt{~/.mozilla/firefox/<user-profile>/chrome/userContent.css}:
-\begin{lstlisting}[language=CSS]
-@-moz-document domain(appear.in) {
-    div.local-client {
-        transform: scaleX(-1);
-    }
-}
-\end{lstlisting}}. When working with several machines, having the option to deploy changes like this to all machines with one single file without any other configuration changes is enormously gratifying.
+Ideally, testing would be automated and not require a running graphical environment, to allow it to be tested often and in response to events such as commits. This could be possible using by running a browser in a fake framebuffer like \texttt{Xvfb}\footnote{\url{http://www.x.org/releases/X11R7.6/doc/man/man1/Xvfb.1.xhtml}} and faking out a media stream\footnote{Chrome: \texttt{-{}-use-fake-device-for-media-stream}, Firefox: \texttt{getUserMedia(\{fake: true, <...>\})}. More info about this approach can be found at \url{http://images.tmcnet.com/expo/webrtc-conference/presentations/san-jose-14/D3-2_Testing_v2_2.pdf}}. Both browsers should be able to be tested in such a setting, but data would be limited to what can be extracted through the \texttt{getStats}-API as described above. Still, it's better than nothing. It is thus possible to automate this, but was considered out of scope for this thesis.
 
 
-\section{Caveats}
+\subsection{Caveats}
 
-Our method is accurate in the sense that latencies observed are the actual end-to-end latencies that users would observe, but the precision of the timing values observed is not on the millisecond level we'd prefer. This is due to a number of factors, most notably the refresh rate of the screen running the timer and the framerate of the video, limiting the precision to $1s/60\approx17ms$ and $1s/30\approx33ms$ respectively. However, we can surpass this precision by averaging several samples taken during the test run, which is why we take several screenshots for each test case, once every 10s for at least a minute. The standard deviation of the measurements is reported in the graphs included later in this chapter, which should give some indication towards how accurate the average is.
+The Firefox method is accurate in the sense that latencies observed are the actual end-to-end latencies that users would observe, but the precision of the timing values observed is not on the millisecond level we'd prefer. This is due to a number of factors, most notably the refresh rate of the screen running the timer and the framerate of the video, limiting the precision to $1s/60\approx17ms$ and $1s/30\approx33ms$ respectively. However, we can surpass this precision by averaging several samples taken during the test run, which is why we take several screenshots for each test case, once every 10s for at least a minute. The standard deviation of the measurements is reported in the graphs included later in this chapter, which should give some indication towards how accurate the average is.
 
 Taking several samples to improve accuracy leads us to another weakness, which is the manual interpretation of the screenshots. Due to the frequency-related issues discussed above, many of the images include timestamps that are blurred, as the camera captured two underlying screen updates in the same frame, as shown in \autoref{fig:blurred-capture}.
 
@@ -122,18 +114,21 @@ For measuring bandwidth utilization between nodes, our method of using \texttt{t
 While the method itself is application-agnostic, configuring nodes the way we do is not suitable for testing other architectures, such as the ones used by Hangouts and Skype. This is unfortunate, as a performance comparison between the different architectures would have been very interesting, but without running a local instance of the architecture under test, there's no way to achieve the internode latencies we desire. This follows from observing that if node A sends her video stream to a Google server, there's no way for her to signal to Google that when the stream is broadcast to nodes B and C, B's stream should be delayed by $x$ms, and the stream to C should be delayed $y$ms. It's also not possible for B and C to apply this latency on the receiving side, as they'd have to split the incoming stream for Google into separate streams for each of the transmitting nodes, which would require both getting access to the DTLS keys used by the web browser to encrypt the traffic, and being capable of splitting the stream and rejoining it again without interfering with the browser.
 
 
-\section{Method}\label{sec:method}
-
-(screensharing scrapped due to framerate artifically limited too severly, did not run any custom code since the solution needed to be (relatively) service agnostic, and could not modify code since it would need to be tagged in the video stream somehow. Some for appear.in, would need to be included in the sdp stream, and extracted -> way too much work).
-
-
 \section{Results}
 
-To get a sense of how appear.in performs under optimal conditions, a test run was performed with 3, 4 and 7 nodes in a conversation, without any traffic shaping. We would expect both bandwidth and latencies to be fairly even among all the nodes, as the only thing different between them is the time they entered the conversation. Since they were given some time to stabilize before the measurements was started, some fairness should have been achieved.
+\subsection{How To Read the Graphs}
 
-As we see in \autoref{fig:vanilla-3p}, bitrates between the nodes are identical, as expected. From the latency measurements there seems to be a slight inclination towards the latest arriving node having somewhat higher latencies outgoing, but the difference is negligible in practice.
+As there will be a lot of graphs in this chapter, a good understanding of how to read them is essential. \autoref{fig:graph-tutorial} gives you a quick primer.
+
+% \begin{figure}
+%     \includegraphics{graph-tutorial}
+% \end{figure}
+\todo{Create annotated graph with Balsamiq or similar}
+
 
 \subsection{Mozilla Firefox}
+
+As we see in \autoref{fig:vanilla-3p}, bitrates between the nodes are identical, as expected. From the latency measurements there seems to be a slight inclination towards the latest arriving node having somewhat higher latencies outgoing, but the difference is negligible in practice.
 
 \begin{figure}
     \centering
