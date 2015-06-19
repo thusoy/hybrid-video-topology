@@ -1,10 +1,10 @@
 \chapter{Test Cases}
 
-To narrow down the problem scope a little, we'll define some example conversations we can work on, and assume that if we can efficiently serve these setups, we can serve most others as well. A summary of the test cases are given in \autoref{tab:example-conversations}. Note that these are intended to be hard cases, with at least one node being more constrained than the others. \autoref{fig:test-cases} illustrates the test cases graphically with the all the inter-node latencies.
+To narrow down the problem scope a little, we'll define some example conversations we can work on, and assume that if we can efficiently serve these setups, we can serve most others as well. A summary of the test cases are given in \autoref{tab:test-cases}. Note that these are intended to be hard cases, with at least one node being more constrained than the others. \autoref{fig:test-cases} illustrates the test cases graphically with the all the inter-node latencies.
 
 \begin{center}
     \captionof{table}{Test Cases}
-    \label{tab:example-conversations}
+    \label{tab:test-cases}
     \begin{tabular}{| l | l | p{7cm} |}
     \hline
     \textbf{Case name} & \textbf{$n$} & \textbf{Description} \\ \hline
@@ -27,53 +27,20 @@ We assume that the backend networks are not saturated, and that each user is ban
 \begin{figure}
     \begin{subfigure}{\textwidth}
         \centering
-        \digraph{exampleconvchat}{
-            edge [dir=none];
-            rankdir=LR;
-            a [label="A (20/5)"];
-            b [label="B (30/15)"];
-
-            a -> b [label="8ms"];
-        }
-        \subcaption{Example conversation ``traveller''.}\label{fig:example-conv-chat}
+        \includegraphics{test-case-traveller}
+        \subcaption{Test case ``traveller''.}\label{fig:test-case-traveller}
     \end{subfigure}
 
     \begin{subfigure}{\textwidth}
         \centering
-        \digraph{exampleconvcasual}{
-            edge [dir=none];
-            rankdir=LR;
-            a [label="A (10/2)"];
-            b [label="B (30/5)"];
-            c [label="C (2/1)"];
-
-            a -> b [label="5ms"];
-            a -> c [label="10ms"];
-            b -> c [label="15ms"];
-        }
-        \caption{Example conversation ``standup''}\label{fig:example-conv-casual}
+        \includegraphics{test-case-standup}
+        \caption{Test case ``standup''}\label{fig:test-case-standup}
     \end{subfigure}
 
     \begin{subfigure}{\textwidth}
         \centering
-        \digraph{exampleconvbusiness}{
-            edge [dir=none];
-            a [label="A (50/50)"];
-            b [label="B (50/50)"];
-            c [label="C (50/50)"];
-            d [label="D (30/30)"];
-
-            a -> b [label="2ms"];
-            a -> c [label="2ms"];
-            a -> d [label="150ms"];
-            b -> c [label="2ms"];
-            b -> d [label="150ms"];
-            c -> d [label="150ms"];
-
-            {rank=same; a b}
-            {rank=same; c d}
-        }
-        \caption{Example conversation ``friends''}\label{fig:example-conv-business}
+        \includegraphics{test-case-friends}
+        \caption{Test case ``friends''}\label{fig:test-case-friends}
     \end{subfigure}
     \caption{The different test cases}
     \label{fig:test-cases}

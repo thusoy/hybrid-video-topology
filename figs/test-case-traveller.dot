@@ -1,0 +1,11 @@
+digraph {
+    edge [dir=none];
+    rankdir=LR;
+    a [label="A (10/5)"];
+    b [label="B (2/1)"];
+    c [label="C (10/8)"];
+
+    a -> b [label="125ms"];
+    a -> c [label="3ms"];
+    b -> c [label="130ms"];
+}

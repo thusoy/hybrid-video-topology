@@ -1,0 +1,17 @@
+digraph {
+    edge [dir=none];
+    a [label="A (50/50)"];
+    b [label="B (50/50)"];
+    c [label="C (50/50)"];
+    d [label="D (30/30)"];
+
+    a -> b [label="2ms"];
+    a -> c [label="2ms"];
+    a -> d [label="150ms"];
+    b -> c [label="2ms"];
+    b -> d [label="150ms"];
+    c -> d [label="150ms"];
+
+    {rank=same; a b}
+    {rank=same; c d}
+}

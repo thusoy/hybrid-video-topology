@@ -8,7 +8,7 @@ default: latex
 all: render-data latex
 
 
-render-data: latencies bitrates captured-latencies captured-bitrates
+render-data: latencies bitrates captured-latencies captured-bitrates graphviz
 
 
 latencies:
@@ -29,10 +29,10 @@ captured-bitrates:
 bitrates:
 	find data -type d -name "appear.in*" ! -name "*capture*" ! -name "*final*" | while read datadir; do ./tools/latexify_csv_bitrate_traces.py $$datadir/*-bitrates.csv > $$datadir/bitrate.tex; done
 
+graphviz:
+	bash -c 'find figs -type f -name "*.dot" | while read path; do target=$$(basename "$$path"); dot -Teps figs/$$target -o "figs/$${target%.*}.eps"; done'
 
 latex:
-	dot -Teps figs/nodesplitting-post.dot -o figs/nodesplitting-post.eps
-	dot -Teps figs/nodesplitting-pre.dot -o figs/nodesplitting-pre.eps
 	pdflatex -draftmode --shell-escape $(TEXFILE) && \
 	bibtex $(TEXFILE) && \
 	makeglossaries $(TEXFILE) && \
