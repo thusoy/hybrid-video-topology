@@ -118,13 +118,44 @@ github.com/muaz-khan/getStats, MIT license)
 
 // appear.in-specific code starts here
 (function () {
+    function ajax(url, config) {
+        // $.ajax-like wrapper around XHR, without any jQuery-dependencies
+        var method = config.type || 'GET';
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState = XMLHttpRequest.DONE) {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    if (config.success) {
+                        config.success(xhr, xhr.status);
+                    }
+                } else if (xhr.status >= 400 && xhr.status < 600) {
+                    // Client or server error
+                    if (config.error) {
+                        config.error(xhr, xhr.status);
+                    }
+                }
+            }
+        }
+        if (config.error) {
+            xhr.onerror = function (xhrStatusEvent) {
+                config.error(xhr, 'Non-HTTP failure. Could be connection related, CORS, etc');
+            };
+        }
+        xhr.open(method, url);
+        if (config.contentType) {
+            xhr.setRequestHeader('Content-Type', config.contentType);
+        }
+        var payload = config.data || '';
+        xhr.send(payload);
+    }
+
     function shipReports(reports) {
-        $.ajax('https://collect.thusoy.com/collect', {
+        ajax('https://collect.thusoy.com/collect', {
             type: 'POST',
             data: JSON.stringify(reports),
             contentType: "application/json",
-            error: function (jqxhr, status, errorThrown) {
-                console.log("Posting stats to collector failed: " + status + "; " + errorThrown);
+            error: function (xhr, status) {
+                console.log("Posting stats to collector failed: " + status);
             }
         });
     }
