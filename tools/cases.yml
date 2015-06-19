@@ -1,4 +1,4 @@
-asia:
+traveller:
     nodes:
         A:
             class: desktop # Max quality percievable by this unit. 4=big monitor desktop, 3=laptop, 2=phone

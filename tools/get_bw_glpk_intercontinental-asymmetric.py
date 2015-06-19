@@ -46,7 +46,7 @@ def main():
         default='512kbps')
     parser.add_argument('-e', '--edges', default=4, type=int,
         help='How many parallell edges to add between each pair of nodes')
-    parser.add_argument('-c', '--case', choices=cases.keys(), default='asia')
+    parser.add_argument('-c', '--case', choices=cases.keys(), default='traveller')
     args = parser.parse_args()
     log_level = logging.INFO if args.verbose else logging.WARNING
     logging.basicConfig(level=log_level, stream=sys.stdout)

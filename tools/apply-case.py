@@ -35,10 +35,10 @@ def main():
     default_role_map = os.path.join(os.path.dirname(__file__), 'rolemap.yml')
     cases = load_cases(default_case_file)
     role_map = load_role_map(default_role_map)
-    parser = argparse.ArgumentParser(prog='case-asia')
+    parser = argparse.ArgumentParser()
     parser.add_argument('-r', '--role', help='Which role should be activated. Defaults to'
         'checking whether any role is associated with your IP address')
-    parser.add_argument('-c', '--case', help='Which case to load', default='asia', choices=cases.keys())
+    parser.add_argument('-c', '--case', help='Which case to load', default='traveller', choices=cases.keys())
     parser.add_argument('-C', '--clear', action='store_true',
         help="Clear all existing rules without applying a new case")
     args = parser.parse_args()

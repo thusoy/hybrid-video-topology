@@ -270,7 +270,7 @@ In the final test without traffic shaping, we step it up to seven nodes in the c
 \todo[inline]{[minor] If time, define custom color set for graphing, based possibly either on solarized or http://clrs.cc/}
 
 
-For our first test case, ``Asia'', the results are shown in \autoref{fig:asia-bitrate}. We can tell that even though node B transmits 0.5Mbps to each of the other nodes, neither of them receive recent data frequent enough to keep an acceptable conversation with node B. The good thing is that even though node B suffers greatly in this case, the flow between A and C is unaffected.
+For our first test case, ``traveller'', the results are shown in \autoref{fig:traveller-bitrate}. We can tell that even though node B transmits 0.5Mbps to each of the other nodes, neither of them receive recent data frequent enough to keep an acceptable conversation with node B. The good thing is that even though node B suffers greatly in this case, the flow between A and C is unaffected.
 
 \begin{figure}
     \centering
@@ -286,7 +286,7 @@ For our first test case, ``Asia'', the results are shown in \autoref{fig:asia-bi
             symbolic x coords={A,B,C},
             enlargelimits=0.15,
             ]
-            \input{data/appear.in-asia/bitrate.tex}
+            \input{data/appear.in-traveller/bitrate.tex}
         \end{axis}
         \end{tikzpicture}
         \subcaption{Outgoing traffic from each node}
@@ -307,13 +307,13 @@ For our first test case, ``Asia'', the results are shown in \autoref{fig:asia-bi
             enlargelimits=0.15,
             nodes near coords=\raisebox{.3cm}{\pgfmathprintnumber{\pgfplotspointmeta}}
             ]
-            \input{data/appear.in-asia/latency.tex}
+            \input{data/appear.in-traveller/latency.tex}
         \end{axis}
         \end{tikzpicture}
         \subcaption{Outgoing latencies for each node}
     \end{subfigure}
-    \caption{Test results for the ``asia'' test case. The out-of-bounds latencies are are all larger than 24s.}
-    \label{fig:asia-bitrate}
+    \caption{Test results for the ``traveller'' test case. The out-of-bounds latencies are are all larger than 24s.}
+    \label{fig:traveller-bitrate}
 \end{figure}
 
 Next up we have the ``standup'' test case, as seen in \autoref{fig:standup}. The key challenge in this case node D, with only 6Mbps available on the downlink, slightly upped by node C with 8Mbps. Node C doesn't have any troubles in this test, but node D is completely satured, receiving 2.1Mbps from each of the other three nodes. Even though node D sends to its fullest capacity, hardly anything of this is correctly received by the other nodes, as can be seen from the latencies incurred. This probably implies that among the data Firefox is actually putting onto the wire, not enough of it reaches the destinations unfragmented, and thus the receiver is incapable of recontructing a complete frame to show to the user.
@@ -504,7 +504,7 @@ Now to the Chrome tests.
             symbolic x coords={A,B,C,D},
             enlargelimits=0.15
             ]
-            \input{data/appear.in-capture-asia/latency-timer.tex}
+            \input{data/appear.in-capture-traveller/latency-timer.tex}
         \end{axis}
         \end{tikzpicture}
         \subcaption{Latencies measured by filming a timer}
@@ -524,12 +524,12 @@ Now to the Chrome tests.
             symbolic x coords={A,B,C,D},
             enlargelimits=0.15,
             ]
-            \input{data/appear.in-capture-asia/latency-getstats.tex}
+            \input{data/appear.in-capture-traveller/latency-getstats.tex}
         \end{axis}
         \end{tikzpicture}
         \subcaption{Latencies reported by \texttt{getStats}}
     \end{subfigure}
-    \caption{Timer broadcasting and getStats compared for the asia test case. Note that the timer broadcasting has only 6 samples, while \texttt{getStats} has 80.}
+    \caption{Timer broadcasting and getStats compared for the traveller test case. Note that the timer broadcasting has only 6 samples, while \texttt{getStats} has 80.}
     \label{fig:standup}
 \end{figure}
 
