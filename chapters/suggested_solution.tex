@@ -6,7 +6,7 @@ In this chapter we'll walk through how the problem can be modelled and solved us
 
 \section{Modelling}
 
-With some prior knowledge of graph algorithms, the first stab at solving the problem might be to look at our sample topologies and see a certain similarity to a max-flow problem -- edges have capacities, there's a set of sources, a set of sinks, and we want to maximize \emph{something}. However, there's a couple of things that make it hard to solve directly as a traditional flow problem, particularly that we don't have a single source and a single sink, but lots of them. Trying to model it as a single-source, single-sink problem quickly leads you to discover the limitations of that model, where you realize that if you actually solved, how would you be able to tell which node is generating flow on a given edge? Clearly, we need a way to distinguish node A's video from node B's video. And we need to make sure that all nodes receive video from every other node, not just maximum bitrate of \emph{any} video.
+With some prior knowledge of graph algorithms, the first stab at solving the problem might be to look at our sample topologies and see a certain similarity to a max-flow problem -- edges have capacities, there's a set of sources, a set of sinks, and we want to maximize \emph{something}. However, there's a couple of things that make it hard to solve directly as a traditional flow problem, particularly that we don't have a single source and a single sink, but lots of them. Trying to model it as a single-source, single-sink problem quickly leads us to discover the limitations of that model, where we realize that if we actually solved it, how would we be able to tell which node is generating flow on a given edge? Clearly, we need a way to distinguish node A's video from node B's video. And we need to make sure that all nodes receive video from every other node, not just maximum bitrate of \emph{any} video.
 
 If we change perspective slightly, we see that this is not a single flow problem, but a \emph{series} of flow problems, sharing an underlying constrained resource. There's the problem of routing video from A to all other nodes, there's the problem of routing video from B to all other nodes, etc. In a conversation with $n$ participants, we now have $n$ separate flow problems, which all share the same resource. However, also this model is too limiting for our use case, as video is sent at a given bitrate, and this stream can neither be split at a given node without incurring a cost, nor does it make sense to add it; two 2Mbit videos cannot be joined to form a 4Mbit video. If you put enough restrictions on your nodes and edges it's probable that you might be able to able to prevent this from happening, but there's another way.\todo{Insert graph showing how this fails. Does it fail it any obvious way? With flow conservation on the nodes it doesn't seem like it, actually. But it might be harder to add restrictions on re-encoding later. Or it's a completely valid option, open for further investigation.}
 
@@ -27,10 +27,9 @@ One other thing we notice from our initial graph compared to traditional flow pr
         \includegraphics[width=\textwidth]{nodesplitting-post}
         \subcaption{Problem after node splitting}
     \end{subfigure}
-    \caption{How node splitting works}
+    \caption{How we can split nodes into external and internal pairs}
     \label{fig:node-splitting}
 \end{figure}
-\todo{Mention splitting into external/internal}
 
 As we now have a well-specified way to go from a given conversation to a graph that can be solved by max-flow algorithms, the entire problem can be solved by joining all the different subproblems under the same resource constraints, and solve as a multi-commodity max-flow problem. This class of problems can be solved with \gls{lp}, which can be summarized in canonical form as in \autoref{eq:lp}
 
@@ -96,12 +95,12 @@ Increasing the bitrate of video is subject to diminishing returns, increasing th
 
 With a linear gain from increased bandwidth, bumping traffic from a given node from 4Mbps to 5Mbps would yield the same return as bumping another node from 1Mbps to 2Mbps, and thus the algorithm would be unlikely to find a fair allocation of bandwidth. Encoding diminishing returns into the objective function ensures that everyone will be allocated a fair share, and still allows nodes with excess bandwidth to grow further than more constrained nodes.
 
-To illustrate how we model this, imagine that instead of node splitting like we did above, we're doing \emph{edge splitting}, replacing a single edge connecting to two nodes with a set of edges, which can have different capacities and costs. This results in a linear approximation like we saw in MISSING\_FIG\_FROM\_ABOVE.
+To illustrate how we model this, imagine that instead of node splitting like we did above, we're doing \emph{edge splitting}, replacing a single edge connecting to two nodes with a set of edges, which can have different capacities and costs. This results in a linear approximation like we saw in MISSING\_FIG\_FROM\_ABOVE\todo{Insert link to actual fig when added}.
 
 
 \section{Link Utilization}
 
-The cost of utilizing a given network link is a function of the link's utilization, which is given by the queuing delay formula, $1/(1 - \mu/\lambda)$. As can be seen in \autoref{fig:utility-latency}, this function is not linear, and can thus not be used directly in our objective function. Nonetheless, we can achieve the same goal -- punishing over-utilization of individual links -- by approximating the function with a piecewise linear function. Conceptually, we can imagine that instead of a single link going into a node, there's a \emph{set} of links to each node, with exponentially increasing costs. Thus a 8Mbps link might be divided into four links of 2Mbps, with exponentially increasing costs.
+The cost of utilizing a given network link is a function of the link's utilization. We can derive this cost from the queuing delay formula, $1/(1 - \mu/\lambda)$, where $\mu$ is the capacity of the link and $\lambda$ is the offered traffic. As can be seen in \autoref{fig:utility-latency}, this function is not linear, and can thus not be used directly in our objective function. Nonetheless, we can achieve the same goal -- punishing over-utilization of individual links -- by approximating the function with a piecewise linear function. Conceptually, we can imagine that instead of a single link going into a node, there's a \emph{set} of links to each node, with exponentially increasing costs. Thus a 8Mbps link might be divided into four links of 2Mbps, with exponentially increasing costs.
 
 Assuming that the weighting between the segments follows the queuing delay formula given above, the ratio between the extra punishment for using the last 10\% of a link and the gain from increasing bandwidth by those extra 10\% can be tuned by implementations. This ratio would basically be a measure of how heavily to hit the network to gain maximum quality. To avoid excessive packet loss, link utilization should probably not exceed 90\%, which can also be achieved by under-reporting the actual bandwidth to the algorithm. What the effects of that would be, compared to increasing the ratio towards more heavily punishing excessive link utilization, is unknown and requires more study to say anything conclusive about.
 
@@ -201,7 +200,7 @@ Note that since commodities are routed independently in our flow network, it's p
 
 Repeaters are also practical since they're not required to know the contents of the packages it forwards, and thus anyone with spare bandwidth can provide a repeater for anyone to use, without compromising the confidentiality of those conversations.
 
-Deployment wise, repeaters are very similar to \gls{turn}-servers, which are used for \gls{nat}-traversal by relaying all video through a central server. A repeater could probably re-use much of the \gls{turn}-protocol, the only practical difference being that a repeater is one-to-many, while TURN is one-to-one.\todo{Confirm whether TURN is 1-1 or skip}
+Deployment wise, repeaters are very similar to \gls{turn}-servers, which are used for \gls{nat}-traversal by relaying all video through a central server \cite{rfc5766}. A repeater could probably re-use much of the \gls{turn}-protocol, the only practical difference being that a repeater is one-to-many, while TURN is one-to-one.\todo{Confirm whether TURN is 1-1 or skip}
 
 
 \section{Transcoders}

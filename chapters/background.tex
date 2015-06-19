@@ -1,11 +1,11 @@
 \chapter{Background}
 \label{chp:background}
 
-In this chapter we'll first discuss some technical aspect of video conferencing that affect how we reason about solving the challenges, before performing we try to benchmark existing solutions to see how they perform in our example conversations.
+In this chapter we'll discuss some technical aspect of video conferencing that affect how we reason about the problem, and evaluate what sort of tradeoffs have been made by established actors on the market.
 
 \section{WebRTC}
 
-This thesis is largely inspired by the efforts of the \gls{w3c} in standardizing \gls{webrtc}, a technology which enables direct browser-to-browser communication. Building on \gls{webrtc}, services like Telenor Digital's appear.in and Telefonica's Hello have come to life, ushering in a new age of communication that does not depend on the traditional GSM infrastructure, but is fueled by faster Internet connections and more and more capable smartphones.
+This thesis is largely inspired by the efforts of the \gls{w3c} in standardizing \gls{webrtc}, a technology which enables direct browser-to-browser communication. Building on \gls{webrtc}, services like Telenor Digital's appear.in and Telefonica's Hello have come to life, ushering in a new age of communication that does not depend on the traditional GSM infrastructure, but is fueled by faster Internet connections and more capable smartphones.
 
 It's interesting to note that many of the largest WebRTC communication platforms (like appear.in and Hello, as mentioned) we've seen so far have been developed by the largest players in the traditional communication field, and not from any independent outsider. The big telephone companies do have capabilities other actors don't enjoy, such as being able to freely route calls back over GSM as a fallback solution in case a person is not reachable online, but this has not been a selling point for the services so far. The services have also largely been focused on video conferencing, even though the technology is equally well-suited for pure voice conversations or text-based communication.
 
@@ -23,7 +23,7 @@ The dynamic routing scheme proposed in this thesis is largely independent of und
 
 \subsection{CPU limitations}
 
-The naïve approach to encoding video is to encode the raw stream from the web camera into several client-optimized streams for transmission. Using VP8, this is the only way to do it. However, H.264 can be encoded in a \gls{svc} manner, which makes it possible to extract different bandwidth-streams from a single stream. With VP8 this is sadly not possible, and the only alternative is to utilize a \gls{sfu}, a technique where several streams are sent to the same endpoint, which can then select which of the streams to forward to the different endpoints. This is not as efficient as sending only a single stream however, and the encoding step is also costlier on the CPU.
+The naïve approach to encoding video is to encode the raw stream from the web camera into several client-optimized streams for transmission. However, H.264 can be encoded in a \gls{svc} manner, which makes it possible to extract different bandwidth-streams from a single stream. With VP8 this is sadly not possible, and the only alternative is to utilize a \gls{sfu}, a technique where several streams are sent to the same endpoint, which can then select which of the streams to forward to the different endpoints. This is not as efficient as sending only a single stream however, and the encoding step is also costlier on the CPU.
 
 
 \subsection{Continuous Presence vs. VAS}
@@ -61,9 +61,9 @@ A selection of widely-known video conferencing solutions today, with significant
 	\end{tabular}
 \end{center}
 
-Notably absent here is FaceTime, Apple's videochat service bundled with their devices. FaceTime's absence in this thesis is due to the lack of support for more than two people in a conversation, which makes the optimal topology question embarassingly easy to answer, and the lack of support on non-Apple devices, which makes the service uninteresting to us.
+Notably absent here is FaceTime, Apple's videochat service bundled with their devices. FaceTime's absence in this thesis is due to the lack of support for more than two people in a conversation (thus being more video \emph{chat} than video \emph{conference}), and the lack of support for non-Apple devices.
 
-We also note that Mozilla just entered the market in collaboration with Telefonica with their Hello service, bundled with recent versions of Firefox\footnote{https://www.mozilla.org/en-US/firefox/hello/}. Hello however essentially provides the same service as appear.in, just bundled with the browser. Thus anything we say about appear.in applies to Firefox Hello as well (and all other peer-to-peer WebRTC services), and we'll therefore not consider them separately. This author will however congratulate Mozilla and Telefonica on their endeavor to make communication more open and available to anyone.
+We also note that Mozilla just entered the market in collaboration with Telefonica with their Hello service, bundled with recent versions of Firefox\footnote{https://www.mozilla.org/en-US/firefox/hello/}. Hello essentially provides the same service as appear.in, just bundled with the browser. Thus anything we say about appear.in applies to Firefox Hello as well (and all other peer-to-peer WebRTC services), and we'll therefore not consider them separately.
 
 Let's take a more detailed look at these services.
 
@@ -78,12 +78,12 @@ appear.in is a free peer-to-peer service built on WebRTC that does not require s
 
 Google Hangouts is alongside appear.in the only other service based in the browser. Hangouts is a merge of several earlier Google communication solutions like Google Talk, Google+ Messenger and the Hangouts feature from Google+. The service uses a Google-provided \gls{mcu}, and VP8/9 over WebRTC as video transport\todo{Find a source to verify this}. A conversation is limited to 10 people.
 
-To use Google Hangouts it requires you to setup a public Google+ profile, which makes the barrier of entry significantly higher than for some of the other services tested in this thesis. It also requires installing the Hangouts extension for video conferencing to work. Since you cannot do video hangouts with yourself, this necessitates managing as many Google accounts as you need nodes in your conversation, and call management is a true \gls{pita} compared to the simplicity of appear.in, where creating or joining a conversation is a simple matter of visiting a URL.
+Hangouts requires you to setup a public Google+ profile, which makes the barrier of entry higher than for most of the other services tested in this thesis. It also requires installing the Hangouts extension for video conferencing to work.
 
 
 \subsection{Skype}
 
-Skype is probably the most well-known of the solutions we're looking at, being among the first to offer free video conferencing for personal use. Skype was also among the first to provide a VoIP solution interoperating with \gls{pstn}, easing the barrier of entry for new users. The original Skype topology was peer-to-peer, routing streams through PCs with Skype installed that had the app running, using a proprietary closed-source protocol. After the Microsoft aquisition Skype ditched the peer-to-peer design to a Microsoft MCU-backed solution, justified as a means to improve performance and security for users. A Skype conversation has a soft limit on five people for the best user experience, hard limited to 10 users.
+Skype is probably the most well-known of the solutions we're looking at, being among the first to offer free video conferencing for personal use. Skype was also among the first to provide a VoIP solution interoperating with \gls{pstn}, easing the barrier of entry for new users. The original Skype topology was peer-to-peer, routing streams through PCs with Skype installed that had the app running, using a proprietary closed-source protocol. After the Microsoft aquisition, Skype dropped the peer-to-peer design to a Microsoft MCU-backed solution, justified as a means to improve performance and security for users. A Skype conversation has a soft limit on five people for the best user experience, and a hard limit on 10 users.
 
 Skype requires a standalone application to run, which is available on pretty much every platform out there, including Windows, Mac, Linux, Android, iOS, Windows Phone, BlackBerry, most tablets, TVs, gaming consoles and more. The benefit is close access to hardware and GPUs for more efficient video encoding, the downside is the lack of open protocols, standardization and transparency.
 
