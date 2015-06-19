@@ -8,7 +8,7 @@ default: latex
 all: render-data latex
 
 
-render-data: latencies bitrates captured-latencies captured-bitrates graphviz
+render-data: latencies bitrates captured-latencies captured-bitrates graphviz inkscape-illustrations
 
 
 latencies:
@@ -25,6 +25,9 @@ captured-latencies:
 captured-bitrates:
 	find data -type d -name "*-capture-*" | while read datadir; do target=$$(basename "$$datadir"); ./tools/latexify_captured_data_bitrate.py data/$$target/$$target.dat > data/$$target/bitrate-getstats.tex; done
 	find data -type d -name "*-final-*" | while read datadir; do target=$$(basename "$$datadir"); ./tools/latexify_captured_data_bitrate.py data/$$target/$$target.dat > data/$$target/bitrate-getstats.tex; done
+
+inkscape-illustrations:
+	bash -c 'find figs -type f -name "*.svg" | while read path; do target=$$(basename "$$path"); inkscape -f "$$path" --export-eps figs/$${target%.*}.eps; done'
 
 bitrates:
 	find data -type d -name "appear.in*" ! -name "*capture*" ! -name "*final*" | while read datadir; do ./tools/latexify_csv_bitrate_traces.py $$datadir/*-bitrates.csv > $$datadir/bitrate.tex; done
@@ -45,3 +48,4 @@ latex:
 clean:
 	rm -f *.aux $(TEXFILE).bbl $(TEXFILE).blg *.log *.out $(TEXFILE).toc $(TEXFILE).lot $(TEXFILE).lof $(TEXFILE).glg $(TEXFILE).glo $(TEXFILE).gls $(TEXFILE).ist $(TEXFILE).acn $(TEXFILE).acr $(TEXFILE).alg $(TEXFILE).xdy $(TEXFILE).loa
 	find data -type f -name "*.tex" -delete
+	find figs -type f -name "*.eps" -delete
