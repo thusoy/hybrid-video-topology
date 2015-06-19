@@ -180,6 +180,10 @@ github.com/muaz-khan/getStats, MIT license)
         }
     }
 
+    // TODO: ideal API for getStats: getStats(funcThatGetsConnections,
+    //       resultFunc, interval)
+    // This would put aggregation within the API, instead of outside. If
+    // interval is missing, only call once.
     function printStats() {
         var ngInjector = angular.element(document.body).injector();
         var rtcmanager = ngInjector.get('RTCManager');
