@@ -47,5 +47,5 @@ latex:
 # Removes TeX-output files
 clean:
 	rm -f *.aux $(TEXFILE).bbl $(TEXFILE).blg *.log *.out $(TEXFILE).toc $(TEXFILE).lot $(TEXFILE).lof $(TEXFILE).glg $(TEXFILE).glo $(TEXFILE).gls $(TEXFILE).ist $(TEXFILE).acn $(TEXFILE).acr $(TEXFILE).alg $(TEXFILE).xdy $(TEXFILE).loa
-	find data -type f -name "*.tex" -delete
+	find data -type f -name "*.tex" ! -name "latency-lin.tex" -delete
 	find figs -type f -name "*.eps" -delete
