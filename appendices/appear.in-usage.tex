@@ -67,6 +67,7 @@ Browser breakdown, by total sessions and new sessions.
     \label{fig:browsers}
 \end{figure}
 
+
 \section{Devices}
 
 By what device do people visit appear.in?
@@ -90,4 +91,49 @@ By what device do people visit appear.in?
 
         \end{axis}
     \end{tikzpicture}
+\end{figure}
+
+
+\section{Conversation Size}
+
+\begin{figure}
+    \begin{subfigure}{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+            \begin{axis}[
+                ybar,
+                width=\textwidth,
+                table/col sep=comma,
+                enlargelimits=0.15,
+                minor tick length=0pt,
+                ylabel=Percentage,
+                xtick=data,
+                xticklabels from table={data/analytics-appear.in/participants.csv}{Number of participants},
+              ]
+                \addplot+table[x=Number of participants, y=Share, x expr=\coordindex]{data/analytics-appear.in/participants.csv};
+            \end{axis}
+        \end{tikzpicture}
+        \subcaption{\#Users in a conversation, linear scale}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+            \begin{axis}[
+                ybar,
+                width=\textwidth,
+                ymode=log,
+                table/col sep=comma,
+                enlargelimits=0.15,
+                minor tick length=0pt,
+                ylabel=Percentage,
+                xtick=data,
+                xticklabels from table={data/analytics-appear.in/participants.csv}{Number of participants},
+              ]
+                \addplot+table[x=Number of participants, y=Share, x expr=\coordindex]{data/analytics-appear.in/participants.csv};
+            \end{axis}
+        \end{tikzpicture}
+        \subcaption{\#Users in a conversation, log scale}
+    \end{subfigure}
+    \caption{How many users are present in conversations on appear.in, mid-May to mid-June 2015}
 \end{figure}
