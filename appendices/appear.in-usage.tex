@@ -1,57 +1,93 @@
 \chapter{appear.in Usage Data}\label{chp:appear.in-usage}
 
-For this thesis, appear.in has been gratious enough to lend some insight into their user patterns.
+For this thesis, appear.in has been generous enough to lend some insight into their user data. The dataset is quite interesting; take for example the difference between browser popularity for new users and total sessions in \autoref{fig:browsers} -- Chrome has a substantially bigger portion of the latter. I consider it likely that it's driven by Chrome's superior performance to Firefox in the tests performed in \autoref{chp:experiments}, which yields other questions for browser vendors. Are users so fluid in terms of browser choice that they pick whichever is best suited for the task at hand? I suspect that might be the case, but for now possibly only among the early adopters that find and use services like appear.in.
+
+Although, it could also be the other way around -- that users on other browsers are less likely to return given their browser's inability to deliver adequate service. Whichever the actual cause is, browsers with poor WebRTC performance are loosing shares to those who can deliver, and everyone would gain if support was more widespread. This is based on reasoning that Chrome users will also be more satisfied with the experience the better the partner they communicate with supports WebRTC.
+
 
 \section{Browser}
 
 Browser breakdown, by total sessions and new sessions.
 
 \begin{figure}
-    \centering
-    \begin{tikzpicture}
-        \begin{axis}[
-            ybar,
-            table/col sep=comma,
-            x tick label style={rotate=45,anchor=east},
-            width=\linewidth,
-            height=6cm,
-            enlargelimits=0.15,
-            minor tick length=0pt,
-            xtick=data,
-            nodes near coords={\pgfmathprintnumber{\pgfplotspointmeta}},
-            xticklabels from table={data/analytics-appear.in/browsers-sessions.csv}{Browser},
-          ]
+    \begin{subfigure}{.49\textwidth}
+        \centering
+        \begin{tikzpicture}
+            \begin{axis}[
+                ybar,
+                table/col sep=comma,
+                x tick label style={rotate=45,anchor=east},
+                width=1.05\linewidth,
+                height=6cm,
+                ymax=80,
+                ylabel=Percentage,
+                enlargelimits=0.15,
+                minor tick length=0pt,
+                xtick=data,
+                nodes near coords={\pgfmathprintnumber[fixed zerofill, precision=1]{\pgfplotspointmeta}},
+                xticklabels from table={data/analytics-appear.in/browsers-sessions.csv}{Browser},
+              ]
 
-            \addplot table[x=Browser,y=Sessions,x expr=\coordindex]{data/analytics-appear.in/browsers-sessions.csv};
+                \addplot table[x=Browser,y=Sessions,x expr=\coordindex]{data/analytics-appear.in/browsers-sessions.csv};
 
-        \end{axis}
-    \end{tikzpicture}
-    \caption{Breakdown of sessions on appear.in, browsers with more than 1\% from mid May to mid June 2015}
+            \end{axis}
+        \end{tikzpicture}
+        \subcaption{Breakdown of sessions on appear.in, browsers with more than 1\% from mid May to mid June 2015}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{.49\textwidth}
+        \centering
+        \begin{tikzpicture}
+            \begin{axis}[
+                ybar,
+                table/col sep=comma,
+                x tick label style={rotate=45,anchor=east},
+                width=1.05\linewidth,
+                height=6cm,
+                ymax=80,
+                ylabel=Percentage,
+                enlargelimits=0.15,
+                minor tick length=0pt,
+                xtick=data,
+                nodes near coords={\pgfmathprintnumber[fixed zerofill, precision=1]{\pgfplotspointmeta}},
+                xticklabels from table={data/analytics-appear.in/browsers-new-users.csv}{Browser},
+              ]
+
+                \addplot+table[
+                    x=Browser,
+                    y=New Users,
+                    x expr=\coordindex,
+                    ]{data/analytics-appear.in/browsers-new-users.csv};
+
+            \end{axis}
+        \end{tikzpicture}
+        \subcaption{Breakdown of new users on appear.in by, browsers with more than 1\% from mid May to mid June 2015}
+    \end{subfigure}
+    \caption{New users compared to all sessions on appear.in}
+    \label{fig:browsers}
 \end{figure}
+
+\section{Devices}
+
+By what device do people visit appear.in?
 
 \begin{figure}
     \centering
     \begin{tikzpicture}
         \begin{axis}[
             ybar,
-            table/col sep=comma,
-            x tick label style={rotate=45,anchor=east},
             width=\linewidth,
-            height=6cm,
+            xtick=data,
+            table/col sep=comma,
+            xticklabels from table={data/analytics-appear.in/devices.csv}{Device},
+            nodes near coords={\pgfmathprintnumber[fixed zerofill, precision=1]{\pgfplotspointmeta}},
             enlargelimits=0.15,
             minor tick length=0pt,
-            xtick=data,
-            nodes near coords={\pgfmathprintnumber{\pgfplotspointmeta}},
-            xticklabels from table={data/analytics-appear.in/browsers-new-users.csv}{Browser},
+            ylabel=Percentage,
           ]
 
-            \addplot+table[
-                x=Browser,
-                y=New Users,
-                x expr=\coordindex,
-                ]{data/analytics-appear.in/browsers-new-users.csv};
+            \addplot+table[x=Device, y=Share,x expr=\coordindex]{data/analytics-appear.in/devices.csv};
 
         \end{axis}
     \end{tikzpicture}
-    \caption{Breakdown of new users on appear.in by, browsers with more than 1\% from mid May to mid June 2015}
 \end{figure}
