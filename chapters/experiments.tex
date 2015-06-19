@@ -20,9 +20,16 @@ Bandwidth usage was measured by running \texttt{tcpdump} throughout the test run
 
 For the Chrome tests, this was a bit simpler and less manual, as Chrome do provider timing data through the \texttt{getStats} API. Firefox also supports \texttt{getStats}, but does not return as much data as Chrome does, even though the data is assumed to be available internally in the browser.
 
-\todo{Add note about order nodes enter conv.}
 
-\todo{How to read graph chart}
+\subsection{Sampling}
+
+At the start of the test, the nodes join the conversation in alphabetical order (the node names are letters A-G), as soon as the previous node has established connection to all the other parties already in the conversation. Preferably the join order would be random and the results averaged over several test runs, but due to time constraints this was not possible.
+
+When all nodes have established bi-directional connections, the conversation was left running for a minute, before sampling started. This was done to allow some time to reach a stable state.
+
+For Firefox, where the interpration of the results is a very tedious and laborsome process, samples were taken every $\approx$12s\footnote{A bit variable, as it's 10s + the delay for taking and storing the screenshot}. The last six samples for each node was interpreted and stored, yielding a total sample time of $\approx$80s. On Chrome, were there's no interpretation step, samples were submitted every second, and the sample time was two minutes, yielding 120 samples for each node.
+
+For all test cases the test was first run without any traffic shaping applied, so that the actual test results could be seen in comparison to results without any network limitations.
 
 \todo{How to read bandwidth}
 
