@@ -23,7 +23,7 @@ traveller:
             A: '130ms 5ms'
             B: '20ms 2ms'
             C: '110ms 4ms'
-            rep_eu: '130ms 2ms' # High-quality SLA-backed connection, how to specify?
+            # rep_eu: '130ms 2ms' # High-quality SLA-backed connection, how to specify?
             #cost: '$.01/GB' # Roughly the cost pr GB at DigitalOcean
 #            'rep_eu': {
 #                'A': '15ms 1ms',
