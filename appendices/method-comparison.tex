@@ -1,0 +1,95 @@
+\chapter{Comparison of Sampling Methods}\label{chp:getstats-vs-timer}
+
+While the direct comparison between Firefox and Chrome in \autoref{chp:experiments} is interesting, any discrepancy observed there could also be a result of different performance between the browsers, not just the sampling method used.
+
+To directly compare the methods, a subset of the tests were run with both methods on Chrome, so that the results could be compared. Note that like the other tests, since the method that films the timer is very labor intensive, only a single test run was performed, thus the sample size is too small to say anything conclusive. However, we do have an indication that the methods are both fairly accurate.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Latency (ms),
+            xtick=data,
+            width=\textwidth,
+            bar width=8,
+            height=240,
+            ymax=150,
+            symbolic x coords={A,B,C,D},
+            enlargelimits=0.15
+            ]
+            \input{data/appear.in-capture-vanilla-3p/latency-timer.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Latencies measured by filming a timer}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Latency (ms),
+            xtick=data,
+            width=\textwidth,
+            ymax=150,
+            bar width=8,
+            height=240,
+            symbolic x coords={A,B,C,D},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-capture-vanilla-3p/latency-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Latencies reported by \texttt{getStats}}
+    \end{subfigure}
+    \caption{Timer broadcasting and getStats compared for three nodes without traffic shaping. Note that the timer broadcasting has only 6 samples, while \texttt{getStats} has 80.}
+    \label{fig:standup}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Latency (ms),
+            xtick=data,
+            width=\textwidth,
+            bar width=8,
+            height=240,
+            ymax=300,
+            symbolic x coords={A,B,C,D},
+            enlargelimits=0.15
+            ]
+            \input{data/appear.in-capture-traveller/latency-timer.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Latencies measured by filming a timer}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Latency (ms),
+            xtick=data,
+            width=\textwidth,
+            ymax=300,
+            bar width=8,
+            height=240,
+            symbolic x coords={A,B,C,D},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-capture-traveller/latency-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Latencies reported by \texttt{getStats}}
+    \end{subfigure}
+    \caption{Timer broadcasting and getStats compared for the traveller test case. Note that the timer broadcasting has only 6 samples, while \texttt{getStats} has 80.}
+    \label{fig:standup}
+\end{figure}
