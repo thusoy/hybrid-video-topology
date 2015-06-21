@@ -1,7 +1,7 @@
 \chapter{Background}
 \label{chp:background}
 
-In this chapter we'll discuss some technical aspect of video conferencing that affect how we reason about the problem, and evaluate what sort of tradeoffs have been made by established actors on the market.
+In this chapter we'll discuss some technical aspects of video conferencing that affects how we reason about the problem, and evaluate what sort of tradeoffs established actors on the market have made.
 
 \section{WebRTC}
 
@@ -30,9 +30,9 @@ The naïve approach to encoding video is to encode the raw stream from the web c
 
 \subsection{Continuous Presence vs. VAS}
 
-There are mainly two different ways to do video conferencing, Continuous presence and \gls{vas}. Continuous presence means that all parties in the conversation is visible to all other parties at the same time. \gls{vas} means that
+There are mainly two different ways to do video conferencing, Continuous presence and \acrfull{vas}. Continuous presence means that all parties in the conversation is visible to all other parties at the same time. \gls{vas} means that only one party is visible, typically the one detected by the system as talking at any given time. There's also hybrid schemes, sort of how Google Hangouts does it, where there's a VAS, but the user can override locally who should be shown up big.
 
-The \autoref{fig:service-possibilities} summarizes the possible services that can be provided for different amounts of available bandwidth. A minimal video unit is the smallest bitrate it makes sense to encode video in. This will be service dependent, but we can imagine $\approx$500kbps to be reasonable.
+Clearly, in larger conversations, there's a huge difference in network impact of the two technologies, as a VAS-based solution will always just require a single video link in and out, while continuous presence will scale bandwidth requirements linearly with the size of the conversation. \autoref{fig:service-possibilities} summarizes the possible services that can be provided for different amounts of available bandwidth. A minimal video unit is the smallest bitrate it makes sense to encode video in. This will be service dependent, but we can imagine $\approx$500kbps to be reasonable.
 
 \begin{figure}
     \centering
@@ -41,10 +41,9 @@ The \autoref{fig:service-possibilities} summarizes the possible services that ca
     \label{fig:service-possibilities}
 \end{figure}
 
+Continuous presence can be accomplished both in a peer-to-peer topology and centralized topologies, but since a \gls{vas} requires insight into the video streams (or at least, the audio streams) to select who is forwarded at any given time, they are only realizible if all the video streams go through centralized servers. In theory it's possible to expand the system to work over peer-to-peer as well, by having each peer use a low-bandwidth data channel to tell nodes whether it's currently speaking or not, but this requires that video streams can be quickly started, stopped, and that the system gracefully handles collisions without falling over. The problem is non-trivial, as it's essentially a question of distributed consensus. Having a single place that handles the question of who's active is a lot simpler to reason about and implement.
 
-\todo[inline]{Only do Continous Presence if the client has enough available bandwidth, ie $BW_{down}>(n-1)*BW_{min}$, otherwise fall back to \gls{vas} through an \gls{mcu}}
-
-\todo[inline]{Write about Continuous Presence (multiple parties on-screen at the same time), and how that limits the different topologies}
+Note that even though video is switched in a \gls{vas}-system, everyone's audio is usually sent to everyone.
 
 
 \section{The current providers}
