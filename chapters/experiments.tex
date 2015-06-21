@@ -129,13 +129,24 @@ As there will be a lot of graphs in this chapter, a good understanding of how to
 
 For each node on the x-axis, if it's a latency chart the node's happier the more of the latencies are low. If it's a bitrate chart, the node's happier the more of the bars are high.
 
-Before we embark on the test cases, we put our two sampling methods up against each other, to see whether the results are comparable. For each of the conversation sizes, 3, 4, and 7, the results were equal across the board for both browsers. Both had a consistent stable bandwidth at slightly less than 2.1Mbps, and latencies below 200ms (Chrome slightly less). The results are included in \chp{no-shaping-comp}.
+Before we embark on the test cases, we put our two sampling methods up against each other, to see whether the results are comparable. For each of the conversation sizes, 3, 4, and 7, the results were equal across the board for both browsers. Both had a consistent stable bandwidth at slightly less than 2.1Mbps, and latencies below 200ms (Chrome slightly less). The results are included in \autoref{no-shaping-comp}.
 
 \todo[inline]{[minor] If time, define custom color set for graphing, based possibly either on solarized or http://clrs.cc/}
 
-\include{experiments-traveller}
+\pgfplotsset{every axis/.append style={
+                    ymajorgrids,
+                    major grid style=dashed,
+                    enlargelimits=0.15,
+                    width=\textwidth,
+                    xtick=data,
+                    ybar,
+                }}
 
-\include{experiments-standup}
+\todo{Write tool to extract bandwidth utilization up and down from cases.yml and the latexified results.}
 
-\include{experiments-friends}
+\input{chapters/experiments-traveller}
+
+\input{chapters/experiments-standup}
+
+\input{chapters/experiments-friends}
 
