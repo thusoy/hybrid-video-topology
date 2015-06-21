@@ -34,7 +34,7 @@ For all test cases the test was first run without any traffic shaping applied, s
 
 \subsection{getStats}
 
-The relevant values offered by the \texttt{getStats}-API on Chrome\footnote{Documentation is very poor for the \texttt{getStats}-API, as the specification is not completed yet, so the most reliable reference is the source: \url{https://chromium.googlesource.com/external/webrtc/+/master/talk/app/webrtc/statstypes.cc} and Firefox is presented in \autoref{tab:}. The values reported here were dumped from what's returned in the browser.} is:
+The relevant values offered by the \texttt{getStats}-API on Chrome\footnote{Documentation is very poor for the \texttt{getStats}-API, as the specification is not completed yet, so the most reliable reference is the source: \url{https://chromium.googlesource.com/external/webrtc/+/master/talk/app/webrtc/statstypes.cc}} and Firefox is presented in \autoref{tab:incoming-video} and \autoref{tab:outgoing-video}. The values reported here were dumped from what's returned by the browser.
 
 \begin{center}
     \captionof{table}{Incoming video data}
@@ -57,7 +57,7 @@ The relevant values offered by the \texttt{getStats}-API on Chrome\footnote{Docu
 
 \begin{center}
     \captionof{table}{Outgoing video data}
-    \label{}
+    \label{tab:outgoing-video}
     \begin{tabular}{| l | l |}
         \hline
         \textbf{Chrome} & \textbf{Firefox} \\ \hline
@@ -113,6 +113,8 @@ For measuring bandwidth utilization between nodes, our method of using \texttt{t
 
 While the method itself is application-agnostic, configuring nodes the way we do is not suitable for testing other architectures, such as the ones used by Hangouts and Skype. This is unfortunate, as a performance comparison between the different architectures would have been very interesting, but without running a local instance of the architecture under test, there's no way to achieve the internode latencies we desire. This follows from observing that if node A sends her video stream to a Google server, there's no way for her to signal to Google that when the stream is broadcast to nodes B and C, B's stream should be delayed by $x$ ms, and the stream to C should be delayed $y$ ms. It's also not possible for B and C to apply this latency on the receiving side, as they'd have to split the incoming stream for Google into separate streams for each of the transmitting nodes, which would require both getting access to the DTLS keys used by the web browser to encrypt the traffic, and being capable of splitting the stream and rejoining it again without interfering with the browser.
 
+For the most accurate comparison of bitrate, it would have been preferable to use the same method for sampling this on both browsers. However, as Firefox was incapable of delivering timing data, the \texttt{getStats} API was discarded entirely, even though it could have been used to sample bitrates as observed by the application. This is unfortunate, but the tools left behind by these experiments allow others who want to repeat the tests to not do this mistake.
+
 
 \section{Results}
 
@@ -125,10 +127,60 @@ As there will be a lot of graphs in this chapter, a good understanding of how to
 % \end{figure}
 \todo{Create annotated graph with Balsamiq or similar}
 
+For each node on the x-axis, if it's a latency chart the node's happier the more of the latencies are low. If it's a bitrate chart, the node's happier the more of the bars are high.
 
-\subsection{Mozilla Firefox}
 
-As we see in \autoref{fig:vanilla-3p}, bitrates between the nodes are identical, as expected. From the latency measurements there seems to be a slight inclination towards the latest arriving node having somewhat higher latencies outgoing, but the difference is negligible in practice.
+\subsection{No Traffic Shaping}
+
+Before we embark on the test cases, we put our two sampling methods up against each other, to see whether the results are comparable. First out is bitrate measurements for a conversation with three people, as shown in \autoref{fig:vanilla-3p-bitrate}.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            ymax=2200000,
+            width=\textwidth,
+            symbolic x coords={A,B,C},
+            enlargelimits=0.15,
+            major grid style=dashed,
+            ymajorgrids,
+            ]
+            \input{data/appear.in-vanilla-3p/bitrate.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Firefox}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            compat=newest,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            ymax=2200000,
+            width=\textwidth,
+            major grid style=dashed,
+            ymajorgrids,
+            symbolic x coords={A,B,C},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-final-vanilla-3p/bitrate-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Chrome}
+    \end{subfigure}
+    \caption{Observed bitrate results with three people, no traffic shaping}
+    \label{fig:vanilla-3p-bitrate}
+\end{figure}
+
+Latencies observed in the same test case is given in \autoref{fig:vanilla-3p-latency}.
 
 \begin{figure}
     \centering
@@ -141,12 +193,14 @@ As we see in \autoref{fig:vanilla-3p}, bitrates between the nodes are identical,
             xtick=data,
             width=\textwidth,
             symbolic x coords={A,B,C},
-            enlargelimits=0.15
+            enlargelimits=0.15,
+            major grid style=dashed,
+            ymajorgrids,
             ]
-            \input{data/appear.in-vanilla-3p/bitrate.tex}
+            \input{data/appear.in-vanilla-3p/latency.tex}
         \end{axis}
         \end{tikzpicture}
-        \subcaption{Outgoing traffic from each node}
+        \subcaption{Firefox}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{.48\textwidth}
@@ -155,23 +209,79 @@ As we see in \autoref{fig:vanilla-3p}, bitrates between the nodes are identical,
         \begin{axis}[
             ybar,
             compat=newest,
-            ylabel=Latency (ms),
+            ylabel=Bitrate (bps),
+            xtick=data,
+            width=\textwidth,
+            major grid style=dashed,
+            ymajorgrids,
+            symbolic x coords={A,B,C},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-final-vanilla-3p/latency-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Chrome}
+    \end{subfigure}
+    \caption{Observed bitrate results with three people, no traffic shaping}
+    \label{fig:vanilla-3p-bitrate}
+\end{figure}
+
+Next up is four people, as shown in \autoref{fig:vanilla-4p-}
+
+
+\subsubsection{Test Case ``traveller''}
+
+Here's a quick recap of the bandwidth limits put on the nodes in the ``traveller'' test case:
+
+\autoref{fig:ff-traveller-bitrate} shows the bitrates flowing between the nodes in the ``traveller'' test case. Remember what was mentioned earlier; the values reported here are only what was received at the node's interface, not what the application was consuming. This is important, as we can see in
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Bitrate (bps),
             xtick=data,
             width=\textwidth,
             symbolic x coords={A,B,C},
             enlargelimits=0.15,
-            nodes near coords=\raisebox{.3cm}{\pgfmathprintnumber{\pgfplotspointmeta}}
+            major grid style=dashed,
+            ymajorgrids,
             ]
-            \input{data/appear.in-vanilla-3p/latency.tex}
+            \input{data/appear.in-vanilla-3p/bitrate.tex}
         \end{axis}
         \end{tikzpicture}
-        \subcaption{Outgoing latencies for each node}
+        \subcaption{Observed incoming bitrates for each node, no traffic shaping}
     \end{subfigure}
-    \caption{Test results for three nodes without traffic shaping}
-    \label{fig:vanilla-3p}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            compat=newest,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            width=\textwidth,
+            major grid style=dashed,
+            ymajorgrids,
+            symbolic x coords={A,B,C},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-traveller/bitrate.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Observed incoming bitrates for each node, with traffic shaping}
+    \end{subfigure}
+    \caption{Bitrate results for the ``traveller'' test case, with and without traffic shaping}
+    \label{fig:ff-traveller-bitrate}
 \end{figure}
 
 Adding another node to the mix, we get the results as shown in \autoref{fig:vanilla-4p}. We see that the bandwidth between the nodes is the same 2.1Mpbs that we saw when there was only three nodes in the conversation, which we can assume is the default transmit bitrate for appear.in. We can also see the same phenomena as in the three node case, that the later arrivals tend to have a slightly higher latency to the nodes first to arrive in the conversation. However, the later nodes (C and D) do not display this phenomena between themselves, thus since all the observations are within one standard deviation of each other we'll not spend any more time investigating this.\todo{Skip?}
+As we see in \autoref{fig:ff-traveller-bitrate}, bitrates between the nodes are identical, as expected. From the latency measurements there seems to be a slight inclination towards the latest arriving node having somewhat higher latencies outgoing, but the difference is negligible in practice.
+
 
 
 \begin{figure}
@@ -443,95 +553,7 @@ To summarize, out of 42 pairs of nodes in the test case, only three of them are 
 
 Now to the Chrome tests.
 
-\begin{figure}
-    \centering
-    \begin{subfigure}[t]{.48\textwidth}
-        \centering
-        \begin{tikzpicture}
-        \begin{axis}[
-            ybar,
-            ylabel=Latency (ms),
-            xtick=data,
-            width=\textwidth,
-            bar width=8,
-            height=240,
-            ymax=150,
-            symbolic x coords={A,B,C,D},
-            enlargelimits=0.15
-            ]
-            \input{data/appear.in-capture-vanilla-3p/latency-timer.tex}
-        \end{axis}
-        \end{tikzpicture}
-        \subcaption{Latencies measured by filming a timer}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[t]{.48\textwidth}
-        \centering
-        \begin{tikzpicture}
-        \begin{axis}[
-            ybar,
-            ylabel=Latency (ms),
-            xtick=data,
-            width=\textwidth,
-            ymax=150,
-            bar width=8,
-            height=240,
-            symbolic x coords={A,B,C,D},
-            enlargelimits=0.15,
-            ]
-            \input{data/appear.in-capture-vanilla-3p/latency-getstats.tex}
-        \end{axis}
-        \end{tikzpicture}
-        \subcaption{Latencies reported by \texttt{getStats}}
-    \end{subfigure}
-    \caption{Timer broadcasting and getStats compared for three nodes without traffic shaping. Note that the timer broadcasting has only 6 samples, while \texttt{getStats} has 80.}
-    \label{fig:standup}
-\end{figure}
 
-\begin{figure}
-    \centering
-    \begin{subfigure}[t]{.48\textwidth}
-        \centering
-        \begin{tikzpicture}
-        \begin{axis}[
-            ybar,
-            ylabel=Latency (ms),
-            xtick=data,
-            width=\textwidth,
-            bar width=8,
-            height=240,
-            ymax=300,
-            symbolic x coords={A,B,C,D},
-            enlargelimits=0.15
-            ]
-            \input{data/appear.in-capture-traveller/latency-timer.tex}
-        \end{axis}
-        \end{tikzpicture}
-        \subcaption{Latencies measured by filming a timer}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[t]{.48\textwidth}
-        \centering
-        \begin{tikzpicture}
-        \begin{axis}[
-            ybar,
-            ylabel=Latency (ms),
-            xtick=data,
-            width=\textwidth,
-            ymax=300,
-            bar width=8,
-            height=240,
-            symbolic x coords={A,B,C,D},
-            enlargelimits=0.15,
-            ]
-            \input{data/appear.in-capture-traveller/latency-getstats.tex}
-        \end{axis}
-        \end{tikzpicture}
-        \subcaption{Latencies reported by \texttt{getStats}}
-    \end{subfigure}
-    \caption{Timer broadcasting and getStats compared for the traveller test case. Note that the timer broadcasting has only 6 samples, while \texttt{getStats} has 80.}
-    \label{fig:standup}
-\end{figure}
 
 
 \begin{figure}
