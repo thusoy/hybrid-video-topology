@@ -1,0 +1,307 @@
+\chapter{No Traffic Shaping Comparison}\label{chp:no-shaping-comp}
+
+The full data set for the browsers compared, without any traffic shaping applied, follows.
+
+The only big outlier here is node E on the seven person test case. For some reason, it sends consistently less video out, and with higher latencies than all the other nodes in the test. It's unknown why this is, but could be because of more traffic on the subnet that node was placed on. These sort of random perturbations of network links should be expected on the Internet, thus applications need to be resilient to these events. Note that the Chrome tests were run a couple of days later and was probably not affected by the same outburst, thus yielding Firefox in a slightly worse light here than what is reasonable.
+
+The full data set can be found in the project repository, at \url{https://github.com/thusoy/hybrid-video-topology}.
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            ymax=2200000,
+            width=\textwidth,
+            symbolic x coords={A,B,C},
+            enlargelimits=0.15,
+            major grid style=dashed,
+            ymajorgrids,
+            ]
+            \input{data/appear.in-vanilla-3p/bitrate.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Firefox}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            compat=newest,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            ymax=2200000,
+            width=\textwidth,
+            major grid style=dashed,
+            ymajorgrids,
+            symbolic x coords={A,B,C},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-final-vanilla-3p/bitrate-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Chrome}
+    \end{subfigure}
+    \caption{Observed bitrates  with three people, no traffic shaping}
+    \label{fig:vanilla-3p-bitrate}
+\end{figure}
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Latency (bps),
+            xtick=data,
+            width=\textwidth,
+            symbolic x coords={A,B,C},
+            enlargelimits=0.15,
+            ymax=200,
+            major grid style=dashed,
+            ymajorgrids,
+            ]
+            \input{data/appear.in-vanilla-3p/latency.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Firefox}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            compat=newest,
+            ylabel=Latency (ms),
+            xtick=data,
+            ymax=200,
+            width=\textwidth,
+            major grid style=dashed,
+            ymajorgrids,
+            symbolic x coords={A,B,C},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-final-vanilla-3p/latency-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Chrome}
+    \end{subfigure}
+    \caption{Observed latencies with three people, no traffic shaping}
+    \label{fig:vanilla-3p-latency}
+\end{figure}
+
+
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            ymax=2200000,
+            width=\textwidth,
+            bar width=4,
+            symbolic x coords={A,B,C,D},
+            enlargelimits=0.15,
+            major grid style=dashed,
+            ymajorgrids,
+            ]
+            \input{data/appear.in-vanilla-4p/bitrate.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Firefox}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            compat=newest,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            ymax=2200000,
+            width=\textwidth,
+            major grid style=dashed,
+            ymajorgrids,
+            bar width=4,
+            symbolic x coords={A,B,C,D},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-final-vanilla-4p/bitrate-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Chrome}
+    \end{subfigure}
+    \caption{Observed bitrates  with four people, no traffic shaping}
+    \label{fig:vanilla-4p-bitrate}
+\end{figure}
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Latency (ms),
+            xtick=data,
+            width=\textwidth,
+            symbolic x coords={A,B,C,D},
+            enlargelimits=0.15,
+            ymax=200,
+            bar width=4,
+            major grid style=dashed,
+            ymajorgrids,
+            ]
+            \input{data/appear.in-vanilla-4p/latency.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Firefox}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            compat=newest,
+            ylabel=Latency (ms),
+            xtick=data,
+            ymax=200,
+            bar width=4,
+            width=\textwidth,
+            major grid style=dashed,
+            ymajorgrids,
+            symbolic x coords={A,B,C,D},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-final-vanilla-4p/latency-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Chrome}
+    \end{subfigure}
+    \caption{Observed latencies with four people, no traffic shaping}
+    \label{fig:vanilla-4p-latency}
+\end{figure}
+
+
+
+
+
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            ymax=2200000,
+            height=240,
+            width=\textwidth,
+            bar width=3,
+            symbolic x coords={A,B,C,D,E,F,G},
+            enlargelimits=0.15,
+            major grid style=dashed,
+            ymajorgrids,
+            ]
+            \input{data/appear.in-vanilla-7p/bitrate.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Firefox}
+    \end{subfigure}
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            compat=newest,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            ymax=2200000,
+            width=\textwidth,
+            major grid style=dashed,
+            height=240,
+            ymajorgrids,
+            bar width=3,
+            symbolic x coords={A,B,C,D,E,F,G},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-final-vanilla-7p/bitrate-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Chrome}
+    \end{subfigure}
+    \caption{Observed bitrates  with seven people, no traffic shaping}
+    \label{fig:vanilla-7p-bitrate}
+\end{figure}
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Latency (ms),
+            xtick=data,
+            width=\textwidth,
+            symbolic x coords={A,B,C,D,E,F,G},
+            enlargelimits=0.15,
+            height=240,
+            ymax=350,
+            bar width=3,
+            major grid style=dashed,
+            ymajorgrids,
+            ]
+            \input{data/appear.in-vanilla-7p/latency.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Firefox}
+    \end{subfigure}
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            compat=newest,
+            ylabel=Latency (ms),
+            xtick=data,
+            height=240,
+            ymax=350,
+            bar width=3,
+            width=\textwidth,
+            major grid style=dashed,
+            ymajorgrids,
+            symbolic x coords={A,B,C,D,E,F,G},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-final-vanilla-7p/latency-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Chrome}
+    \end{subfigure}
+    \caption{Observed latencies with seven people, no traffic shaping}
+    \label{fig:vanilla-7p-latency}
+\end{figure}
+

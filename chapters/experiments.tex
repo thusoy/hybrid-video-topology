@@ -129,10 +129,9 @@ As there will be a lot of graphs in this chapter, a good understanding of how to
 
 For each node on the x-axis, if it's a latency chart the node's happier the more of the latencies are low. If it's a bitrate chart, the node's happier the more of the bars are high.
 
+Before we embark on the test cases, we put our two sampling methods up against each other, to see whether the results are comparable. For each of the conversation sizes, 3, 4, and 7, the results were equal across the board for both browsers. Both had a consistent stable bandwidth at slightly less than 2.1Mbps, and latencies below 200ms (Chrome slightly less). The results are included in \chp{no-shaping-comp}.
 
-\subsection{No Traffic Shaping}
 
-Before we embark on the test cases, we put our two sampling methods up against each other, to see whether the results are comparable. First out is bitrate measurements for a conversation with three people, as shown in \autoref{fig:vanilla-3p-bitrate}.
 
 \begin{figure}
     \centering
