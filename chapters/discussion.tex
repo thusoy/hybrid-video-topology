@@ -1,7 +1,13 @@
 \chapter{Discussion}
 \label{chp:discussion}
 
-In this chapter we'll discuss the feasibility of implementing the suggested solution, what considerations should be taken, and possible implications of this.
+In this chapter we'll take a step back, and try to evalute both the experiments and the suggested solution from a high level, to see what's necessary to get any further traction.
+
+\section{Experimental Results}
+
+Our experiments were run in browser-homogenuous environements; all browsers in a conversation were the same. It would be interesting to see how the test cases would have evolved in a more realistic scenario, where some of the users are running Firefox and others are running Chrome. Our ``traveller'' test case for example, where one node has severely limited bandwidth and higher latencies than the two others, would make an intersting test. How does Firefox act as the limited node, when the two others are Chrome, compared to how Chrome acts as limited, when the two others are Firefox? As we saw in our results, Chrome is much better at negotiating bitrates that don't saturate a node's link, would this also be the case if the sender is Firefox? Results from a test like that would indicate where exactly Firefox is failing, whether it's not adhering to signals sent by the limited node, or whether the limited node fails to send to appropriate signals.
+
+These sort of cross-browser tests could also provide tremendous value to the browser implementors if they could be run in an automatic way (like discussed in \autoref{subsec:automated-testing}). When tweaking the implementations, the implementors would be able to run a sanity check towards other browsers and itself in a set of test cases, immediately seeing how the changes affect the performance in different test cases.
 
 
 \section{Implementation}
