@@ -35,8 +35,8 @@ inkscape-illustrations:
 
 bitrates:
 	find data -type d -name "appear.in*" ! -name "*capture*" ! -name "*final*" | while read datadir; do ./tools/latexify_csv_bitrate_traces.py $$datadir/*-bitrates.csv > $$datadir/bitrate.tex; done
-	./tools/latexify_csv_bitrate_traces.py data/appear.in-final-traveller/*-bitrates.csv > data/appear.in-final-traveller/bitrate-tcpdump.tex
-	./tools/latexify_csv_bitrate_traces.py data/appear.in-final-vanilla-3p/*-bitrates.csv > data/appear.in-final-vanilla-3p/bitrate-tcpdump.tex
+	./tools/latexify_csv_bitrate_traces.py -n 120 data/appear.in-final-traveller/*-bitrates.csv > data/appear.in-final-traveller/bitrate-tcpdump.tex
+	./tools/latexify_csv_bitrate_traces.py -n 120 data/appear.in-final-vanilla-3p/*-bitrates.csv > data/appear.in-final-vanilla-3p/bitrate-tcpdump.tex
 
 graphviz:
 	bash -c 'find figs -type f -name "*.dot" | while read path; do target=$$(basename "$$path"); dot -Teps figs/$$target -o "figs/$${target%.*}.eps"; done'
