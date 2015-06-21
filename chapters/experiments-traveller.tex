@@ -2,9 +2,9 @@
 
 A quick recap of the bandwidth limits put on the nodes in the ``traveller'' test case: A (10/5), B (2/1), C (10/8).
 
-\autoref{fig:traveller-bitrate} shows the bitrates flowing between the nodes in the ``traveller'' test case. Remember what was mentioned earlier; the values reported here are only what was received at the node's interface, not what the application was consuming. This is important, as we can see.
+\autoref{fig:traveller-bitrate} shows the bitrates flowing between the nodes in the ``traveller'' test case. Remember what was mentioned earlier; the values reported here are only what was received at the node's interface, not what the application was consuming. This is important, as it seems from the bandwidths alone that everyone is doing fairly well in the Firefox case; but look closer. Node B only has a 2Mbps downlink, but is sent more than 3Mbps of data. Thus its link is completely saturated, which is again reflected in the latencies in \autoref{fig:traveller-latency}. We can also see that node B is saturating its own uplink as well, which also has a grave impact on the latencies.
 
-For our first test case, ``traveller'', the results are shown in \autoref{fig:traveller-bitrate}. We can tell that even though node B transmits 0.5Mbps to each of the other nodes, neither of them receive recent data frequent enough to keep an acceptable conversation with node B. The good thing is that even though node B suffers greatly in this case, the flow between A and C is unaffected.
+Chrome balances this out much better, where A and C communicate unhindered by the constraints of node B (like the Firefox case), but also respect B's constraints and only send what it's capable of receiving. Thus, B's downlink has $\approx$50\% utilization, and likewise $\approx$66\% for the uplink.
 
 \begin{figure}
     \centering
@@ -16,14 +16,60 @@ For our first test case, ``traveller'', the results are shown in \autoref{fig:tr
             ylabel=Bitrate (bps),
             xtick=data,
             width=\textwidth,
-            bar width=8,
             symbolic x coords={A,B,C},
             enlargelimits=0.15,
+            major grid style=dashed,
+            ymajorgrids,
             ]
             \input{data/appear.in-traveller/bitrate.tex}
         \end{axis}
         \end{tikzpicture}
-        \subcaption{Outgoing traffic from each node}
+        \subcaption{Firefox}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            compat=newest,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            width=\textwidth,
+            symbolic x coords={A,B,C},
+            enlargelimits=0.15,
+            major grid style=dashed,
+            ymajorgrids,
+            ]
+            \input{data/appear.in-final-traveller/bitrate-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Chrome}
+    \end{subfigure}
+    \caption{Observed bitrates in the ``traveller'' test case}
+    \label{fig:traveller-bitrate}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Latency (ms),
+            xtick=data,
+            ymax=1000,
+            width=\textwidth,
+            symbolic x coords={A,B,C},
+            enlargelimits=0.15,
+            major grid style=dashed,
+            ymajorgrids,
+            ]
+            \input{data/appear.in-traveller/latency.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Firefox}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{.48\textwidth}
@@ -36,60 +82,16 @@ For our first test case, ``traveller'', the results are shown in \autoref{fig:tr
             xtick=data,
             ymax=1000,
             width=\textwidth,
-            bar width=8,
-            symbolic x coords={A,B,C},
-            enlargelimits=0.15,
-            nodes near coords=\raisebox{.3cm}{\pgfmathprintnumber{\pgfplotspointmeta}}
-            ]
-            \input{data/appear.in-traveller/latency.tex}
-        \end{axis}
-        \end{tikzpicture}
-        \subcaption{Outgoing latencies for each node}
-    \end{subfigure}
-    \caption{Test results for the ``traveller'' test case. The out-of-bounds latencies are are all larger than 24s.}
-    \label{fig:traveller-bitrate}
-\end{figure}
-
-\begin{figure}
-    \centering
-    \begin{subfigure}[t]{.48\textwidth}
-        \centering
-        \begin{tikzpicture}
-        \begin{axis}[
-            ybar,
-            ylabel=Bitrate (bps),
-            xtick=data,
-            width=\textwidth,
-            symbolic x coords={A,B,C},
-            enlargelimits=0.15,
-            major grid style=dashed,
-            ymajorgrids,
-            ]
-            \input{data/appear.in-vanilla-3p/bitrate.tex}
-        \end{axis}
-        \end{tikzpicture}
-        \subcaption{Observed incoming bitrates for each node, no traffic shaping}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[t]{.48\textwidth}
-        \centering
-        \begin{tikzpicture}
-        \begin{axis}[
-            ybar,
-            compat=newest,
-            ylabel=Bitrate (bps),
-            xtick=data,
-            width=\textwidth,
             major grid style=dashed,
             ymajorgrids,
             symbolic x coords={A,B,C},
             enlargelimits=0.15,
             ]
-            \input{data/appear.in-traveller/bitrate.tex}
+            \input{data/appear.in-final-traveller/latency-getstats.tex}
         \end{axis}
         \end{tikzpicture}
-        \subcaption{Observed incoming bitrates for each node, with traffic shaping}
+        \subcaption{Chrome}
     \end{subfigure}
-    \caption{Bitrate results for the ``traveller'' test case, with and without traffic shaping}
-    \label{fig:traveller-bitrate}
+    \caption{Observed latencies in the ``traveller'' test case. Actual values for the out-of-bounds values in Firefox, from left to right: 26s, 48s, 48s, 23s.}
+    \label{fig:traveller-latency}
 \end{figure}
