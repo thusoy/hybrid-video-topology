@@ -1,0 +1,37 @@
+\documentclass{MScthesisITEM}
+
+\usepackage{pgfplots}
+
+\title{Hybrid Video Topologies} % The title of your assignement; NB use \newlinetitle to start a newline
+\author{Tarjei Husøy} % Your firstname and lastname
+\professor{Poul Heegaard, ITEM} % Affiliation = ITEM for instance
+\supervisor{Svein Willassen, appear.in}
+
+%% Uncomment the following in case you want subfigures; note that there will be a warning for the caption package
+\let\subcaption\undefined
+\let\subfloat\undefined
+\usepackage[width=.85\textwidth]{caption}
+\usepackage{subcaption}
+
+\setlength\epigraphwidth{12cm}
+\setlength\epigraphrule{0pt}
+
+\pgfplotsset{every axis/.append style={
+                    % axis x line=middle,    % put the x axis in the middle
+                    % axis y line=middle,    % put the y axis in the middle
+                    % axis y line style={<->}, % arrows on the axis
+                    % xlabel={$x$},          % default put x on x-axis
+                    axis lines*=left,
+                    axis x line=center,
+                    y axis line style={->}, % arrows on the axis
+                    x axis line style={-},
+                    ylabel={$y$},          % default put y on y-axis
+                    legend style={at={(0.5,-0.10)}, anchor=north,legend columns=-1},
+                    major x tick style = {opacity=0},
+                    minor x tick num = 1,
+                    minor tick length=2ex,
+                }}
+
+\begin{document}
+\include{graphtotest}
+\end{document}
