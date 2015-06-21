@@ -93,3 +93,99 @@ To directly compare the methods, a subset of the tests were run with both method
     \caption{Timer broadcasting and getStats compared for the traveller test case. Note that the timer broadcasting has only 6 samples, while \texttt{getStats} has 80.}
     \label{fig:standup}
 \end{figure}
+
+
+Then there's the bitrate sampling methods, \texttt{tcpdump} vs. \texttt{getStats}, which are compared in \autoref{fig:comparison-bitrate-vanilla} and \autoref{fig:comparison-bitrate-traveller}. They seem to be very well aligned, but \texttt{getStats} seems to underreport actual traffic a little bit. I suspect this might be due to the \gls{rtcp} stream not beign accounted for, RTCP can take up to 5\% of the session bandwidth. If it's left out of the \texttt{getStats} reports, we can assume the full session bandwidth is 5.3\% higher than what we can see in the graphs, which means they're about 108kbps lower than the actual numbers. Taking this into account, they're practically equal.\footnote{This could be verified by checking the dump files to see what ports were used, but \texttt{libjingle} multiplexes RTP and RTCP over the same port, so there's no way to extract the RTCP overhead without doing deep packet inspection, which is hard since it's all DTLS.}
+
+\autoref{fig:comparison-bitrate-traveller} shows a bit higher discrepancy for bitrate from node B to node C. This might be because node B is closer to saturating it's outbound link, which increases the odds of queued and dropped packets, and could explain why the effective bitrate seen by the application is lower than what's received by the interface. This is not thought to have any significant effect on conclusions made from this data.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            width=\textwidth,
+            ymax=2500000,
+            bar width=8,
+            height=240,
+            symbolic x coords={A,B,C,D},
+            enlargelimits=0.15
+            ]
+            \input{data/appear.in-final-vanilla-3p/bitrate-tcpdump.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{\texttt{tcpdump}}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            width=\textwidth,
+            ymax=2500000,
+            bar width=8,
+            height=240,
+            symbolic x coords={A,B,C,D},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-final-vanilla-3p/bitrate-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{\texttt{getStats}}
+    \end{subfigure}
+    \caption{Bitrates reported by tcpdump and getStats compared, no traffic shaping}
+    \label{fig:comparison-bitrate-vanilla}
+\end{figure}
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            width=\textwidth,
+            ymax=2500000,
+            bar width=8,
+            height=240,
+            symbolic x coords={A,B,C,D},
+            enlargelimits=0.15
+            ]
+            \input{data/appear.in-final-traveller/bitrate-tcpdump.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{\texttt{tcpdump}}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            width=\textwidth,
+            ymax=2500000,
+            bar width=8,
+            height=240,
+            symbolic x coords={A,B,C,D},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-final-traveller/bitrate-getstats.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{\texttt{getStats}}
+    \end{subfigure}
+    \caption{Bitrates reported by tcpdump and getStats compared, ``traveller'' test case}
+    \label{fig:comparison-bitrate-traveller}
+\end{figure}
