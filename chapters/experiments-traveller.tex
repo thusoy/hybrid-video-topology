@@ -1,0 +1,95 @@
+\subsubsection{Test Case ``traveller''}
+
+A quick recap of the bandwidth limits put on the nodes in the ``traveller'' test case: A (10/5), B (2/1), C (10/8).
+
+\autoref{fig:traveller-bitrate} shows the bitrates flowing between the nodes in the ``traveller'' test case. Remember what was mentioned earlier; the values reported here are only what was received at the node's interface, not what the application was consuming. This is important, as we can see.
+
+For our first test case, ``traveller'', the results are shown in \autoref{fig:traveller-bitrate}. We can tell that even though node B transmits 0.5Mbps to each of the other nodes, neither of them receive recent data frequent enough to keep an acceptable conversation with node B. The good thing is that even though node B suffers greatly in this case, the flow between A and C is unaffected.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            width=\textwidth,
+            bar width=8,
+            symbolic x coords={A,B,C},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-traveller/bitrate.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Outgoing traffic from each node}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            compat=newest,
+            ylabel=Latency (ms),
+            xtick=data,
+            ymax=1000,
+            width=\textwidth,
+            bar width=8,
+            symbolic x coords={A,B,C},
+            enlargelimits=0.15,
+            nodes near coords=\raisebox{.3cm}{\pgfmathprintnumber{\pgfplotspointmeta}}
+            ]
+            \input{data/appear.in-traveller/latency.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Outgoing latencies for each node}
+    \end{subfigure}
+    \caption{Test results for the ``traveller'' test case. The out-of-bounds latencies are are all larger than 24s.}
+    \label{fig:traveller-bitrate}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            width=\textwidth,
+            symbolic x coords={A,B,C},
+            enlargelimits=0.15,
+            major grid style=dashed,
+            ymajorgrids,
+            ]
+            \input{data/appear.in-vanilla-3p/bitrate.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Observed incoming bitrates for each node, no traffic shaping}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            compat=newest,
+            ylabel=Bitrate (bps),
+            xtick=data,
+            width=\textwidth,
+            major grid style=dashed,
+            ymajorgrids,
+            symbolic x coords={A,B,C},
+            enlargelimits=0.15,
+            ]
+            \input{data/appear.in-traveller/bitrate.tex}
+        \end{axis}
+        \end{tikzpicture}
+        \subcaption{Observed incoming bitrates for each node, with traffic shaping}
+    \end{subfigure}
+    \caption{Bitrate results for the ``traveller'' test case, with and without traffic shaping}
+    \label{fig:traveller-bitrate}
+\end{figure}
