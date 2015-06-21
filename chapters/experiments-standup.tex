@@ -1,97 +1,45 @@
-\begin{figure}
-    \centering
-    \begin{subfigure}[t]{.9\textwidth}
-        \centering
-        \begin{tikzpicture}
-        \begin{axis}[
-            ybar,
-            ylabel=Bitrate (bps),
-            xtick=data,
-            width=\textwidth,
-            bar width=10,
-            height=240,
-            symbolic x coords={A,B,C,D},
-            enlargelimits=0.15
-            ]
-            \input{data/appear.in-vanilla-4p/bitrate.tex}
-        \end{axis}
-        \end{tikzpicture}
-        \subcaption{Outgoing traffic from each node}
-    \end{subfigure}
-    \begin{subfigure}[t]{.9\textwidth}
-        \centering
-        \begin{tikzpicture}
-        \begin{axis}[
-            ybar,
-            compat=newest,
-            ylabel=Latency (ms),
-            xtick=data,
-            width=\textwidth,
-            symbolic x coords={A,B,C,D},
-            bar width=10,
-            height=240,
-            enlargelimits=0.15,
-            nodes near coords=\raisebox{.3cm}{\pgfmathprintnumber{\pgfplotspointmeta}}
-            ]
-            \input{data/appear.in-vanilla-4p/latency.tex}
-        \end{axis}
-        \end{tikzpicture}
-        \subcaption{Outgoing latencies for each node}
-    \end{subfigure}
-    \caption{Test results for four nodes without traffic shaping}
-    \label{fig:vanilla-4p}
-\end{figure}
+Quick refresher on ``standup'' bandwidth limits: A (30/20), B (30/15), C (8/6) and D (6/3).
 
+The key challenge in this case node D, with only 6Mbps available on the downlink, slightly upped by node C with 8Mbps. Observed bitrates from the test are given in \autoref{fig:standup-bitrate}. Firefox displays much of the same things we saw for the ``traveller'' test case; Node C doesn't have any troubles in this test, but node D is completely satured. Node D receives 2.1Mbps from each of the other three nodes, which again destroys the latencies in the conversation. Even though node D sends to its fullest capacity, hardly anything of this is correctly received by the other nodes. This probably implies that among the data Firefox is actually putting onto the wire, not enough of it reaches the destinations unfragmented, and thus the receiver is incapable of recontructing a complete frame to show to the user. Node C doesn't entirely saturate it's uplink however, so there's obviously \emph{some} way streams are limited in Firefox, but it's clearly not adequate.
 
+Chrome handles the two challenged nodes elegantly, with 61\%/76\% downlink/uplink utilization on node C, and 85\%/80\% utilization on node D.
 
-Next up we have the ``standup'' test case, as seen in \autoref{fig:standup}. The key challenge in this case node D, with only 6Mbps available on the downlink, slightly upped by node C with 8Mbps. Node C doesn't have any troubles in this test, but node D is completely satured, receiving 2.1Mbps from each of the other three nodes. Even though node D sends to its fullest capacity, hardly anything of this is correctly received by the other nodes, as can be seen from the latencies incurred. This probably implies that among the data Firefox is actually putting onto the wire, not enough of it reaches the destinations unfragmented, and thus the receiver is incapable of recontructing a complete frame to show to the user.
+Latencies are depicted in \autoref{fig:standup-latency}.
 
 \begin{figure}
     \centering
-    \begin{subfigure}[t]{.9\textwidth}
+    \begin{subfigure}[t]{\textwidth}
         \centering
         \begin{tikzpicture}
         \begin{axis}[
-            ybar,
             ylabel=Bitrate (bps),
-            xtick=data,
-            width=\textwidth,
-            bar width=8,
+            bar width=10,
             height=240,
             symbolic x coords={A,B,C,D},
-            enlargelimits=0.15
             ]
             \input{data/appear.in-standup/bitrate.tex}
         \end{axis}
         \end{tikzpicture}
-        \subcaption{Outgoing traffic from each node}
+        \subcaption{Firefox}
     \end{subfigure}
-    \begin{subfigure}[t]{.9\textwidth}
+    \begin{subfigure}[t]{\textwidth}
         \centering
         \begin{tikzpicture}
         \begin{axis}[
-            ybar,
             ylabel=Latency (ms),
-            xtick=data,
-            width=\textwidth,
-            ymax=1000,
-            bar width=8,
-            height=240,
+            ymax=2500000,
             symbolic x coords={A,B,C,D},
-            enlargelimits=0.15,
-            nodes near coords=\raisebox{.3cm}{\pgfmathprintnumber{\pgfplotspointmeta}}
+            bar width=10,
+            height=240,
             ]
-            \input{data/appear.in-standup/latency.tex}
+            \input{data/appear.in-final-standup/bitrate-getstats.tex}
         \end{axis}
         \end{tikzpicture}
-        \subcaption{Outgoing latencies for each node}
+        \subcaption{Chrome}
     \end{subfigure}
-    \caption{Test results for the ``standup'' test case.}
-    \label{fig:standup}
+    \caption{Bitrates in the ``standup'' test case.}
+    \label{fig:standup-latency}
 \end{figure}
-
-Chrome:
-
 
 \begin{figure}
     \centering
@@ -99,44 +47,33 @@ Chrome:
         \centering
         \begin{tikzpicture}
         \begin{axis}[
-            ybar,
-            ymax=950,
-            ylabel=Latency (ms),
-            xtick=data,
-            width=\textwidth,
-            symbolic x coords={A,B,C,D},
+            ylabel=Bitrate (bps),
             bar width=8,
+            ymax=1000,
+            ymin=0,
             height=240,
-            enlargelimits=0.15,
-            major grid style=dashed,
-            ymajorgrids
+            symbolic x coords={A,B,C,D},
             ]
-            \input{data/appear.in-capture-vanilla-4p/latency-getstats.tex}
+            \input{data/appear.in-standup/latency.tex}
         \end{axis}
         \end{tikzpicture}
-        \subcaption{Latencies measured without traffic shaping, seven nodes}
+        \subcaption{Firefox}
     \end{subfigure}
     \begin{subfigure}[t]{\textwidth}
         \centering
         \begin{tikzpicture}
         \begin{axis}[
-            ybar,
-            ymax=950,
             ylabel=Latency (ms),
-            xtick=data,
-            width=\textwidth,
-            symbolic x coords={A,B,C,D},
+            ymax=1000,
             bar width=8,
             height=240,
-            enlargelimits=0.15,
-            major grid style=dashed,
-            ymajorgrids
+            symbolic x coords={A,B,C,D},
             ]
             \input{data/appear.in-final-standup/latency-getstats.tex}
         \end{axis}
         \end{tikzpicture}
-        \subcaption{Latencies observed with traffic shaping, ``standup'' test case}
+        \subcaption{Chrome}
     \end{subfigure}
-    \caption{Observed latencies in a conversation with seven nodes, with and without traffic shaping}
-    \label{fig:vanilla-7p-getstats}
+    \caption{Observed latencies in the ``standup'' test case}
+    \label{fig:standup-latency}
 \end{figure}
