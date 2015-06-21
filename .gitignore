@@ -11,8 +11,10 @@
 *.ist
 *.loa
 *.lof
+*.log
 *.lot
 *.out
+*.pdf
 *.pyg
 *.tdo
 *.toc
@@ -22,7 +24,5 @@
 figs/*converted-to.pdf
 figs/*.eps
 data/**/*.tex
-main.log
-main.pdf
 report.pdf
 tmp
