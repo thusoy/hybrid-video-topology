@@ -79,7 +79,7 @@ def get_statistical_properties(latencies):
                 stderr('OBS: Large offset at {}'.format(
                     str([(timestamp, value) for timestamp, value in measurements if abs(value - mean) > stdev])))
 
-            properties[receiver][sender] = (mean, stdev)
+            properties[sender][receiver] = (mean, stdev)
     return properties
 
 

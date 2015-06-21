@@ -61,7 +61,7 @@ def summarize_results(results):
             if sender != receiver:
                 print('Num measurements {} -> {}: {}'.format(sender, receiver,
                 len(values)), file=sys.stderr)
-            properties[receiver][sender] = BitrateProperties(mean, stdev)
+            properties[sender][receiver] = BitrateProperties(mean, stdev)
     return properties
 
 
