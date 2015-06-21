@@ -17,6 +17,10 @@ latencies:
 	export SOURCE=appear.in-capture-vanilla-3p; ./tools/latexify_captured_data_latency.py -s 1434048948 data/$$SOURCE/$$SOURCE.dat > data/$$SOURCE/latency-getstats.tex
 	export SOURCE=appear.in-capture-traveller; ./tools/latexify_latency_csv.py -f data/$$SOURCE/$$SOURCE.csv > data/$$SOURCE/latency-timer.tex
 	export SOURCE=appear.in-capture-traveller; ./tools/latexify_captured_data_latency.py -s 1434050117 data/$$SOURCE/$$SOURCE.dat > data/$$SOURCE/latency-getstats.tex
+	export SOURCE=appear.in-final-vanilla-3p; ./tools/latexify_latency_csv.py -f data/$$SOURCE/$$SOURCE.csv > data/$$SOURCE/latency-timer.tex
+	export SOURCE=appear.in-final-vanilla-3p; ./tools/latexify_captured_data_latency.py --new-format -s 1434048948 data/$$SOURCE/$$SOURCE.dat > data/$$SOURCE/latency-getstats.tex
+	export SOURCE=appear.in-final-traveller; ./tools/latexify_latency_csv.py -f data/$$SOURCE/$$SOURCE.csv > data/$$SOURCE/latency-timer.tex
+	export SOURCE=appear.in-final-traveller; ./tools/latexify_captured_data_latency.py --new-format -s 1434050117 data/$$SOURCE/$$SOURCE.dat > data/$$SOURCE/latency-getstats.tex
 
 captured-latencies:
 	find data -type d -name "*-capture-*" | while read datadir; do target=$$(basename "$$datadir"); ./tools/latexify_captured_data_latency.py data/$$target/$$target.dat > data/$$target/latency-getstats.tex; done
