@@ -38,6 +38,9 @@ bitrates:
 	./tools/latexify_csv_bitrate_traces.py -n 120 data/appear.in-final-traveller/*-bitrates.csv > data/appear.in-final-traveller/bitrate-tcpdump.tex
 	./tools/latexify_csv_bitrate_traces.py -n 120 data/appear.in-final-vanilla-3p/*-bitrates.csv > data/appear.in-final-vanilla-3p/bitrate-tcpdump.tex
 
+utilization:
+	./tools/calculate_link_utilization.py data/appear.in-friends/bitrate.tex -c friends > tmp/friends-utilization-firefox.tex
+
 graphviz:
 	bash -c 'find figs -type f -name "*.dot" | while read path; do target=$$(basename "$$path"); dot -Teps figs/$$target -o "figs/$${target%.*}.eps"; done'
 

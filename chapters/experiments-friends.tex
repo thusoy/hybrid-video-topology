@@ -1,8 +1,26 @@
-Last out is the ``friends'' test case. As there's a lot of data points for this case, the results have been split in two; one logarithmic view giving a rough overview of how the nodes performed (\autoref{fig:friends-log}), and one cropped view, where only edges with latency less than 500ms is included (\autoref{fig:friends-lin}). As we can see from the linear chart, there's only four nodes that observe latencies below 500ms, and not even all of those can reasonably be expected to be able to hold a conversation. A and B can talk together; A and E can talk, although a little more strained with latencies around 400ms. B and E can not talk, as B doesn't receive E's stream in reasonable time; B and F however \emph{can} talk together.
+\subsection{Test Case ``Friends''}
 
-To summarize, out of 42 pairs of nodes in the test case, only three of them are able to communicate bidirectionally. In practice, this is a conversation all parties abandon immediately, as it's useless.
+Quick refresher of bandwidth limits for nodes in the ``friends'' test case, there's two groups (A-C and D-G) with high inter-group latency: A (15/15), B (50/50), C (14/8), D (15/9), E (30/20), F (40/30), and G (9/4).
 
-\autoref{fig:friends-getstats-bitrates} shows that for resource-constrained nodes, those resources are not distributed evenly among its peers. We see this in the data for node G, which is constrained to 9/4 bandwidth. Of it's 4Mbps, we see that node E receives a little more than 1Mbps of this, while the two other nearby nodes (D and F) lie around 500kbps each. Among the remote nodes, node C receives $\approx$350kbps, while A and B share the scraps that remain, with $\approx$200kbps each.
+\autoref{fig:friends-bitrate} shows that for the most resource-constrained nodes, Firefox -- not unexpectedly -- again completely saturates the links. Both C and G have 100\% utilization of their uplinks. G is the only node that also has a saturated downlink, and again we see the results this have on the latencies in \autoref{fig:friends-latency}.
+
+The link utilizations are given in \autoref{tab:friends-utilization}.
+
+\begin{center}
+    \captionof{table}{Link utilization in the ``friends'' test case}
+    \begin{tabular}{| l | l | l |}
+    \hline
+    \textbf{Node} & \textbf{Downlink} & \textbf{Uplink} \\ \hline
+    \input{tmp/friends-utilization-firefox}
+    \hline
+    \end{tabular}
+\end{center}
+
+On Chrome, resources are not distributed evenly among its peers. We see this in the data for node G, which is constrained to 9/4 bandwidth. Of it's 4Mbps, we see that node E receives a little more than 1Mbps of this, while the two other nearby nodes (D and F) lie around 500kbps each. Among the remote nodes, node C receives $\approx$350kbps, while A and B share the scraps that remain, with $\approx$200kbps each.
+
+As there's a lot of data points with wildly varying magnitude for Firefox in this case, the results have been split in two; one logarithmic view giving a rough overview of how the nodes performed (\autoref{fig:friends-latency-log}), and one cropped view, where only edges with latency less than 500ms is included (\autoref{fig:friends-latency}). As we can see from the linear chart, there's only four nodes that observe latencies below 500ms, and not even all of those can reasonably be expected to be able to hold a conversation. A and B can talk together; A and E can talk, although a little more strained with latencies around 400ms. B and E can not talk, as B doesn't receive E's stream in reasonable time; B and F however \emph{can} talk together.
+
+To summarize, out of 42 pairs of nodes in the test case, only three of them are able to communicate bidirectionally with Firefox. In practice, this is a conversation all parties abandon immediately.
 
 We observe something similar for nodes C and D, which are constrained to 8Mbps and 9Mbps, respectively. Well, almost -- node C is well received by nodes B, D and E, while nodes A and F are left with hardly anything -- which shows that being local or remote \emph{does not} seem to significantly influence who gets a fair share. Granted, this dataset is only from one single test run, more data is needed to say anything conclusively about whether this is expected behavior, but our data seem to imply that even a minute is not enough to reach fairness for Chrome.
 

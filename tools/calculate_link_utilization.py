@@ -76,7 +76,6 @@ def load_bandwidth_usage(tex_file):
             mean_bandwidth = float(line[line.find(',') + 1:line.find(')')])
             sending_usage[nodes[sending_node_index]] += mean_bandwidth
             receiving_usage[receiving_node] += mean_bandwidth
-            print 'Found %.0f from %s to %s' % (mean_bandwidth, nodes[sending_node_index], receiving_node)
 
     usage = {}
     for node, downlink_usage in receiving_usage.items():
@@ -95,7 +94,7 @@ def get_utilization(limits, usage):
 
 def print_utilization(utilization):
     for node, (down_util, up_util) in sorted(utilization.items()):
-        print '%s: %.2f/%.2f' % (node, down_util, up_util)
+        print '%s & %.0f & %.0f \\\\' % (node, down_util*100, up_util*100)
 
 
 if __name__ == '__main__':
