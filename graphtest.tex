@@ -30,10 +30,20 @@
                     x axis line style={-},
                     ylabel={$y$},          % default put y on y-axis
                     legend style={at={(0.5,-0.10)}, anchor=north,legend columns=-1},
-                    major x tick style = {opacity=0},
-                    minor x tick num = 1,
-                    minor tick length=2ex,
                 }}
+
+\pgfplotsset{experimentResults/.style={
+    ymajorgrids,
+    major grid style=dashed,
+    enlargelimits=0.15,
+    width=\textwidth,
+    xtick=data,
+    ybar,
+    ymin=0,
+    major x tick style = {opacity=0},
+    minor x tick num = 1,
+    minor tick length=2ex,
+}}
 
 \begin{document}
 \include{graphtotest}
