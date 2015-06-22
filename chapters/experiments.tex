@@ -89,6 +89,8 @@ Thus, applying a given test case is completely independent of the actual network
 
 Ideally, testing would be automated and not require a running graphical environment, to allow tests to be run often and in response to events such as commits. This could be possible using by running a browser in a fake framebuffer like \texttt{Xvfb}\footnote{\url{http://www.x.org/releases/X11R7.6/doc/man/man1/Xvfb.1.xhtml}} and faking out a media stream\footnote{Chrome: \texttt{-{}-use-fake-device-for-media-stream}, Firefox: \texttt{getUserMedia(\{fake: true, <...>\})}. More info about this approach can be found at \url{http://images.tmcnet.com/expo/webrtc-conference/presentations/san-jose-14/D3-2_Testing_v2_2.pdf}}. Both browsers should be able to be tested in such a setting, but data would be limited to what can be extracted through the \texttt{getStats}-API as described above. Still, it's better than nothing. It is thus possible to automate this, but was considered out of scope for this thesis.
 
+Chrome runs regular interoperability tests with Firefox\footnote{Google blogged about this: \url{http://googletesting.blogspot.se/2014/09/chrome-firefox-webrtc-interop-test-pt-2.html}}, but these tests only test that calls can be established, and do not test any network configurations or measure statistics. Integrating the results from this thesis into this test suite is encouraged for more insight into the performance and behavior of WebRTC implementations. The W3C also maintain a test suite for implementations\footnote{\url{http://www.webrtc.org/testing/w3c-conformance-tests}}, but those only test compatibility with the APIs, and not network behavior.
+
 
 \subsection{Caveats}
 
