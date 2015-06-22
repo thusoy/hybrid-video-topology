@@ -1,0 +1,21 @@
+digraph {
+    aint [label="A int"];
+    amid [label=""];
+    aext [label="A ext"];
+
+    # int <-> mid: Bandwidth gains
+    amid -> aint [label="b=2Mbit g=1"];
+    amid -> aint [label="b=18Mbit g=.3"];
+
+    aint -> amid [label="5Mbit"];
+
+    # mid <-> ext: Link utilization costs
+    aext -> amid [label="b=15Mbit c=1"];
+    amid -> aext [label="b=2Mbit c=2"];
+    aext -> amid [label="b=5Mbit c=2"];
+
+    amid -> aext [label="b=3Mbit c=1"];
+
+
+    {rank=same aint amid aext}
+}

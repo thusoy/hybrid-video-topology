@@ -98,18 +98,16 @@ Increasing the bitrate of video is subject to diminishing returns, increasing th
 
 With a linear gain from increased bandwidth, bumping traffic from a given node from 4Mbps to 5Mbps would yield the same return as bumping another node from 1Mbps to 2Mbps, and thus the algorithm would be unlikely to find a fair allocation of bandwidth. Encoding diminishing returns into the objective function ensures that everyone will be allocated a fair share, and still allows nodes with excess bandwidth to grow further than more constrained nodes.
 
-To illustrate how we model this, imagine that instead of node splitting like we did above, we're doing \emph{edge splitting}, replacing a single edge connecting to two nodes with a set of edges, which can have different capacities and costs. This results in a linear approximation like we saw in \autoref{fig:bitrate-quality}.
+To illustrate how we model this, imagine that instead of node splitting like we did above, we're doing \emph{edge splitting}, replacing a single edge connecting to two nodes with a set of edges, which can have different capacities and costs. Note that we only have to split the edge coming into the node, there's nothing that affects the objective on the outgoing ones.
 
 
 \section{Link Utilization}
 
-The cost of utilizing a given network link is a function of the link's utilization. We can derive this cost from the queuing delay formula, $1/(1 - \mu/\lambda)$, where $\mu$ is the capacity of the link and $\lambda$ is the offered traffic. As can be seen in \autoref{fig:utility-latency}, this function is not linear, and can thus not be used directly in our objective function. Nonetheless, we can achieve the same goal -- punishing over-utilization of individual links -- by approximating the function with a piecewise linear function. Conceptually, we can imagine that instead of a single link going into a node, there's a \emph{set} of links to each node, with exponentially increasing costs. Thus a 8Mbps link might be divided into four links of 2Mbps, with exponentially increasing costs.
+The cost of utilizing a given network link is a function of the link's utilization. We can derive this cost from the queuing delay formula, $1/(1 - \mu/\lambda)$, where $\mu$ is the capacity of the link and $\lambda$ is the offered traffic. As can be seen in \autoref{fig:utility-latency}, this function is not linear, and can thus not be used directly in our objective function. Nonetheless, we can achieve the same goal -- punishing over-utilization of individual links -- by approximating the function with a piecewise linear function. Conceptually, we can approach this in the same way as for bandwidth gains by splitting the edges into the node. Thus a 8Mbps link might be divided into four links of 2Mbps, with exponentially increasing costs.
 
 Assuming that the weighting between the segments follows the queuing delay formula given above, the ratio between the extra punishment for using the last 10\% of a link and the gain from increasing bandwidth by those extra 10\% can be tuned by implementations. This ratio would basically be a measure of how heavily to hit the network to gain maximum quality. To avoid excessive packet loss, link utilization should probably not exceed 90\%, which can also be achieved by under-reporting the actual bandwidth to the algorithm. What the effects of that would be, compared to increasing the ratio towards more heavily punishing excessive link utilization, is unknown and requires more study to say anything conclusive about.
 
-\todo{Insert partitioning-algo here}
-
-Based on this formula, we can formulate the cost multiplier of a link as $1 + k/(\mu - \lambda)$, where $k$ is a customizable parameter for how heavily link saturation should be punished. In our experiments, $k=10$ seems appropriate. We then partition this function into a small set of piecewise linear intervals, which we can model as parallel edges between two nodes, with different capacities and costs. Keeping this set small limits the number of variables in the resulting matrix, and thus keeps processing times reasonably low.
+We can formulate the cost multiplier of a link as $1 + k/(\mu - \lambda)$, where $k$ is a customizable parameter for how heavily link saturation should be punished. In our experiments, $k=10$ seems appropriate. We then partition this function into a small set of piecewise linear intervals, which we can model as parallel edges between two nodes, with different capacities and costs. Keeping this set small limits the number of variables in the resulting matrix, and thus keeps processing times reasonably low.
 
 \begin{figure}
     \centering
@@ -143,6 +141,18 @@ Based on this formula, we can formulate the cost multiplier of a link as $1 + k/
 \end{center}
 
 Using this partitioning as a guide, we can map any number of slots on a physical link into a set of edges $E$ in our graph where $|E| <= 4$.
+
+As there's now two different edge splits on the edge between a node's internal and external parts, we have to insert a temporary node between them to separate the two edge sets.
+
+Thus, after doing the linear approximations a single node in our flow network ends up like depicted in \autoref{fig:double-edge-split}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{double-edge-split}
+    \caption{A (20/5) node after two rounds of edge splitting. g is the gain from the bandwidth over an edge, c is the cost.}
+    \label{fig:double-edge-split}
+\end{figure}
+
 
 \section{Alternative model}\label{sec:alternative-model}
 
