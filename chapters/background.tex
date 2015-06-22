@@ -1,7 +1,7 @@
 \chapter{Background}
 \label{chp:background}
 
-In this chapter we'll discuss some technical aspects of video conferencing that affects how we reason about the problem, and evaluate what sort of tradeoffs established actors on the market have made.
+In this chapter we'll discuss some technical aspects of video conferencing that affects how we reason about the problem, and evaluate what sort of trade-offs established actors on the market have made.
 
 \section{WebRTC}
 
@@ -9,7 +9,7 @@ This thesis is largely inspired by the efforts of the \gls{w3c} in standardizing
 
 It's interesting to note that many of the largest WebRTC communication platforms (like appear.in and Hello, as mentioned) we've seen so far have been developed by the largest players in the traditional communication field, and not from any independent outsider. The big telephone companies do have capabilities other actors don't enjoy, such as being able to freely route calls back over GSM as a fallback solution in case a person is not reachable online, but this has not been a selling point for the services so far. The services have also largely been focused on video conferencing, even though the technology is equally well-suited for pure voice conversations or text-based communication.
 
-In any case, the hard part of the problem is video conferencing, as the demands on the user equipement and connection is far greater than what will ever be excercised by voice or text. Group conversations on appear.in is today artificially limited to 8 people, but often the parties in the conversation will experience practical limits below this due to insufficient bandwidth or CPUs not capable of encoding enough parallel video streams.
+In any case, the hard part of the problem is video conferencing, as the demands on the user equipment and connection is far greater than what will ever be exercised by voice or text. Group conversations on appear.in is today artificially limited to 8 people, but often the parties in the conversation will experience practical limits below this due to insufficient bandwidth or CPUs not capable of encoding enough parallel video streams.
 
 The dynamic routing scheme proposed in this thesis is largely independent of underlying technology, but is intended to be built on top of \gls{webrtc}. The requirements to implement the suggested solution is that the platform allows clients to establish connections with a given starting bitrate (which WebRTC allows through modifying the SDP offer), and that streams can be routed arbitrarily. As connections have to be established in an ad-hoc way out-of-band in WebRTC, as long as the parties involved all share session keys, this should also be feasible.
 
@@ -41,7 +41,7 @@ Clearly, in larger conversations, there's a huge difference in network impact of
     \label{fig:service-possibilities}
 \end{figure}
 
-Continuous presence can be accomplished both in a peer-to-peer topology and centralized topologies, but since a \gls{vas} requires insight into the video streams (or at least, the audio streams) to select who is forwarded at any given time, they are only realizible if all the video streams go through centralized servers. In theory it's possible to expand the system to work over peer-to-peer as well, by having each peer use a low-bandwidth data channel to tell nodes whether it's currently speaking or not, but this requires that video streams can be quickly started, stopped, and that the system gracefully handles collisions without falling over. The problem is non-trivial, as it's essentially a question of distributed consensus. Having a single place that handles the question of who's active is a lot simpler to reason about and implement.
+Continuous presence can be accomplished both in a peer-to-peer topology and centralized topologies, but since a \gls{vas} requires insight into the video streams (or at least, the audio streams) to select who is forwarded at any given time, they are only realizable if all the video streams go through centralized servers. In theory it's possible to expand the system to work over peer-to-peer as well, by having each peer use a low-bandwidth data channel to tell nodes whether it's currently speaking or not, but this requires that video streams can be quickly started, stopped, and that the system gracefully handles collisions without falling over. The problem is non-trivial, as it's essentially a question of distributed consensus. Having a single place that handles the question of who's active is a lot simpler to reason about and implement.
 
 Note that even though video is switched in a \gls{vas}-system, everyone's audio is usually sent to everyone.
 
@@ -62,7 +62,7 @@ A selection of widely-known video conferencing solutions today, with significant
 	\end{tabular}
 \end{center}
 
-Notably absent here is FaceTime, Apple's videochat service bundled with their devices. FaceTime's absence in this thesis is due to the lack of support for more than two people in a conversation (thus being more video \emph{chat} than video \emph{conference}), and the lack of support for non-Apple devices.
+Notably absent here is FaceTime, Apple's video conversation service bundled with their devices. FaceTime's absence in this thesis is due to the lack of support for more than two people in a conversation (thus being more video \emph{chat} than video \emph{conference}), and the lack of support for non-Apple devices.
 
 We also note that Mozilla just entered the market in collaboration with Telefonica with their Hello service, bundled with recent versions of Firefox\footnote{https://www.mozilla.org/en-US/firefox/hello/}. Hello essentially provides the same service as appear.in, just bundled with the browser. Thus anything we say about appear.in applies to Firefox Hello as well (and all other peer-to-peer WebRTC services), and we'll therefore not consider them separately.
 
@@ -70,7 +70,7 @@ Let's take a more detailed look at these services.
 
 \subsection{appear.in}
 
-appear.in is a free peer-to-peer service built on WebRTC that does not require sign-ups or installation of addons to your browser. Due to the WebRTC requirement the service is available to anyone using a recent version of either Google Chrome, Mozilla Firefox or Opera, while the OS-provided browsers (Internet Explorer and Safari) have notably not implemented WebRTC yet.\footnote{Browser support for WebRTC can be tracked at \url{http://iswebrtcreadyyet.com/}}
+appear.in is a free peer-to-peer service built on WebRTC that does not require sign-ups or installation of add-ons to your browser. Due to the WebRTC requirement the service is available to anyone using a recent version of either Google Chrome, Mozilla Firefox or Opera, while the OS-provided browsers (Internet Explorer and Safari) have notably not implemented WebRTC yet.\footnote{Browser support for WebRTC can be tracked at \url{http://iswebrtcreadyyet.com/}}
 
 \todo[inline]{Write a bit more about appear.in architecture: linear scaling, contionus presence, ease of testing due to no signups, limit of 8 people}
 
@@ -84,7 +84,7 @@ Hangouts requires you to setup a public Google+ profile, which makes the barrier
 
 \subsection{Skype}
 
-Skype is probably the most well-known of the solutions we're looking at, being among the first to offer free video conferencing for personal use. Skype was also among the first to provide a VoIP solution interoperating with \gls{pstn}, easing the barrier of entry for new users. The original Skype topology was peer-to-peer, routing streams through PCs with Skype installed that had the app running, using a proprietary closed-source protocol. After the Microsoft aquisition, Skype dropped the peer-to-peer design to a Microsoft MCU-backed solution, justified as a means to improve performance and security for users. A Skype conversation has a soft limit on five people for the best user experience, and a hard limit on 10 users.
+Skype is probably the most well-known of the solutions we're looking at, being among the first to offer free video conferencing for personal use. Skype was also among the first to provide a VoIP solution inter-operating with \gls{pstn}, easing the barrier of entry for new users. The original Skype topology was peer-to-peer, routing streams through PCs with Skype installed that had the application running, using a proprietary closed-source protocol. After the Microsoft acquisition, Skype dropped the peer-to-peer design to a Microsoft MCU-backed solution, justified as a means to improve performance and security for users. A Skype conversation has a soft limit on five people for the best user experience, and a hard limit on 10 users.
 
 Skype requires a standalone application to run, which is available on pretty much every platform out there, including Windows, Mac, Linux, Android, iOS, Windows Phone, BlackBerry, most tablets, TVs, gaming consoles and more. The benefit is close access to hardware and GPUs for more efficient video encoding, the downside is the lack of open protocols, standardization and transparency.
 
