@@ -207,7 +207,7 @@ Deployment wise, repeaters are very similar to \gls{turn}-servers, which are use
 
 Another unit that can be added to the flow network is a transcoder, which is like a repeater in that it has practically unconstrained bandwidth in and out, but also has the capability to transcode incoming video. If node A only has 2Mbps upload capacity, and node B is a desktop with 10Mbps downlink, and node C is a phone with only 1 Mbps downlink, A can send its full 2Mbps video stream to a transcoder, which can then forward the full 2Mbps stream to node B, but transcode the stream down to a leaner 1Mbps stream for node C. That way A is able to fully utilize its upload capacity, while the receivers get a stream best utilizing their downlink capacity.
 
-Transcoders are more costly to run than repeaters, due to much heavier compute operations required to transcode video in real-time. They will typically be nodes with specialized hardware for video encoding, such as Intel processors with Quick Sync\footnote{Intel's hardware-accelerated H.264 encoder, first introduced in the Sandy Bridge family of CPUs}, GPUs, or other hardware built for real-time streaming.
+Transcoders are more costly to run than repeaters, due to much heavier compute operations required to transcode video in real-time. They will typically be nodes with specialized hardware for video encoding\footnote{The WebM project maintains royalty-free hardware-accelerated designs for encoding VPx: \url{http://www.webmproject.org/hardware/vp9/bige/}}.
 
 Constraint-wise, a transcoder performs the same commodity mangling as repeaters, but can output commodities of arbitrary bitrates less than or equal to the source commodity.
 
