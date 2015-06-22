@@ -8,7 +8,7 @@ default: latex
 all: render-data latex
 
 
-render-data: latencies bitrates captured-latencies captured-bitrates graphviz inkscape-illustrations
+render-data: latencies bitrates captured-latencies captured-bitrates graphviz inkscape-illustrations utilization
 
 
 latencies:
