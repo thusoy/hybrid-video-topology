@@ -51,7 +51,7 @@ Thus, our reformulated problem is to \emph{maximize} bandwidth of each commodity
 Given those factors, our problem is solved by finding a solution to the problem in \autoref{eq:objective}, where $x^k$ is a matrix with the amount of commodity $k$ transmitted on each edge, $c(i, j)$ is a cost function for the edge between $i$ and $j$, and $g_i$ is a vector of how much each device has to gain from receiving something. The gain is reflected in the device types, a phone will require less bandwidth to satisfy the user than a desktop computer with a large display will, thus introducing the gain makes sure the system will allocate bandwidth to each device's potential and capability. $s_k$ and $t_k$ is the source and sink for commodity $k$, $d_k$ is the gain. $u_{i, j}$ is the capacity of the link between $i$ and $j$.
 
 \begin{gather}\label{eq:objective}
-    max \sum_{k \in K} (d_{t_k} \sum_{w \in V} log(x_{w, t_k}^k) - \sum_e 1 + 1/(u_e - x_e^k))\\
+    max \sum_{k \in K} (d_{t_k} \sum_{w \in V} log(x_{w, t_k}^k) - \sum_e \frac{1}{(u_e - x_e^k)})\\
     \text{subject to} \nonumber \\
     \sum_{k \in K} \sum_{(i, j) \in E} x_{i, j}^k = 0, \qquad{} i, j \neq s_k, t_k \label{eq:flow-conservation} \\
     \sum_i \sum_j (\sum_{k \in K}x_{i, j}^k) < u_{i, j} \label{eq:bwlim}
