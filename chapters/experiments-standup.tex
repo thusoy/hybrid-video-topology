@@ -14,6 +14,7 @@ Latencies are depicted in \autoref{fig:standup-latency}.
         \centering
         \begin{tikzpicture}
         \begin{axis}[
+            experimentResults,
             ylabel=Bitrate (bps),
             bar width=10,
             height=240,
@@ -28,7 +29,8 @@ Latencies are depicted in \autoref{fig:standup-latency}.
         \centering
         \begin{tikzpicture}
         \begin{axis}[
-            ylabel=Latency (ms),
+            experimentResults,
+            ylabel=Bitrate (bps),
             ymax=2500000,
             symbolic x coords={A,B,C,D},
             bar width=10,
@@ -49,10 +51,10 @@ Latencies are depicted in \autoref{fig:standup-latency}.
         \centering
         \begin{tikzpicture}
         \begin{axis}[
-            ylabel=Bitrate (bps),
+            experimentResults,
+            ylabel=Latency (ms),
             bar width=8,
             ymax=1000,
-            ymin=0,
             height=240,
             symbolic x coords={A,B,C,D},
             ]
@@ -65,6 +67,7 @@ Latencies are depicted in \autoref{fig:standup-latency}.
         \centering
         \begin{tikzpicture}
         \begin{axis}[
+            experimentResults,
             ylabel=Latency (ms),
             ymax=1000,
             bar width=8,

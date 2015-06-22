@@ -12,14 +12,9 @@ Chrome balances this out much better, where A and C communicate unhindered by th
         \centering
         \begin{tikzpicture}
         \begin{axis}[
-            ybar,
+            experimentResults,
             ylabel=Bitrate (bps),
-            xtick=data,
-            width=\textwidth,
             symbolic x coords={A,B,C},
-            enlargelimits=0.15,
-            major grid style=dashed,
-            ymajorgrids,
             ]
             \input{data/appear.in-traveller/bitrate.tex}
         \end{axis}
@@ -31,15 +26,9 @@ Chrome balances this out much better, where A and C communicate unhindered by th
         \centering
         \begin{tikzpicture}
         \begin{axis}[
-            ybar,
-            compat=newest,
+            experimentResults,
             ylabel=Bitrate (bps),
-            xtick=data,
-            width=\textwidth,
             symbolic x coords={A,B,C},
-            enlargelimits=0.15,
-            major grid style=dashed,
-            ymajorgrids,
             ]
             \input{data/appear.in-final-traveller/bitrate-getstats.tex}
         \end{axis}
@@ -56,15 +45,10 @@ Chrome balances this out much better, where A and C communicate unhindered by th
         \centering
         \begin{tikzpicture}
         \begin{axis}[
-            ybar,
+            experimentResults,
             ylabel=Latency (ms),
-            xtick=data,
             ymax=1000,
-            width=\textwidth,
             symbolic x coords={A,B,C},
-            enlargelimits=0.15,
-            major grid style=dashed,
-            ymajorgrids,
             ]
             \input{data/appear.in-traveller/latency.tex}
         \end{axis}
@@ -76,16 +60,10 @@ Chrome balances this out much better, where A and C communicate unhindered by th
         \centering
         \begin{tikzpicture}
         \begin{axis}[
-            ybar,
-            compat=newest,
+            experimentResults,
             ylabel=Latency (ms),
-            xtick=data,
             ymax=1000,
-            width=\textwidth,
-            major grid style=dashed,
-            ymajorgrids,
             symbolic x coords={A,B,C},
-            enlargelimits=0.15,
             ]
             \input{data/appear.in-final-traveller/latency-getstats.tex}
         \end{axis}
