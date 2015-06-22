@@ -8,9 +8,9 @@ In this chapter we'll walk through how the problem can be modelled and solved us
 
 With some prior knowledge of graph algorithms, the first stab at solving the problem might be to look at our sample topologies and see a certain similarity to a max-flow problem -- edges have capacities, there's a set of sources, a set of sinks, and we want to maximize \emph{something}. However, there's a couple of things that make it hard to solve directly as a traditional flow problem, particularly that we don't have a single source and a single sink, but lots of them. Trying to model it as a single-source, single-sink problem quickly leads us to discover the limitations of that model, where we realize that if we actually solved it, how would we be able to tell which node is generating flow on a given edge? Clearly, we need a way to distinguish node A's video from node B's video. And we need to make sure that all nodes receive video from every other node, not just maximum bitrate of \emph{any} video.
 
-If we change perspective slightly, we see that this is not a single flow problem, but a \emph{series} of flow problems, sharing an underlying constrained resource. There's the problem of routing video from A to all other nodes, there's the problem of routing video from B to all other nodes, etc. In a conversation with $n$ participants, we now have $n$ separate flow problems, which all share the same resource. However, also this model is too limiting for our use case, as video is sent at a given bitrate, and this stream can neither be split at a given node without incurring a cost, nor does it make sense to add it; two 2Mbit videos cannot be joined to form a 4Mbit video. If you put enough restrictions on your nodes and edges it's probable that you might be able to able to prevent this from happening, but there's another way.\todo{Insert graph showing how this fails. Does it fail it any obvious way? With flow conservation on the nodes it doesn't seem like it, actually. But it might be harder to add restrictions on re-encoding later. Or it's a completely valid option, open for further investigation.}
+If we change perspective slightly, we see that this is not a single flow problem, but a \emph{series} of flow problems, sharing an underlying constrained resource. There's the problem of routing video from A to all other nodes, there's the problem of routing video from B to all other nodes, etc. In a conversation with $n$ participants, we now have $n$ separate flow problems, which all share the same resource. However, also this model is too limiting for our use case, as video is sent at a given bitrate, and this stream can neither be split at a given node without incurring a cost, nor does it make sense to add it; two 2Mbit videos cannot be joined to form a 4Mbit video. If you put enough restrictions on your nodes and edges it's probable that you might be able to able to prevent this from happening, but there's another way.
 
-This time around, imagine that we have a separate flow problem for each \emph{pair} of nodes; we have one problem routing node A's video to node B, we have one problem routing node A's video to node C, etc. This yields a total of $n(n-1)$ problems, which is $O(n^2)$. Modelling the problem this way means we don't have to add any supernodes to connect the targets, each node can act as sink for its own video stream, hereafter known as the \emph{commodity}, destined for itself.
+This time around, imagine that we have a separate flow problem for each \emph{pair} of nodes; we have one problem routing node A's video to node B, we have one problem routing node A's video to node C, etc. This yields a total of $n(n-1)$ problems, which is $O(n^2)$. Modelling the problem this way means we don't have to add any supersinks to connect the targets; each node can act as sink for the video stream, hereafter known as the \emph{commodity}, destined for itself.
 
 One other thing we notice from our initial graph compared to traditional flow problems is that we notice that we have \emph{node constraints} in the initial graph, while flow problems only work on \emph{edge constraints}. To accommodate this, we split each node into two parts, hereafter called the external and internal part, as illustrated in \autoref{fig:node-splitting}.
 
@@ -31,7 +31,7 @@ One other thing we notice from our initial graph compared to traditional flow pr
     \label{fig:node-splitting}
 \end{figure}
 
-As we now have a well-specified way to go from a given conversation to a graph that can be solved by max-flow algorithms, the entire problem can be solved by joining all the different subproblems under the same resource constraints, and solve as a multi-commodity max-flow problem. This class of problems can be solved with \gls{lp}, which can be summarized in canonical form as in \autoref{eq:lp}
+As we now have a well-specified way to go from a given conversation to a graph that can be solved by max-flow algorithms, the entire problem can be solved by joining all the different subproblems under the same resource constraints, and solve as a multi-commodity max-flow problem. This class of problems can be solved with \gls{lp} \cite{ahuja1988network}, which can be summarized in canonical form as in \autoref{eq:lp}
 
 \begin{align}\label{eq:lp}
     \text{maximize}\qquad &\mathbf{c^Tx} \\
@@ -60,7 +60,7 @@ Given those factors, our problem is solved by finding a solution to the problem 
 
 In plain English: For each commodity, maximize the gain of sending that commodity to it's receiver, minus the link cost sending said commodity induces (\autoref{eq:objective}), while all nodes conserve bandwidth except the source and sink for a commodity (\autoref{eq:flow-conservation}) and that no link exceeds its capacity (\autoref{eq:bwlim}). The observant reader will note that we require each sink to receive each commodity, instead of having each source send each commodity. We'll come back to this decision in \autoref{sec:repeaters}
 
-In any case, this raises some other issues that has to be handled. The objective function has to be linear to be solved as a linear program, but several of our parameters are non-linear. Perceived gain from increasing bandwidth is non-linear, the cost of link utilization is non-linear, and perceived gain from reducing latency is probably non-linear. However, all of these can be approximated arbitrarily close by a piecewise linear function, as illustrated in \todo{Insert example of piecewise linear functions}. This too can be parametrized, as either the number of pieces to divide into or as the maximum deviation from the true allowed.
+In any case, this raises some other issues that has to be handled. The objective function has to be linear to be solved as a linear program, but several of our parameters are non-linear. Perceived gain from increasing bandwidth is non-linear, the cost of link utilization is non-linear, and perceived gain from reducing latency is probably non-linear. However, all of these can be approximated arbitrarily close by a piecewise linear function, as illustrated in \autoref{fig:bitrate-quality}. This too can be parametrized, as either the number of pieces to divide into or as the maximum deviation from the true allowed.
 
 These different cases will be discussed in the following paragraphs, before we arrive at our final objective function.
 
@@ -82,17 +82,23 @@ Increasing the bitrate of video is subject to diminishing returns, increasing th
             axis x line=bottom,
         ]
 
-        \addplot+[domain=0:51, mark=none]{6*ln(x)};
+        \addplot+[domain=0:51, mark=none, smooth]{6*ln(x)};
+        \addplot+[color=red, mark=x] coordinates {
+            (2.1,4.45)
+            (18,17.34)
+            (34,21.16)
+            (50,23.47)
+        };
         \end{axis}
     \end{tikzpicture}
 
-    \caption{The logarithmic relationship between bitrate and quality in the x264 project}
+    \caption{The logarithmic relationship between bitrate and quality in the x264 project (blue), and a linear approximation (red) with three pieces}
     \label{fig:bitrate-quality}
 \end{figure}
 
 With a linear gain from increased bandwidth, bumping traffic from a given node from 4Mbps to 5Mbps would yield the same return as bumping another node from 1Mbps to 2Mbps, and thus the algorithm would be unlikely to find a fair allocation of bandwidth. Encoding diminishing returns into the objective function ensures that everyone will be allocated a fair share, and still allows nodes with excess bandwidth to grow further than more constrained nodes.
 
-To illustrate how we model this, imagine that instead of node splitting like we did above, we're doing \emph{edge splitting}, replacing a single edge connecting to two nodes with a set of edges, which can have different capacities and costs. This results in a linear approximation like we saw in MISSING\_FIG\_FROM\_ABOVE\todo{Insert link to actual fig when added}.
+To illustrate how we model this, imagine that instead of node splitting like we did above, we're doing \emph{edge splitting}, replacing a single edge connecting to two nodes with a set of edges, which can have different capacities and costs. This results in a linear approximation like we saw in \autoref{fig:bitrate-quality}.
 
 
 \section{Link Utilization}
