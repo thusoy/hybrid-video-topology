@@ -79,9 +79,6 @@ Increasing the bitrate of video is subject to diminishing returns, increasing th
             xmin=0,
             ymin=0,
             x axis line style={->},
-            ticks=none,
-            major x tick style = {opacity=1},
-            minor tick length=0pt,
             axis x line=bottom,
         ]
 
@@ -106,7 +103,7 @@ Assuming that the weighting between the segments follows the queuing delay formu
 
 \todo{Insert partitioning-algo here}
 
-Based on this formula, we can formulate the cost multiplier of a link as $1 + k/(\mu - \lambda)$, where $k$ is a customizable parameter for how heavily link saturation should be punished. In our experiments, $k=10$ seems appropriate. This cost function can be seen in \autoref{fig:utility-latency}. We then partition this function into a small set of piecewise linear intervals, which we can model as parallel edges between two nodes, with different capacities and costs. Keeping this set small limits the number of variables in the resulting matrix, and thus keeps processing times reasonably low.
+Based on this formula, we can formulate the cost multiplier of a link as $1 + k/(\mu - \lambda)$, where $k$ is a customizable parameter for how heavily link saturation should be punished. In our experiments, $k=10$ seems appropriate. We then partition this function into a small set of piecewise linear intervals, which we can model as parallel edges between two nodes, with different capacities and costs. Keeping this set small limits the number of variables in the resulting matrix, and thus keeps processing times reasonably low.
 
 \begin{figure}
     \centering
@@ -141,10 +138,7 @@ Based on this formula, we can formulate the cost multiplier of a link as $1 + k/
 
 Using this partitioning as a guide, we can map any number of slots on a physical link into a set of edges $E$ in our graph where $|E| <= 4$.
 
-
-
-
-\subsection{Alternative model}\label{sec:alternative-model}
+\section{Alternative model}\label{sec:alternative-model}
 
 One alternative way to model the problem, is to skip the node splitting step of the previous model, and instead connect nodes directly, but stay below bandwidth by adding constraints for the total sum going out from each node. Which model to choose is -- as in every engineering matter -- a question of priorities. The first model is a bit harder to comprehend initially, but results in fewer total edges than the latter model does when $n>3$, as can be seen in \autoref{fig:model-scaling}. Edge counts do not matter that much when $n$ is low as finding a solution will occur in trivial time anyway, but the difference might be substantial when n is larger. \todo{If performance ends up being an issue for larger graphs, add a note here about more research being needed into optimizing performance, as alternative models might be an avenue to explore for achieving that.}
 
@@ -177,7 +171,6 @@ One alternative way to model the problem, is to skip the node splitting step of 
 
         \addplot+[domain=2:15, mark=none, color=red]{x*(x-1) + 2*x*4};
         \addlegendentry{$n(n-1) + 2en, e=4$ }
-        \label{fig:utility-latency}
         \end{axis}
     \end{tikzpicture}
     \caption{How the number of edges in the graph scales for different modeling techniques. Blue graph is the alternative model, red is the suggested one}
