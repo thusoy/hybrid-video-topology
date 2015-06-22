@@ -365,6 +365,8 @@ def get_exit_path_from_proxy(variables, origin, incoming_paths, commodity):
     path = []
     # Check for cycle
     for incoming_path in incoming_paths:
+        if incoming_path == origin:
+            continue
         # Do we send to that node as well as receive -> cycle.
         if any(edge.varValue for edge in
             variables[origin][incoming_path][commodity]):
