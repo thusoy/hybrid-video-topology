@@ -8,7 +8,11 @@ The JavaScript was injected into Chrome using ``Custom JavaScript for websites''
 
 The client-side script is very compact and carries negligible overhead on page load. Minified and gzipped it weighs in at 1.3kB, with no external dependencies.
 
-\todo{Write a bit about tradeoffs between selecting values to keep client side vs stability vs network efficiency}
+Since the returned data from the \texttt{getStats} API differs between browsers, it has to be cleaned up before it can be presented for analysis. This could be done either on the client side, or on the server side. I'd argue that this is most sensibly done on the server side, since if keeps the client-side script lighter, prevents it from having to incorporate changes as the browsers change, and reduces the likelihood of crashes. If parsing is done here, the script will have to know about every change done by every browser, which will make it huge and failure-prone when the browser change what they return. If the script submits the user agent string with the results, the server can collect them all, and when new data appears, it can add handlers for that, and build up support for ever more user agents in the backend.
+
+However, there's a balance to be found. The \texttt{getStats} API is very verbose, returning lots of data of connection candidates and key pairs and lots of data that is generally not that interesting for analytics. To reduce impact on bandwidth, it's of interest to the client to not have to submit a lot of junk that will be discarded by the backend anyway. Thus the script used here tries to find the middle way; it detects the interesting parts (audio in/out, video in/out and current connection details) and discards the rest, sending the interesting parts off to the server without any further parsing of the contents.
+
+Support for Firefox is only half-way there, reports are fetched from the API but the aforementioned detection of report types is not compatible with Firefox. Extending the script to support this should be easy.
 
 \inputminted[
     linenos,
