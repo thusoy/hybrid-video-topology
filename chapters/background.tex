@@ -13,7 +13,7 @@ In any case, the hard part of the problem is video conferencing, as the demands 
 
 The dynamic routing scheme proposed in this thesis is largely independent of underlying technology, but is intended to be built on top of \gls{webrtc}. The requirements to implement the suggested solution is that the platform allows clients to establish connections with a given starting bitrate (which WebRTC allows through modifying the SDP offer), and that streams can be routed arbitrarily. As connections have to be established in an ad-hoc way out-of-band in WebRTC, as long as the parties involved all share session keys, this should also be feasible.
 
-\todo{Write about the different WebRTC implementations?}
+There are practically three different implementations of the WebRTC specification today; \texttt{libjingle}, which powers Chrome and Opera; Mozilla's, which is tightly coupled with Firefox; and OpenWebRTC, a mobile-first framework for native apps, started by Ericsson Research. There's also WebRTC Microstack\footnote{\url{http://opentools.homeip.net/webrtc}}, but they are data-channel only, which means they don't support the audio/video APIs. There's also been some interest in a pure JavaScript implementation to ease development of WebRTC-aware server-side applications\footnote{\url{https://github.com/webrtcftw/goals/issues/1}}, but that project doesn't seem to have had much activity since late 2014.
 
 
 \section{A Technical Look at Video Conferencing}
