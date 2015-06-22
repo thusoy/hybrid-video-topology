@@ -18,14 +18,15 @@ The dynamic routing scheme proposed in this thesis is largely independent of und
 
 \section{A Technical Look at Video Conferencing}
 
-\subsection{Hardware}
+\subsection{Encoding}
 
-\todo{Write about what hardware performs encoding. CPU for VP8, hardware-accel for H264, GPU potential, custom machinery (ala cisco)}
+The naïve approach to encoding video is to encode the raw stream from the web camera into several client-optimized streams for transmission. However, H.264 can be encoded in a \gls{svc} manner, which layers several different streams with different bandwidths into a single stream. A node receiving a \gls{svc} stream can extract layers with the bitrate desired, without re-encoding the entire stream. With VP8 this is sadly not possible, and the only alternative is to utilize a \gls{sfu}, a technique where several streams are sent to the same endpoint, which can then select which of the streams to forward to the different endpoints. This is not as efficient as sending only a single stream however, and the encoding step is costlier in terms of CPU-time.
 
+Google has entered a collaboration with Vidyo \cite{vp9-vidyo} to bring \gls{svc} to VP9, which might bring free-to-use \gls{svc} to WebRTC. While both Firefox and Google support decoding VP9 today \cite{vp9-support}, encoding is not yet an option for either.
 
-\subsection{CPU limitations}
+One of the big issues regarding video codecs is the ongoing war between H.26x and VPx, which boils down to licensing issues. VPx is royalty-free for anyone to use and implement, and has thus gained lots of support in the free software community. H.26x is protected by patents, and products shipped with H.26x support needs to aquire a license, which motivated the browsers to start pursuing a free\footnote{As in speech} option which became the WebM project that develops VPx.
 
-The naïve approach to encoding video is to encode the raw stream from the web camera into several client-optimized streams for transmission. However, H.264 can be encoded in a \gls{svc} manner, which makes it possible to extract different bandwidth-streams from a single stream. With VP8 this is sadly not possible, and the only alternative is to utilize a \gls{sfu}, a technique where several streams are sent to the same endpoint, which can then select which of the streams to forward to the different endpoints. This is not as efficient as sending only a single stream however, and the encoding step is also costlier on the CPU.
+Both H.26x and VPx can be hardware-accelerated, and is deployed in several products on the market. Most deployed solutions are decode only, but some, like the Nvidia Tegra 4, also supports encoding \cite{nvidia-hw-encode}. The WebM project maintains open designs for hardware encoders and decoders for VPx.
 
 
 \subsection{Continuous Presence vs. VAS}
