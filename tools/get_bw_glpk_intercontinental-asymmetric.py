@@ -228,13 +228,28 @@ def initialize_variables(number_of_edges):
                 cat=LpInteger))
     return variables
 
+def parse_bandwidth_into_slots(bandwidth):
+    slot_size = 512000
+    bandwidth = bandwidth.strip('bit')
+    unit = bandwidth[-1]
+    multipliers = {
+        'G': 10**9,
+        'M': 10**6,
+        'k': 10**3,
+    }
+    multiplier = multipliers[unit]
+    return int(bandwidth[:-1])*multiplier/slot_size
+
+
 def add_bandwidth_conservation(variables):
     # Stay below bandwidth (capacities)
     for node in nodes():
-        downlink_capacity = int(case['nodes'][node]['downlink'].strip('Mbit'))
+        downlink_raw = case['nodes'][node]['downlink']
+        downlink_capacity = parse_bandwidth_into_slots(downlink_raw)
         add_constraint(sum(sum(variables[node+'proxy'][node][commodity]) for
             commodity in commodities()) <= downlink_capacity)
-        uplink_capacity = int(case['nodes'][node]['uplink'].strip('Mbit'))
+        uplink_raw = case['nodes'][node]['uplink']
+        uplink_capacity = parse_bandwidth_into_slots(uplink_raw)
         add_constraint(sum(sum(variables[node][node+'proxy'][commodity]) for
             commodity in commodities()) <= uplink_capacity)
 
@@ -442,8 +457,10 @@ def print_solution(variables):
 
 def print_bandwidth_usage(variables):
     for node in nodes():
-        downlink_capacity = int(case['nodes'][node]['downlink'].strip('Mbit'))
-        uplink_capacity = int(case['nodes'][node]['uplink'].strip('Mbit'))
+        downlink_raw = case['nodes'][node]['downlink']
+        downlink_capacity = parse_bandwidth_into_slots(downlink_raw)
+        uplink_raw = case['nodes'][node]['uplink']
+        uplink_capacity = parse_bandwidth_into_slots(uplink_raw)
         proxy = node + 'proxy'
         downlink_used = sum(sum(edge.varValue for edge in
             variables[proxy][node][commodity]) for commodity in commodities())
