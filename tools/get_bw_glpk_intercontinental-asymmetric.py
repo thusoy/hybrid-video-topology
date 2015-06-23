@@ -7,6 +7,7 @@ import argparse
 import logging
 import os
 import sys
+import time
 import yaml
 
 logger = logging.getLogger('hytop')
@@ -492,9 +493,9 @@ def solve_case(args, number_of_edges):
     for constraint in constraints:
         prob += constraint
 
-
+    starttime = time.time()
     res = GLPK(echo_proc=args.verbose).solve(prob)
-
+    endtime = time.time()
 
     for commodity in commodities():
         print 'K%d: %s -> %s' % (commodity, commodity.sender,
@@ -514,6 +515,7 @@ def solve_case(args, number_of_edges):
         print_bandwidth_usage(variables)
 
         print "Score =", value(prob.objective)
+        print 'Found solution in %.3fs' % (endtime - starttime)
 
 
 if __name__ == '__main__':
