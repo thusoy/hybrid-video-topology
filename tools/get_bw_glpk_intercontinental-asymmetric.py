@@ -56,7 +56,7 @@ def main():
     solve_case(args, number_of_edges=args.edges)
 
 
-def edges(include_self=False):
+def all_edges(include_self=False):
     for node in nodes():
         for other_node in nodes():
             if other_node != node or include_self:
@@ -79,7 +79,7 @@ def get_edges(number_of_slots, number_of_edges=4):
         utilization += utilization_step*slots
         edges.append(Edge(slots, utilization, cost(utilization)))
     utilized_slots = sum(edge.slots for edge in edges)
-    edges.append((number_of_slots - utilized_slots, 1, cost(1)))
+    edges.append(Edge(number_of_slots - utilized_slots, 1, cost(1)))
     edges = [edge for edge in edges if edge.slots]
     return edges
 
@@ -195,16 +195,19 @@ def get_objective(variables, number_of_edges):
     for node, other_node in node_pairs():
         commodity = commodity_from_nodes(node, other_node)
         other_proxy = other_node + 'proxy'
-        for edge in range(number_of_edges):
+        edges = get_edges(number_of_edges)
+        for edge_number, edge in enumerate(edges):
             # Add bandwidth-gains to objective
             device_class = case['nodes'][other_node]['class']
             gain = device_gain[device_class]
-            edge_var = variables[other_proxy][other_node][commodity][edge]
-            objective += 10 * gain * edge_var
+            edge_var = variables[other_proxy][other_node][commodity][edge_number]
+            gainconst = 1
+            objective += gainconst * gain * edge_var
+            objective -= edge.cost * edge_var
             # TODO: Subtract incoming flow to the source node from objective?
 
 
-    for commodity, (node, other_node) in product(commodities(), edges()):
+    for commodity, (node, other_node) in product(commodities(), all_edges()):
         # Subtract edge cost from objective
         edge_latency = get_edge_latency(node, other_node)
         for edge in variables[node][other_node][commodity]:
@@ -216,7 +219,7 @@ def get_objective(variables, number_of_edges):
 def initialize_variables(number_of_edges):
     variables = defaultdict(lambda: defaultdict(list))
     # Initialize all edge variables
-    for (node, other_node), commodity in product(edges(), commodities()):
+    for (node, other_node), commodity in product(all_edges(), commodities()):
         bandwidth_limited = ('proxy' in node and node[0] == other_node) or (
             'proxy' in other_node and other_node[0] == node)
         parallell_edges = number_of_edges if bandwidth_limited else 1
@@ -516,6 +519,39 @@ def solve_case(args, number_of_edges):
 
         print "Score =", value(prob.objective)
         print 'Found solution in %.3fs' % (endtime - starttime)
+
+
+import unittest
+class VideoSolverTestCase(unittest.TestCase):
+
+    def test_get_exit_path_from_node_with_cycle(self):
+        graph = {
+            'Aext': {
+                'Bext': [1]
+            },
+            'Bext': {
+                'B': [1],
+                'Cext': [1]
+            },
+            'B': {
+                'Bext': [1],
+            },
+            'Cext': {}
+        }
+        expected_path = ['Cext', 'Bext', 'B', 'Bext', 'Aext']
+        commodity = 0
+        path = get_exit_path_from_proxy(graph, 'Bext', ['Aext', 'B'], commodity)
+        self.assertEqual(path, expected_path)
+
+
+    def test_bandwidth_parsing(self):
+        test_values = {
+            '10Mbit': 10000000,
+            '3kbit': 3000,
+            '14Gbit': 14000000000,
+        }
+        for bw, expected in test_values.items():
+            self.assertEqual(parse_bandwidth_into_slots(bw), expected)
 
 
 if __name__ == '__main__':
