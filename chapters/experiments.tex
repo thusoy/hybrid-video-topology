@@ -80,9 +80,9 @@ It's a bit sad to see that all of the values are casted to strings in Chrome. Th
 
 \subsection{Constraining Nodes}
 
-To configure the cluster according to the different test cases, we utilized the Linux traffic control utility \texttt{tc}, which is capable of rate-limiting incoming and outgoing traffic, as well as delaying traffic destined for certain hosts. A small script was developed to act as a glue layer between a representation of a network and \texttt{tc}, making configuration repeatable and easily parametrized. The script is included in \autoref{chp:apply-case}.
+To configure the cluster according to the different test cases, we utilized the Linux traffic control utility \texttt{tc}, which is capable of rate-limiting incoming and outgoing traffic, as well as delaying traffic destined for certain hosts. A small script was developed to act as a glue layer between a representation of a network and \texttt{tc}, making configuration repeatable and easily parametrized. The script is included in \autoref{chp:apply-case}. The test cases from \autoref{chp:test-cases} was serialized into \gls{yaml}, and the same case definitions could then be used by both the script configuring the nodes, and for the sample solution provided in \autoref{chp:suggested-solution}.
 
-Thus, applying a given test case is completely independent of the actual network utilized in the test cluster, keeping all intelligence on the nodes themselves. This removed the need for expensive routers or having to customize the application code, thus making the method application agnostic and applicable to any peer-to-peer solution, not just appear.in.
+Applying a given test case is thus completely independent of the actual network utilized in the test cluster, keeping all intelligence on the nodes themselves. This removed the need for expensive routers or having to customize the application code, thus making the method application agnostic and applicable to any peer-to-peer solution, not just appear.in.
 
 
 \subsection{Automated Testing?}\label{subsec:automated-testing}
