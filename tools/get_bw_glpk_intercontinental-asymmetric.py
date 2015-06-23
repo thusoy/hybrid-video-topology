@@ -349,7 +349,7 @@ def find_next_path_hops_and_commodity(variables, origin, destination,
     if len(incoming_paths) == 2:
         # There's a cycle (we go through another node), add the cycle and
         # the actual exit to the path
-        return get_exit_path_from_proxy(variables, destination,
+        return get_exit_path_from_proxy(variables, origin,
             incoming_paths, commodity), commodity
     elif len(incoming_paths) == 1:
         return incoming_paths, commodity
@@ -458,7 +458,6 @@ def solve_case(args, number_of_edges):
     variables = initialize_variables(number_of_edges)
 
     # TODO: Subtract repeater/re-encoder costs
-    # TODO: Subtract CPU costs
 
     constraints = get_constraints(variables)
 
