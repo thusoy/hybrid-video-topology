@@ -140,7 +140,7 @@ We can formulate the cost multiplier of a link as $1 + k/(\mu - \lambda)$, where
     \end{tabular}
 \end{center}
 
-Using this partitioning as a guide, we can map any number of slots on a physical link into a set of edges $E$ in our graph where $|E| <= 4$.
+To avoid having extra constraints to keep flowing video above a certain minimal treshold, we can replace link capacity with link \emph{slots}. A slot is the size of a minimal unit of video, like 512kbps. This means that we only need to ensure at least one slot us used between each pair, instead of enforcing more finegrained constraints. Using the partitioning in \autoref{tab:utilization-to-cost} as a guide, we can map any number of slots on a physical link into a set of edges $E$ in our graph where $|E| <= 4$. It would have been possible to instead of having a fixed set of parallel edges, just divide the each into the number of slots
 
 As there's now two different edge splits on the edge between a node's internal and external parts, we have to insert a temporary node between them to separate the two edge sets.
 
