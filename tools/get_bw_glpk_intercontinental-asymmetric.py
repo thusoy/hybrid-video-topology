@@ -42,11 +42,12 @@ def main():
         action='store_true', default=False)
     parser.add_argument('-d', '--debug', help='Print debug information',
         action='store_true', default=False)
-    parser.add_argument('-s', '--slot-size', help='Set slot size to this size',
-        default='512kbps')
+    parser.add_argument('-s', '--slot-size', default='512kbps',
+        help='Set slot size to this size')
     parser.add_argument('-e', '--edges', default=4, type=int,
         help='How many parallell edges to add between each pair of nodes')
-    parser.add_argument('-c', '--case', choices=cases.keys(), default='traveller')
+    parser.add_argument('-c', '--case', choices=cases.keys(),
+        default='traveller')
     args = parser.parse_args()
     log_level = logging.INFO if args.verbose else logging.WARNING
     logging.basicConfig(level=log_level, stream=sys.stdout)
@@ -163,7 +164,8 @@ def debug():
     return _debug_vars[-1] - _debug_vars[-2]
 
 def dump_nonzero_variables(prob):
-    print '\n'.join('%s = %s' % (v.name, v.varValue) for v in prob.variables() if v.varValue)
+    print '\n'.join('%s = %s' % (v.name, v.varValue) for v in prob.variables()
+        if v.varValue)
 
 
 def get_edge_latency(node, other_node):
@@ -382,24 +384,29 @@ def get_exit_path_from_proxy(variables, origin, incoming_paths, commodity):
             break
     return path
 
+
 def find_mangled_commodity(variables, repeater, sender):
     all_node_commodities = [c for c in commodities() if c.sender == sender]
     for c in all_node_commodities:
         for sending_node, variable in variables.iteritems():
-            if repeater in variable and any(edge.varValue for edge in variable[repeater][c]):
+            if repeater in variable and any(edge.varValue for edge in \
+                                            variable[repeater][c]):
                 return c
     raise ValueError('Mangled commodity not found.')
+
 
 def find_path(variables, origin, destination, commodity):
     path = []
     last_node_found = origin
     while last_node_found != destination:
-        sending_nodes = find_nodes_who_sends_commodity(variables, last_node_found, commodity)
+        sending_nodes = find_nodes_who_sends_commodity(variables,
+            last_node_found, commodity)
         if sending_nodes:
             last_node_found = sending_nodes[0]
         else:
             raise ValueError('No path found after repeater change, '
-                'path: %s, origin: %s, dest: %s, c: %s' % (path, origin, destination, commodity))
+                'path: %s, origin: %s, dest: %s, c: %s' % (path, origin,
+                destination, commodity))
         path.append(last_node_found)
     return path
 

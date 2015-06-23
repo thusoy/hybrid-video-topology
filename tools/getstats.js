@@ -4,45 +4,56 @@ github.com/muaz-khan/getStats, MIT license)
 */
 
 (function () {
+    function preprocessGoogleGetStats(reports, keysToSkip, callback) {
+        var result = {
+            audio: {},
+            video: {},
+            timestamp: new Date().getTime(),
+        };
+
+        for (var i = 0; i < reports.length; i++) {
+            var report = reports[i],
+                isIncomingAudio = report.audioOutputLevel !== undefined,
+                isOutgoingAudio = report.audioInputLevel !== undefined,
+                isIncomingVideo = report.googFrameRateReceived !== undefined,
+                isOutgoingVideo = report.googFrameRateSent !== undefined,
+                // TODO: googActiveConnection is only true between two
+                // Chrome browsers, find a better way.
+                isConnectionInUse = report.type == 'googCandidatePair' &&
+                    report.googActiveConnection == 'true',
+                isBandwidthEstimation = report.type == 'VideoBwe';
+
+            if (isIncomingAudio) {
+                result.audio.incoming = parseReport(report,
+                    'audio.incoming.', keysToSkip);
+            } else if (isOutgoingAudio) {
+                result.audio.outgoing = parseReport(report,
+                    'audio.outgoing.', keysToSkip);
+            } else if (isIncomingVideo) {
+                result.video.incoming = parseReport(report,
+                    'video.incoming.', keysToSkip);
+            } else if (isOutgoingVideo) {
+                result.video.outgoing = parseReport(report,
+                    'video.outgoing.', keysToSkip);
+            } else if (isBandwidthEstimation) {
+                result.video.bandwidth = parseReport(report,
+                    'video.bandwidth.', keysToSkip);
+            } else if (isConnectionInUse) {
+                result.connection = parseConnectionReport(report);
+            }
+        }
+
+        if (result.connection !== undefined) {
+            callback(result);
+        } else {
+            console.log("Failed to find active connection, try again...");
+            console.log(reports);
+        }
+    }
+
     function getPrivateStats(peer, callback, keysToSkip) {
         _getStats(peer, function (reports) {
-            var result = {
-                audio: {},
-                video: {},
-                timestamp: new Date().getTime(),
-            };
-
-            for (var i = 0; i < reports.length; i++) {
-                var report = reports[i],
-                    isIncomingAudio = report.audioOutputLevel !== undefined,
-                    isOutgoingAudio = report.audioInputLevel !== undefined,
-                    isIncomingVideo = report.googFrameRateReceived !== undefined,
-                    isOutgoingVideo = report.googFrameRateSent !== undefined,
-                    isConnectionInUse = report.type == 'googCandidatePair' && report.googActiveConnection == 'true',
-                    isBandwidthEstimation = report.type == 'VideoBwe';
-
-                if (isIncomingAudio) {
-                    result.audio.incoming = parseReport(report, 'audio.incoming.', keysToSkip);
-                } else if (isOutgoingAudio) {
-                    result.audio.outgoing = parseReport(report, 'audio.outgoing.', keysToSkip);
-                } else if (isIncomingVideo) {
-                    result.video.incoming = parseReport(report, 'video.incoming.', keysToSkip);
-                } else if (isOutgoingVideo) {
-                    result.video.outgoing = parseReport(report, 'video.outgoing.', keysToSkip);
-                } else if (isBandwidthEstimation) {
-                    result.video.bandwidth = parseReport(report, 'video.bandwidth.', keysToSkip);
-                } else if (isConnectionInUse) {
-                    // report.googActiveConnection means either STUN or TURN is used.
-                    result.connection = parseConnectionReport(report);
-                }
-            }
-
-            if (result.connection !== undefined) {
-                callback(result);
-            } else {
-                console.log("Failed to find active connection, try again...");
-                console.log(reports);
-            }
+            preprocessGoogleGetStats(reports, keysToSkip, callback);
         });
     }
 
@@ -138,7 +149,8 @@ github.com/muaz-khan/getStats, MIT license)
         }
         if (config.error) {
             xhr.onerror = function (xhrStatusEvent) {
-                config.error(xhr, 'Non-HTTP failure. Could be connection related, CORS, etc');
+                config.error(xhr, 'Non-HTTP failure. Could be connection ' +
+                    'related, CORS, etc. Check console for details.');
             };
         }
         xhr.open(method, url);
@@ -161,9 +173,10 @@ github.com/muaz-khan/getStats, MIT license)
     }
 
     function createReportAggregator() {
-        // Bundles all reports from the same time into a list that's shipped of
-        // to the collector at the same time. Uses a list of remotes currently
-        // collected, and ships of when the same remote appears again.
+        // Bundles all reports from the same time into a list that's shipped
+        // of to the collector at the same time. Uses a list of remotes
+        // currently collected, and ships off when the same remote appears
+        // again.
         var remoteIps = [];
         var currentReports = [];
 
