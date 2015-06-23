@@ -10,9 +10,9 @@ Our experiments were run in browser-homogenuous environements; all browsers in a
 These sort of cross-browser tests could also provide tremendous value to the browser implementors if they could be run in an automatic way (like discussed in \autoref{subsec:automated-testing}). When tweaking the implementations, the implementors would be able to run a sanity check towards other browsers and itself in a set of test cases, immediately seeing how the changes affect the performance in different test cases.
 
 
-\section{Implementation}
+\section{Implementation and Deployment}
 
-\todo[inline]{Write about what's necessary to deploy this solution}
+Implementing a script demonstrating how the routing works was harder than expected, and not all desired features could be implemented. As every edge in the flow network is a variable, and since they all will contribute with either cost or gain, you need to keep track of them somehow. The sample script did this
 
 It must be noted, our custom algorithm will not be unjustly favored since it can access the additional forwarding nodes. Google Hangouts and Skype both utilize similar nodes, but their architecture and inner working is hidden from us due to the proprietary nature of these products, and thus they can not be modelled accurately. Only pure peer-to-peer WebRTC products like appear.in and Firefox Hello rely only on the client nodes, but they're both free to add any helpers themselves.
 
@@ -28,12 +28,16 @@ While tricky, I do assume that efficient ways of gathering this information can 
 
 \section{Who's the Boss}
 
-\todo[inline]{Write about who runs the LP solver}
+In theory, any node in the conversation could model the problem and solve it to derive where its video should be routed and at what quantity. However, no node can do this without full knowledge of the flow network, which requires everyone to share data with everyone. You'd also need to make sure that everyone in the conversation agrees about the numbers the node came up with, which is hard in a distributed scenario. Since most solutions will be require some central provider to find contacts, it's natural to assume that the service provider can be the negotiator. As the intended application is for WebRTC deployments, this keeps the client light and allows the LP-solver to run where there's most compute capacity available.
+
+This is not a hard requirement however, WebRTC has no dependency on centralization to work. The only thing WebRTC requires is an external channel to communicate session establishment. Practically all WebRTC-based video conferencing deployments do this over HTTP towards a central server provided by the service, but WebRTC could also be utilized without any providers, if the communicating parties publish connection info over external channels, like Twitter or mail. The proposed solution could work in such a scenario, perhaps by letting the node with the most compute capacity solve the LP-problem. Such distributed schemes have not been the focus for this thesis, but is an interesting avenue for further reasearch.
 
 
 \section{NAT-traversal}
 
-\todo[inline]{Write about the feasability of the solution in the face of NATs}
+The presence of \gls{nat} makes connection estalishment harder than necessary, as nodes are behind a NAT are not aware of their external IP address and port. The \gls{ICE} framework providers two protocols that can be implemented to alleviate parts of the problem; \gls{stun} and \gls{turn}.
+
+Getting rid of \glspl{nat} would not get rid of the problem though, if WebRTC is the target platform. JavaScript does not have any APIs for binding to ports, only for outgoing connection establishment. Thus there's no way for a node to announce the port it's accepting connections to, before it has established a connection outward. The same mitigation applies though, if a STUN server is available to reflect the remote port, the port can be communicated to the other parties and communication can be established.
 
 
 \section{Limits}
