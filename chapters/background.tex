@@ -73,15 +73,14 @@ Let's take a more detailed look at these services.
 
 appear.in is a free peer-to-peer service built on WebRTC that does not require sign-ups or installation of add-ons to your browser. Due to the WebRTC requirement the service is available to anyone using a recent version of either Google Chrome, Mozilla Firefox or Opera, while the OS-provided browsers (Internet Explorer and Safari) have notably not implemented WebRTC yet.\footnote{Browser support for WebRTC can be tracked at \url{http://iswebrtcreadyyet.com/}}
 
-\todo[inline]{Write a bit more about appear.in architecture: linear scaling, contionus presence, ease of testing due to no signups, limit of 8 people}
+appear.in is the only solution studied in this thesis that allow anonymous communication. The combination of continuous presence and a peer-to-peer topology makes the device and network requirements scale linearly with the number of people in a conversation. The service is limited to maximum 8 people in a conversation.
 
 
 \subsection{Google Hangouts}
 
-Google Hangouts is alongside appear.in the only other service based in the browser. Hangouts is a merge of several earlier Google communication solutions like Google Talk, Google+ Messenger and the Hangouts feature from Google+. The service uses a Vidyo-provided \gls{sfu}, and VP8/9 over WebRTC as video transport\todo{Find a source to verify this}. A conversation is limited to 10 people.
-\todo{Add ref to either https://www.youtube.com/watch?v=GBAEG_RuqeE&list=PLOU2XLYxmsILM4q-aaVpYgRM5XTCnQuVt&index=9 or https://webrtchacks.com/hangout-analysis-philipp-hancke/}
+Google Hangouts is alongside appear.in the only other service covered in this thesis based in the browser. Hangouts is a merge of several earlier Google communication solutions like Google Talk, Google+ Messenger and the Hangouts feature from Google+. The service uses a Vidyo-provided \gls{sfu}, and VP8/9 over WebRTC in a non-standard configuration on Chrome \cite{hangouts-webrtc}, and requires a plugin on other browsers \cite{google-hangouts-support}. A conversation is limited to 10 people.
 
-Hangouts requires you to setup a public Google+ profile, which makes the barrier of entry higher than for most of the other services tested in this thesis. It also requires installing the Hangouts extension for video conferencing to work.
+Hangouts requires you to setup a public Google+ profile, which makes the barrier of entry higher than for most of the other services tested in this thesis. Hangouts is free to use, but room capacity can be increased to 15 people in the paid Google Apps for Work version.
 
 
 \subsection{Skype}
