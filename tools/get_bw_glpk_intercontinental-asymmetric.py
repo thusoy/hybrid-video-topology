@@ -4,6 +4,7 @@ from pdb import set_trace as trace
 from pulp import (LpMinimize, LpMaximize, LpProblem, LpVariable, LpInteger,
     LpSenses, GLPK, value)
 import argparse
+import io
 import logging
 import os
 import sys
@@ -201,9 +202,9 @@ def get_objective(variables, number_of_edges):
             device_class = case['nodes'][other_node]['class']
             gain = device_gain[device_class]
             edge_var = variables[other_proxy][other_node][commodity][edge_number]
-            gainconst = 1
+            gainconst = 10
             objective += gainconst * gain * edge_var
-            objective -= edge.cost * edge_var
+            # objective -= edge.cost * edge_var
             # TODO: Subtract incoming flow to the source node from objective?
 
 
@@ -233,7 +234,7 @@ def initialize_variables(number_of_edges):
     return variables
 
 def parse_bandwidth_into_slots(bandwidth):
-    slot_size = 512000
+    slot_size = 400000
     bandwidth = bandwidth.strip('bit')
     unit = bandwidth[-1]
     multipliers = {
@@ -476,6 +477,7 @@ def print_bandwidth_usage(variables):
             uplink_percentage)
 
 def solve_case(args, number_of_edges):
+    global_start_time = time.time()
     variables = initialize_variables(number_of_edges)
 
     # TODO: Subtract repeater/re-encoder costs
@@ -497,8 +499,13 @@ def solve_case(args, number_of_edges):
         prob += constraint
 
     starttime = time.time()
-    res = GLPK(echo_proc=args.verbose).solve(prob)
+    pipe = io.StringIO()
+    res = GLPK(pipe=pipe).solve(prob)
     endtime = time.time()
+
+    output = pipe.getvalue()
+    memstart = output.find('Memory used')
+
 
     for commodity in commodities():
         print 'K%d: %s -> %s' % (commodity, commodity.sender,
@@ -519,6 +526,13 @@ def solve_case(args, number_of_edges):
 
         print "Score =", value(prob.objective)
         print 'Found solution in %.3fs' % (endtime - starttime)
+        with open('results.csv', 'a') as fh:
+            memory_segment = ''.join(output[memstart:memstart+20])
+            memory_used = float(memory_segment.split()[2])*10**6
+            solve_time = endtime - starttime
+            build_time = starttime - global_start_time
+            retrace_time = time.time() - endtime
+            fh.write('%.3f,%.3f,%.3f,%d' % (solve_time, build_time, retrace_time, memory_used) + '\n')
 
 
 import unittest
