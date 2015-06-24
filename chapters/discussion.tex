@@ -33,14 +33,13 @@ In theory, any node in the conversation could model the problem and solve it to 
 This is not a hard requirement however, WebRTC has no dependency on centralization to work. The only thing WebRTC requires is an external channel to communicate session establishment. Practically all WebRTC-based video conferencing deployments do this over HTTP towards a central server provided by the service, but WebRTC could also be utilized without any providers, if the communicating parties publish connection info over external channels, like Twitter or mail. The proposed solution could work in such a scenario, perhaps by letting the node with the most compute capacity solve the LP-problem. Such distributed schemes have not been the focus for this thesis, but is an interesting avenue for further reasearch.
 
 
-\section{NAT-traversal}
+\section{Limitations}
 
-The presence of \gls{nat} makes connection estalishment harder than necessary, as nodes are behind a NAT are not aware of their external IP address and port. The \gls{ICE} framework providers two protocols that can be implemented to alleviate parts of the problem; \gls{stun} and \gls{turn}.
+Scalability.
 
-Getting rid of \glspl{nat} would not get rid of the problem though, if WebRTC is the target platform. JavaScript does not have any APIs for binding to ports, only for outgoing connection establishment. Thus there's no way for a node to announce the port it's accepting connections to, before it has established a connection outward. The same mitigation applies though, if a STUN server is available to reflect the remote port, the port can be communicated to the other parties and communication can be established.
+As long as conversations are modelled as flow networks, any device or network characteristic that can be included in such a model and described as a linear function or approximation can be used to define the objective function. Our goal of maximum bandwidth at minimum latency could also have been minimum latency at minimum server costs, or minimal CPU usage at maximum bandwidth. Any combination is possible.
 
-
-\section{Limits}
+Do we need LP?
 
 \todo[inline]{Find upper limits for performance of the solution. How big networks?}
 
