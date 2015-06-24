@@ -1,0 +1,212 @@
+traveller:
+Memory used: 0.2 Mb 
+Solving time: 0.013s
+Build time: 0.028s
+Time retracing paths: 0.001s
+Memory used: 0.2 Mb 
+Solving time: 0.013s
+Build time: 0.027s
+Time retracing paths: 0.002s
+Memory used: 0.2 Mb 
+Solving time: 0.009s
+Build time: 0.026s
+Time retracing paths: 0.001s
+Memory used: 0.2 Mb 
+Solving time: 0.013s
+Build time: 0.026s
+Time retracing paths: 0.002s
+Memory used: 0.2 Mb 
+Solving time: 0.013s
+Build time: 0.026s
+Time retracing paths: 0.001s
+Memory used: 0.2 Mb 
+Solving time: 0.012s
+Build time: 0.026s
+Time retracing paths: 0.001s
+Memory used: 0.2 Mb 
+Solving time: 0.013s
+Build time: 0.026s
+Time retracing paths: 0.001s
+Memory used: 0.2 Mb 
+Solving time: 0.015s
+Build time: 0.026s
+Time retracing paths: 0.003s
+Memory used: 0.2 Mb 
+Solving time: 0.013s
+Build time: 0.027s
+Time retracing paths: 0.001s
+Memory used: 0.2 Mb 
+Solving time: 0.013s
+Build time: 0.026s
+Time retracing paths: 0.001s
+
+
+standup:
+Memory used: 0.5 Mb 
+Solving time: 0.028s
+Build time: 0.077s
+Time retracing paths: 0.006s
+Memory used: 0.5 Mb 
+Solving time: 0.032s
+Build time: 0.077s
+Time retracing paths: 0.004s
+Memory used: 0.5 Mb 
+Solving time: 0.029s
+Build time: 0.075s
+Time retracing paths: 0.006s
+Memory used: 0.5 Mb 
+Solving time: 0.029s
+Build time: 0.076s
+Time retracing paths: 0.005s
+Memory used: 0.5 Mb 
+Solving time: 0.027s
+Build time: 0.077s
+Time retracing paths: 0.006s
+Memory used: 0.5 Mb 
+Solving time: 0.031s
+Build time: 0.084s
+Time retracing paths: 0.005s
+Memory used: 0.5 Mb 
+Solving time: 0.027s
+Build time: 0.077s
+Time retracing paths: 0.006s
+Memory used: 0.5 Mb 
+Solving time: 0.033s
+Build time: 0.075s
+Time retracing paths: 0.006s
+Memory used: 0.5 Mb 
+Solving time: 0.032s
+Build time: 0.078s
+Time retracing paths: 0.004s
+Memory used: 0.5 Mb 
+Solving time: 0.033s
+Build time: 0.077s
+Time retracing paths: 0.005s
+
+friends
+Memory used: 3.5 Mb 
+Solving time: 0.156s
+Build time: 0.659s
+Time retracing paths: 0.016s
+Memory used: 3.5 Mb 
+Solving time: 0.161s
+Build time: 0.690s
+Time retracing paths: 0.016s
+Memory used: 3.5 Mb 
+Solving time: 0.158s
+Build time: 0.676s
+Time retracing paths: 0.016s
+Memory used: 3.5 Mb 
+Solving time: 0.156s
+Build time: 0.679s
+Time retracing paths: 0.016s
+Memory used: 3.5 Mb 
+Solving time: 0.156s
+Build time: 0.666s
+Time retracing paths: 0.016s
+Memory used: 3.5 Mb 
+Solving time: 0.165s
+Build time: 0.682s
+Time retracing paths: 0.016s
+Memory used: 3.5 Mb 
+Solving time: 0.162s
+Build time: 0.664s
+Time retracing paths: 0.016s
+Memory used: 3.5 Mb 
+Solving time: 0.162s
+Build time: 0.677s
+Time retracing paths: 0.016s
+Memory used: 3.5 Mb 
+Solving time: 0.158s
+Build time: 0.672s
+Time retracing paths: 0.016s
+Memory used: 3.5 Mb 
+Solving time: 0.162s
+Build time: 0.668s
+Time retracing paths: 0.017s
+
+
+
+friends,8
+Memory used: 5.6 Mb 
+Solving time: 0.264s
+Build time: 1.162s
+Time retracing paths: 0.029s
+Memory used: 5.6 Mb 
+Solving time: 0.261s
+Build time: 1.158s
+Time retracing paths: 0.027s
+Memory used: 5.6 Mb 
+Solving time: 0.258s
+Build time: 1.139s
+Time retracing paths: 0.027s
+Memory used: 5.6 Mb 
+Solving time: 0.261s
+Build time: 1.149s
+Time retracing paths: 0.028s
+Memory used: 5.6 Mb 
+Solving time: 0.259s
+Build time: 1.146s
+Time retracing paths: 0.029s
+Memory used: 5.6 Mb 
+Solving time: 0.260s
+Build time: 1.143s
+Time retracing paths: 0.029s
+Memory used: 5.6 Mb 
+Solving time: 0.265s
+Build time: 1.177s
+Time retracing paths: 0.028s
+Memory used: 5.6 Mb 
+Solving time: 0.263s
+Build time: 1.141s
+Time retracing paths: 0.028s
+Memory used: 5.6 Mb 
+Solving time: 0.262s
+Build time: 1.160s
+Time retracing paths: 0.027s
+Memory used: 5.6 Mb 
+Solving time: 0.256s
+Build time: 1.156s
+Time retracing paths: 0.028s
+
+friends,9
+Memory used: 8.5 Mb 
+Solving time: 0.410s
+Build time: 1.866s
+Time retracing paths: 0.044s
+Memory used: 8.5 Mb 
+Solving time: 0.413s
+Build time: 1.877s
+Time retracing paths: 0.043s
+Memory used: 8.5 Mb 
+Solving time: 0.404s
+Build time: 1.869s
+Time retracing paths: 0.043s
+Memory used: 8.5 Mb 
+Solving time: 0.399s
+Build time: 1.855s
+Time retracing paths: 0.043s
+Memory used: 8.5 Mb 
+Solving time: 0.406s
+Build time: 1.885s
+Time retracing paths: 0.043s
+Memory used: 8.5 Mb 
+Solving time: 0.401s
+Build time: 1.899s
+Time retracing paths: 0.044s
+Memory used: 8.5 Mb 
+Solving time: 0.410s
+Build time: 1.898s
+Time retracing paths: 0.044s
+Memory used: 8.5 Mb 
+Solving time: 0.417s
+Build time: 1.868s
+Time retracing paths: 0.045s
+Memory used: 8.5 Mb 
+Solving time: 0.406s
+Build time: 1.903s
+Time retracing paths: 0.043s
+Memory used: 8.5 Mb 
+Solving time: 0.401s
+Build time: 1.856s
+Time retracing paths: 0.044s
