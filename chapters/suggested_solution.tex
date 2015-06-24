@@ -224,14 +224,17 @@ However, in contrast to repeaters, transcoders have to access the contents of th
 
 \section{Implementation}\label{sec:implementation}
 
-\todo[inline]{Write about how the implementation was done}
+The sample implementation is in Python and uses GLPK for solving the created linear program. The script makes to attempt to optimize the creation of the linear program, and since it's written quite modular it will as a consequence iterate over every single edge dozens of times. Thus, the creation of the linear program is often more expensive than the actual solving of said program. While it's true that there will always be a cost of creating the linear program, since both the $O(n^4)$ objective function has to be created along with $O(n^4)$ constraints, the $n$ is usually small enough not to make the total running time unmanageable. If the approach is to be used in situations where $n$ can be large, more research is needed into optimizing this step.
+
+The provided implementation does not fully implement everything discussed here, as time was limited. The script is capable of finding optimal routes for the objective as specified in reasonable time, but does not implement any approximation of the non-linear functions. Thus there's no punishment for maximizing network links, which means all nodes end up with 100\% utilization of their uplink, as long as someone has the capacity to receive. The script supports adding repeaters to the mix, routing video through them for nodes that are otherwise incapable of receiving video.
+
+The script is a bit brittle in terms of adjusting parameters -- trying to tune bandwidth gain will in many cases crash it, and is thus \emph{not} recommended for any sort of production purposes.
 
 
 \section{Results}\label{sec:results}
 
+How does the approach scale with the size of the conversation? Our objective function is $O(n^4)$, the same for the number of constraints. Worst-case running time of simplex, the algortihm that powers many LP-solvers, is exponential, but is polynomial in the average case. So how do our cases fare?
+
 \todo[inline]{Provide the results from running the script on the test cases}
 
-
-\section{Tuning}
-
-\todo[inline]{How can the algorithm be tuned, and how was the parameters chosen? (don't say random, don't say random, don't say random...)}
+While the included script is not feature-complete, it does create test cases close to the correct size, which we can use to give some inclination to expected running time, and how it scales.
