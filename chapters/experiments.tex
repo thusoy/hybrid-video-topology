@@ -12,7 +12,7 @@ Since the test covers two different browsers which do not share a common API (mo
 \begin{figure}
     \centering
     \includegraphics[width=.7\textwidth]{example-screenshot}
-    \caption{An example screenshot from a test run on node A. The nodes are, from top left and clockwise, A, C, B and D. We can see from the difference between the local timestamp and A's own video stream that there's about 75ms of processing time in the browser before the image is sent (if we round A up to the almost visible 50.021 timestamp), and that the latencies from the other nodes are 31ms, 93ms and 93ms for B, C, and D, respectively.}
+    \caption{An example screenshot from a test run on node A. The nodes are, from top left and clockwise, A, C, B and D. We can see from the difference between the local timestamp and A's own video stream that there's about 75 ms of processing time in the browser before the image is sent (if we round A up to the almost visible 50.021 timestamp), and that the latencies from the other nodes are 31 ms, 93 ms and 93 ms for B, C, and D, respectively.}
     \label{fig:example-screenshot}
 \end{figure}
 
@@ -27,7 +27,7 @@ At the start of the test, the nodes join the conversation in alphabetical order 
 
 When all nodes have established bi-directional connections, the conversation was left running for a minute, before sampling started. This was done to allow some time to reach a stable state.
 
-For Firefox, where the interpretation of the results is a very tedious and laboursome process, samples were taken every $\approx$12s\footnote{A bit variable, as it's 10s + the delay for taking and storing the screenshot}. The last six samples for each node was interpreted and stored, yielding a total sample time of $\approx$80s. On Chrome, were there's no interpretation step, samples were submitted every second, and the sample time was two minutes, yielding 120 samples for each node.
+For Firefox, where the interpretation of the results is a very tedious and laboursome process, samples were taken every $\approx$12 s\footnote{A bit variable, as it's 10 s + the delay for taking and storing the screenshot}. The last six samples for each node was interpreted and stored, yielding a total sample time of $\approx$80 s. On Chrome, were there's no interpretation step, samples were submitted every second, and the sample time was two minutes, yielding 120 samples for each node.
 
 For all test cases the test was first run without any traffic shaping applied, so that the actual test results could be seen in comparison to results without any network limitations.
 
@@ -94,14 +94,14 @@ Chrome runs regular interoperability tests with Firefox\footnote{Google blogged 
 
 \subsection{Caveats}
 
-The Firefox method is accurate in the sense that latencies observed are the actual end-to-end latencies that users would observe, but the precision of the timing values observed is not on the millisecond level we'd prefer. This is due to a number of factors, most notably the refresh rate of the screen running the timer and the framerate of the video, limiting the precision to $1s/60\approx17ms$ and $1s/30\approx33ms$ respectively. However, we can surpass this precision by averaging several samples taken during the test run, which is why we take several screenshots for each test case, once every 10s for at least a minute. The standard deviation of the measurements is reported in the graphs included later in this chapter, which should give some indication towards how accurate the average is.
+The Firefox method is accurate in the sense that latencies observed are the actual end-to-end latencies that users would observe, but the precision of the timing values observed is not on the millisecond level we'd prefer. This is due to a number of factors, most notably the refresh rate of the screen running the timer and the frame rate of the video, limiting the precision to $1 s/60\approx17 ms$ and $1 s/30\approx33 ms$ respectively. However, we can surpass this precision by averaging several samples taken during the test run, which is why we take several screenshots for each test case, once every 10 s for at least a minute. The standard deviation of the measurements is reported in the graphs included later in this chapter, which should give some indication towards how accurate the average is.
 
 Taking several samples to improve accuracy leads us to another weakness, which is the manual interpretation of the screenshots. Due to the frequency-related issues discussed above, many of the images include timestamps that are blurred, as the camera captured two underlying screen updates in the same frame, as shown in \autoref{fig:blurred-capture}.
 
 \begin{figure}
     \centering
     \includegraphics[width=.7\textwidth]{blurred-capture}
-    \caption{A screenshot where a node has sent two overlaying timestamps. In this case interpreted as 10.106, which is reasonable as it's close to the expected 33ms increase from the previous 10.075.}
+    \caption{A screenshot where a node has sent two overlaying timestamps. In this case interpreted as 10.106, which is reasonable as it's close to the expected 33 ms increase from the previous 10.075.}
     \label{fig:blurred-capture}
 \end{figure}
 
@@ -109,7 +109,7 @@ In general for these cases, the recorded timestamp was consistently interpreted 
 
 Even assuming that the timestamps are comprehensible and fairly accurate, there's still a possibility of human error when lots of numbers has to be recorded in this way. To minimize the risk of any mistyped numbers making it into the dataset, any number outside 1.5 standard deviations of the mean (a range which should include 87\% of the numbers observed) was verified once more. There's still a chance of smaller errors making it into the dataset, but we assume that these are small enough and distributed evenly among the nodes to not significantly influence any conclusions drawn.
 
-As not enough cameras of any single model was available for the experiments, two different models\footnote{HP Webcam HD-4110 and Tandberg (now Cisco) PrecisionHD} had to be used. These had slightly different performance characteristics; the cameras were put side by side with a timer and showed a mean difference of 39.6ms, but with a relatively large standard deviation of 19.5ms. As the same restrictions on screen refresh rates as discussed above, pretty much all the samples were at a 30ms or 60ms interval of each other.\footnote{Out of 20 samples, 1 was 0ms, 13 were 30ms, 5 were 60ms, and 1 was 90ms. Which really means in the range of that frame, that is in the range of 0--29ms difference, 30--60ms difference, and so on.} As the difference was assumed to be normally distributed, the mean was simply added to all measurements from the slower camera model to compensate.
+As not enough cameras of any single model was available for the experiments, two different models\footnote{HP Webcam HD-4110 and Tandberg (now Cisco) PrecisionHD} had to be used. These had slightly different performance characteristics; the cameras were put side by side with a timer and showed a mean difference of 39.6 ms, but with a relatively large standard deviation of 19.5 ms. As the same restrictions on screen refresh rates as discussed above, pretty much all the samples were at a 30 ms or 60 ms interval of each other.\footnote{Out of 20 samples, 1 was 0 ms, 13 were 30 ms, 5 were 60 ms, and 1 was 90 ms. Which really means in the range of that frame, that is in the range of 0--29 ms difference, 30--60 ms difference, and so on.} As the difference was assumed to be normally distributed, the mean was simply added to all measurements from the slower camera model to compensate.
 
 For measuring bandwidth utilization between nodes, our method of using \texttt{tcpdump} is not entirely satisfactory, as there's no way to report actual \emph{consumed} bandwidth by the application. This is because the traffic control features of the Linux kernel lies above \texttt{libpcap}, the library that performs packet capture for \texttt{tcpdump} in the network stack. Effectively this means that any incoming bandwidth reported by \texttt{libpcap} will be before the rate limiting performed by \texttt{tc}. Thus, \texttt{tcpdump} cannot report the actual bandwidth consumed by application, only what was received by the network interface. Nonetheless, the bandwidth \emph{sent} by each node is what was actually sent by the application, but there's no guarantee that the receiver was capable of consuming it all. This is good enough for us though, as we can aggregate the data sent by all nodes to determine how saturated a given node's network link is.
 
@@ -133,7 +133,7 @@ As there will be a lot of graphs in this chapter, a good understanding of how to
 
 For each node on the x-axis, if it's a latency chart the node's happier the more of the latencies are low. If it's a bitrate chart, the node's happier the more of the bars are high.
 
-Before we embark on the test cases, we put our two sampling methods up against each other, to see whether the results are comparable. For each of the conversation sizes, 3, 4, and 7, the results were equal across the board for both browsers. Both had a consistent stable bandwidth at slightly less than 2.1Mbps, and latencies below 200ms (Chrome slightly less). The results are included in \autoref{no-shaping-comp}.
+Before we embark on the test cases, we put our two sampling methods up against each other, to see whether the results are comparable. For each of the conversation sizes, 3, 4, and 7, the results were equal across the board for both browsers. Both had a consistent stable bandwidth at slightly less than 2.1 Mbps, and latencies below 200 ms (Chrome slightly less). The results are included in \autoref{no-shaping-comp}.
 
 \todo[inline]{[minor] If time, define custom color set for graphing, based possibly either on solarized or http://clrs.cc/}
 

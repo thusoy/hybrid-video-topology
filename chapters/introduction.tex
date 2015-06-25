@@ -69,14 +69,14 @@ Before trying to solve the problem we'll first evaluate the current video confer
 
 \section{Contribution}
 
-This thesis proposes an approac to modelling video conferences with known inter-node latencies and bandwidths as a flow network, and shows how an efficient routing for video can be derived from the model using linear programming. The method also demonstrates how performance can get a significant boost by adding extra nodes to the flow network acting as repeaters and transcoders, bridging the performance gap between traditional \gls{mcu}-backed solutions and peer-to-peer solutions.
+This thesis proposes an approach to modelling video conferences with known inter-node latencies and bandwidths as a flow network, and shows how an efficient routing for video can be derived from the model using linear programming. The method also demonstrates how performance can get a significant boost by adding extra nodes to the flow network acting as repeaters and transcoders, bridging the performance gap between traditional \gls{mcu}-backed solutions and peer-to-peer solutions.
 
 I also benchmark the two most popular web browsers as of the time of writing, Google Chrome and Mozilla Firefox, in a set of test cases, and reveal severe flaws in how Firefox handles constrained nodes. Both browsers are shown to have lots of potential for increased performance. These tests were run with tools developed for this purpose, which are included in the appendices.
 
 
 \section{Notation and Terminology}
 
-Bandwidth will often be written like this: 10/5. That should be read as 10Mbit download and 5Mbit upload, unless another unit is specified.
+Bandwidth will often be written like this: 10/5. That should be read as 10 Mbps download and 5 Mbps upload, unless another unit is specified.
 
 A video conference will often be called a conversation in this thesis. The term ``video conferencing'' carries a lot of luggage from its early history, when the technology was cumbersome, expensive, and only applicable in business scenarios. The movement WebRTC represents is about the opposite, commoditizing the technology to make it cheap and accessible to everyone, allowing it to enter the private domain. Friends don't ``confer'' between themselves; they converse. Names say a lot about a technology's intended application, thus if we want the technology to enter the private domain we need a name for it that does not convey business usage. Hence the term used in this thesis: video conversations. The even less formal ``video chat'' could also have fit the bill, but that feels like it leaves the business side entirely in the dark; conversation feels like a good middle ground that is applicable to both sides.
 
