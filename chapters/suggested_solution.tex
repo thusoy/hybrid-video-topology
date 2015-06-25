@@ -235,8 +235,52 @@ The script is a bit brittle in terms of adjusting parameters -- trying to tune b
 
 \section{Results}\label{sec:results}
 
-How does the approach scale with the size of the conversation? Our objective function is $O(n^4)$, the same for the number of constraints. Worst-case running time of simplex, the algortihm that powers many LP-solvers, is exponential, but is polynomial in the average case. So how do our cases fare?
+How does the approach scale with the size of the conversation? Our objective function is $O(n^4)$, the same for the number of constraints. Worst-case running time of simplex, the algorithm that powers many LP-solvers, is exponential, but is polynomial in the average case. So how do our cases fare?
 
-\todo[inline]{Provide the results from running the script on the test cases}
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.48\textwidth}
+        \begin{tikzpicture}
+            \begin{axis}[
+                xlabel=n,
+                ybar stacked,
+                ylabel=Execution time (s),
+                xmin=2,
+                xmax=10,
+                ymin=0,
+                width=\textwidth,
+                x axis line style={->},
+                axis x line=bottom,
+                legend style={at={(.05,0.70)}, anchor=north west,legend columns=1},
+                ]
+                \input{tmp/script-runtimes}
+            \end{axis}
+        \end{tikzpicture}
+        \subcaption{Execution times}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.48\textwidth}
+        \begin{tikzpicture}
+            \begin{axis}[
+                ybar,
+                xlabel=n,
+                width=\textwidth,
+                ylabel=Memory usage (MB),
+                xmin=2,
+                xmax=10,
+                ymin=0,
+                x axis line style={->},
+                axis x line=bottom,
+                ]
+                \input{tmp/script-runtimes-mem}
+            \end{axis}
+        \end{tikzpicture}
+        \subcaption{Memory usage}
+    \end{subfigure}
+    \caption{Resource consumption for the sample implementation}
+    \label{fig:script-runtimes}
+\end{figure}
 
-The script was run with a minimal video unit of 400kbps, which allows even the weakest node in the friends case (node G, with 4Mbit up) enough slots to stream to all other nodes. While the included script is not feature-complete, it does create test cases close to the correct size, which we can use to give some inclination to expected running time, and how it scales.
+The script was run with a minimal video unit of 400kbps, which allows even the weakest node in the friends case (node G, with 4Mbit up) enough slots to stream to all other nodes. While the included script is not feature-complete, it does create test cases close to the correct size, which we can use to give some inclination to expected running time, and how it scales. The tests for 8 and 9 nodes were run by adding one and two extra nodes to the friends test case.
+
+\todo{Write interpretation of script runtimes}

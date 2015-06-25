@@ -8,7 +8,7 @@ default: latex
 all: render-data latex
 
 
-render-data: latencies bitrates captured-latencies captured-bitrates graphviz inkscape-illustrations utilization
+render-data: latencies bitrates captured-latencies captured-bitrates graphviz inkscape-illustrations utilization script-runtimes
 
 
 latencies:
@@ -44,6 +44,10 @@ utilization:
 
 graphviz:
 	bash -c 'find figs -type f -name "*.dot" | while read path; do target=$$(basename "$$path"); dot -Teps figs/$$target -o "figs/$${target%.*}.eps"; done'
+
+script-runtimes:
+	./tools/latexify_script_runtimes.py > tmp/script-runtimes.tex
+	./tools/latexify_script_runtimes.py mem > tmp/script-runtimes-mem.tex
 
 latex:
 	pdflatex -draftmode --shell-escape $(TEXFILE) && \
