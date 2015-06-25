@@ -208,7 +208,7 @@ Note that since commodities are routed independently in our flow network, it's p
 
 Repeaters are also practical since they're not required to know the contents of the packages it forwards, and thus anyone with spare bandwidth can provide a repeater for anyone to use, without compromising the confidentiality of those conversations.
 
-Deployment wise, repeaters are very similar to \gls{turn}-servers, which are used for \gls{nat}-traversal by relaying all video through a central server \cite{rfc5766}. A repeater could probably re-use much of the \gls{turn}-protocol, the only practical difference being that a repeater is one-to-many, while TURN is one-to-one.\todo{Confirm whether TURN is 1-1 or skip}
+Deployment wise, repeaters are practiaclly the same as \glspl{sfu}, thus adding repeaters to a network should not be a challenging task. The biggest difference between repeaters and SFUs is in who controls the sent data; traditional SFUs handle that themselves, negotiating with each peer which stream it should receive based on it's capabilities. Repeaters would be instructed by either the sending node or the room which streams should be routed where, thus a repeater is a slightly simpler unit.
 
 
 \section{Transcoders}
@@ -220,6 +220,8 @@ Transcoders are more costly to run than repeaters, due to much heavier compute o
 Constraint-wise, a transcoder performs the same commodity mangling as repeaters, but can output commodities of arbitrary bitrates less than or equal to the source commodity.
 
 However, in contrast to repeaters, transcoders have to access the contents of the calls to be able to transcode the signal. This will be the case until a homomorphic cryptosystem is available for video transcoding, which might be in a couple of years or it might be never.
+
+Transcoders are to \glspl{mcu} what repeaters are to \glspl{sfu}; much the same, but slightly simpler.
 
 
 \section{Implementation}\label{sec:implementation}
