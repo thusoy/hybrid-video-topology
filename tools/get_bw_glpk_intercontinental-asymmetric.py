@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Find optimal video routing for a given case.
 

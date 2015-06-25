@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Webserver that appends incoming getStats data to file.
 
