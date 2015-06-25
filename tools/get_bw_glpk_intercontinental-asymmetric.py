@@ -322,8 +322,8 @@ def add_repeater_flow_conservation(variables):
         for commodity in commodities():
             if commodity.sender == node:
                 left_side += variables[proxy][repeater][commodity][0]
-                node_ext = commodity.receiver + 'proxy'
-                right_side.append(variables[repeater][node_ext][commodity][0])
+                receiver_ext = commodity.receiver + 'proxy'
+                right_side.append(variables[repeater][receiver_ext][commodity][0])
 
                 # Never send traffic back to source (hopefully not needed)
                 sender_ext = commodity.sender + 'proxy'
