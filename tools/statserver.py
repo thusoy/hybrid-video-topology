@@ -1,13 +1,19 @@
+"""
+    Webserver that appends incoming getStats data to file.
 
-from flask import Flask, request
+    :copyright: (c) 2015 by Tarjei Husøy
+    :license: MIT, see http://opensource.org/licenses/MIT
+"""
+
+import flask
 import argparse
-import ujson as json
+import json
 
-app = Flask(__name__)
+app = flask.Flask(__name__)
 
 @app.route('/collect', methods=['POST'])
 def collect():
-    data = request.get_json()
+    data = flask.request.get_json()
     if sanity_check_data(data):
         with open(app.config['TARGET'], 'a') as target:
             target.write(request.data + '\n')

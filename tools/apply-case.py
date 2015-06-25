@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+"""
+    Applies network restrictions according to a desired case.
+
+    :copyright: (c) 2015 by Tarjei Husøy
+    :license: MIT, see http://opensource.org/licenses/MIT
+"""
 
 import argparse
 import requests

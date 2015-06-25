@@ -1,3 +1,10 @@
+"""
+    Find optimal video routing for a given case.
+
+    :copyright: (c) 2015 by Tarjei Husøy
+    :license: MIT, see http://opensource.org/licenses/MIT
+"""
+
 from collections import defaultdict, namedtuple
 from itertools import chain, product
 from pdb import set_trace as trace
