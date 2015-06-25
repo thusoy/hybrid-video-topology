@@ -16,7 +16,7 @@ The dynamic routing scheme proposed in this thesis is largely independent of und
 There are practically three different implementations of the WebRTC specification today; \texttt{libjingle}, which powers Chrome and Opera; Mozilla's, which is tightly coupled with Firefox; and OpenWebRTC, a mobile-first framework for native apps, started by Ericsson Research. There's also WebRTC Microstack\footnote{\url{http://opentools.homeip.net/webrtc}}, but they are data-channel only, which means they don't support the audio/video APIs. There's also been some interest in a pure JavaScript implementation to ease development of WebRTC-aware server-side applications\footnote{\url{https://github.com/webrtcftw/goals/issues/1}}, but that project doesn't seem to have had much activity since late 2014.
 
 
-\section{A Technical Look at Video Conferencing}
+\section{A Technical Look at Video Conversations}
 
 \subsection{Encoding}
 
@@ -29,7 +29,7 @@ One of the big issues regarding video codecs is the ongoing war between H.26x an
 Both H.26x and VPx can be hardware-accelerated, and is deployed in several products on the market. Most deployed solutions are decode only, but some, like the Nvidia Tegra 4, also supports encoding \cite{nvidia-hw-encode}. The WebM project maintains open designs for hardware encoders and decoders for VPx.
 
 
-\subsection{Continuous Presence vs. VAS}
+\subsection{Continuous Presence vs. Voice-Activated Switching}
 
 There are mainly two different ways to do video conferencing, Continuous presence and \acrfull{vas}. Continuous presence means that all parties in the conversation is visible to all other parties at the same time. \gls{vas} means that only one party is visible, typically the one detected by the system as talking at any given time. There's also hybrid schemes, sort of how Google Hangouts does it, where there's a VAS, but the user can override locally who should be shown up big.
 
@@ -99,3 +99,12 @@ Skype requires a standalone application to run, which is available on pretty muc
 \subsection{Cisco}
 
 Cisco offers both on-premises, off-premises and hybrid solutions for video conferencing, aimed at the enterprise market. Video is routed through either self-hosted or cloud \glspl{mcu} or \glspl{sfu}, using \gls{sip} and H.323 for call establishment \cite{cisco-arch}. In the case of only two people in a conversation, calls can be established peer-to-peer. H.323 allows interoperability with devices on legacy networks like the \gls{pstn}, such as ISDN videophones, through H.320 gateways. Their core offering is specialized hardware and dedicated rooms for video conferencing (so called immersive video conferences), but they also have a free service that can be run on end-user computers.
+
+
+\section{Related Work}
+
+Networking and algorithms related to networking is not a new topic, by any stretch of the imagination, and like in all most branches of computer science, it's mostly old problems in a new context.
+
+In this thesis we will borrow heavily from previous work on networking and graph algorithms in general, and flow algorithms in particular. Many algorithmic problems can be solved as a linear program, which as a problem was first solved by Fourier in 1827 \cite{sierksma2001linear}. Another solution, the simplex method, was first introduced by G.B. Dantzig in 1947 \cite{sierksma2001linear}, and serves as the basis for the \gls{lp}-solver we'll use for our solution. The topic was introduced to me in \cite{ahuja1988network} by Ahuja, Magnanti and Orlin, which establishes the fundamentals for the flow-problem solution proposed later in this thesis. The simplex method has been widely adopted for its ease of implementation on computers, and years of exponential growth of computer performance has made solving increasingly large problem sets feasible.
+
+A study at Chalmers in 2014 \cite{tree-topology-webrtc} investigated the feasibility of utilizing normal nodes in a video conference as supernodes, routing traffic from less powerful nodes through these nodes to reduce network load. The authors conclude that such a solution is feasible given proper supernode selection, which gives even greater possibilities for a solution utilizing dynamic topologies like presented in this thesis. Pushing as much traffic as possible over client-provided supernodes lowers the cost for the provider, and enables better quality for the users since peers can be closer to each other than to the closest data center. As the study concluded with supernodes being feasible and beneficial, the approach outlined here is developed to be flexible enough to allow nodes to forward video to other nodes.
