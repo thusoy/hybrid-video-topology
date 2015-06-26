@@ -2,12 +2,9 @@
 
 For this thesis, appear.in has been generous enough to lend some insight into their user data. The dataset is quite interesting; take for example the difference between browser popularity for new users and total sessions in \autoref{fig:browsers} -- Chrome has a substantially bigger portion of the latter. I consider it likely that it's driven by Chrome's superior performance to Firefox in the tests performed in \autoref{chp:experiments}, which yields other questions for browser vendors. Are users so fluid in terms of browser choice that they pick whichever is best suited for the task at hand? I suspect that might be the case, but for now possibly only among the early adopters that find and use services like appear.in.
 
-Although, it could also be the other way around -- that users on other browsers are less likely to return given their browser's inability to deliver adequate service. Whichever the actual cause is, browsers with poor WebRTC performance are loosing shares to those who can deliver, and everyone would gain if support was more widespread. This is based on reasoning that Chrome users will also be more satisfied with the experience the better the partner they communicate with supports WebRTC.
+Although, it could also be the other way around -- that users on other browsers are less likely to return given their browser's inability to deliver adequate service. Whichever the actual cause is, browsers with poor WebRTC performance are loosing shares to those who can deliver, and everyone would gain from support being more widespread. This is based on the reasoning that Chrome users will also be more satisfied with the experience if their non-Chrome friends also have a better experience.
 
-
-\section{Browser}
-
-Browser breakdown, by total sessions and new sessions.
+Browser breakdown, by total sessions and new sessions, is given in \autoref{fig:browsers}. An overview of what devices users on appear.in use, is given in \autoref{fig:devices}, and conversation sizes are broken down in \autoref{fig:conversation-sizes}.
 
 \begin{figure}
     \begin{subfigure}{.49\textwidth}
@@ -61,16 +58,11 @@ Browser breakdown, by total sessions and new sessions.
 
             \end{axis}
         \end{tikzpicture}
-        \subcaption{Breakdown of new users on appear.in by, browsers with more than 1\% from mid May to mid June 2015}
+        \subcaption{Breakdown of new users on appear.in, browsers with more than 1\% from mid May to mid June 2015}
     \end{subfigure}
     \caption{New users compared to all sessions on appear.in}
     \label{fig:browsers}
 \end{figure}
-
-
-\section{Devices}
-
-By what device do people visit appear.in?
 
 \begin{figure}
     \centering
@@ -92,9 +84,6 @@ By what device do people visit appear.in?
         \end{axis}
     \end{tikzpicture}
 \end{figure}
-
-
-\section{Conversation Size}
 
 \begin{figure}
     \begin{subfigure}{.48\textwidth}
@@ -136,4 +125,5 @@ By what device do people visit appear.in?
         \subcaption{\#Users in a conversation, log scale}
     \end{subfigure}
     \caption{How many users are present in conversations on appear.in, mid-May to mid-June 2015}
+    \label{fig:conversation-sizes}
 \end{figure}

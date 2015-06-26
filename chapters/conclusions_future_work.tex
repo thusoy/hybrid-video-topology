@@ -3,28 +3,34 @@
 
 \section{Concluding Remarks}\label{sec:conclusions}
 
-Traditional peer-to-peer systems require all nodes in a conversation to have upload and download capacity of at least $(n-1) \times b$, where $n$ is the number of users in a conversation, and $b$ the minimal bitrate of a video stream. This requirement grows linearly with the number of users in a conversation, quickly becoming a limiting factor. Other solutions like Skype and Google Hangouts route all calls through the service provider's data centers, sacrificing latency for an upload requirement of only $b$. The solution presented in this thesis merges the best of these properties, allowing users in a conversations with sufficient resources to route all their calls in a peer-to-peer to manner, while directing only constrained users through data centers, or through other peers with excess resources.
+Traditional peer-to-peer systems require all nodes in a conversation to have upload and download capacity of at least $(n-1) \times b$, where $n$ is the number of users in a conversation, and $b$ the minimal bitrate of a video stream. This requirement grows linearly with the number of users in a conversation, quickly becoming a limiting factor. Other solutions like Skype and Google Hangouts route all calls through the service provider's data centers, sacrificing latency for an upload requirement of only $b$. The approach presented in this thesis merges the best of these properties, allowing users in a conversations with sufficient resources to route all their calls in a peer-to-peer to manner, while directing only constrained users through data centers, or through other peers with excess resources.
 
-In case a node does not have sufficient bandwidth for receiving $(n-1)$ streams of $BW_{min}$, the routing algorithm will fail. In case this happens, a smart system could fall back to a performing \gls{vas} for the most challenged nodes. However, in the case where the node has sufficient bandwidth for receiving \emph{some} streams, but not all, the user could be presented with an interface that allows prioritizing certain nodes for always being present, while the rest share a \gls{vas}-link to the node. Extending the system to accommodate both a VAS node and respecting commodity preferences was considered out of scope for this thesis, but is a topic for further research. If this is accomplished, services like appear.in could cover the entire bandwidth spectrum, as was illustrated in \autoref{fig:service-possibilities}.
+The approach in this thesis can also improve pure peer-to-peer conversations, by finding an optimal routing of video much faster than what browsers do today through trial and error. Providers adapting this work could instrument the browser directly, allow everyone to establish connections with bandwidth adjusted to fit them without a long period to reach steady state.
 
-Further fallback is also possible, in the cases where either upload or download is less than $b$. If this is the case, the user could be prompted to join the conversation as a voice-only participant, enabling the service to smoothly accommodate all devices with bandwidth larger than 30--40 kbps in both directions.
+Current browsers were shown to not handle constrained environments satisfactorily, either failing entirely or taking a very long time to establish decent connections to new nodes. The approach outlined could enable existing service providers to serve markets that are currently incapable of communicating over peer-to-peer services. Centralized providers could adapt the approach to push high-capacity conversations over peer-to-peer, to reduce the need for servers to manage the traffic.
 
 
 \section{Future Work}\label{sec:future_work}
 
-Develop toolkit for more automated test suites, to enable tests to be run more frequently to see the effect of code changes.
-
-Run tests against Hangout and Skype, to see how well they stack up.
+This thesis only presented a light sample implementation of the approach, which does not conclusively demonstrate that the approach is feasible. Some points below are listed that remains before this can be established.
 
 \subsection{Implementation}
 
-The system has not been tested in any actual conversations and is incapable of running any actual conversations in the current state. Developing a full proof of concept and evaluating whether the performance is sufficient for wider deployment is a large task that remains.
+The system has not been tested in any actual video conversations and does not currently employ all the features described in \autoref{chp:suggested-solution} to achieve a fair routing. Implementing the missing features and testing the solution in actual conversations need to be done.
 
 As discussed in \autoref{sec:dynamic-conversations}, conversations are unlikely to be static, and will probably in many cases greatly change topology as the conversation progresses. This is inevitable for conversations with more than two participants, as the system will first solve for a $n=2$ system, and then later have to solve for a $n=3$ system when the next node joins. The system as proposed in this paper is completely oblivious to the state of a conversation, it simply takes in a configuration of nodes, and outputs an efficient routing of commodities. Adapting the system to support either change-sets to an existing topology, maybe prioritizing not interrupting existing connections when new nodes enter a conversation, or just recomputing from scratch, will both require both the room and the nodes to listen to notifications from others about topology changes. Incorporating this into the system in a transparent way for the user remains to be done in future work.
+
+As the approach requires knowledge of
 
 
 \subsection{Other Limiting Factors}
 
-Bandwidth was the only limiting factor we included in our system for this thesis, but there's a ton of other variables that could influence desired topology, such as CPU, battery, screen size, link packet loss, link jitter, and user profiles ("Only do pure peer to peer, confidential call").
+Bandwidth and latency were the only limiting factors we included in the sample implementation, but there's a ton of other variables that could influence desired topology, such as CPU, battery, screen size, link packet loss, link jitter, and user profiles ("Only do pure peer to peer, this is a confidential call").
 
 None of these factors were considered for these first tests of a dynamic topology system, but should be considered for future work. Decisions could be based on data, but allow user overrides, such as prompting the user whether to optimize for performance, which will kill the battery in 10 minutes, or slightly degrade performance by routing video through a repeater/transcoder to reduce local CPU consumption to last another 20 minutes. Or just take the decision and silently notify the user. The degree of user autonomy in these cases are left to implementations to decide.
+
+
+\subsection{Integrate Test Cases With Browsers}
+
+If the entire test suite is made automatic, tests could easily be run by browser vendors to continuously assess how they perform in constrained environments. This also requires that Firefox exposes timing data from the RTCP stream through the \texttt{getStats} API, and preferably that the API gets standardized.
+

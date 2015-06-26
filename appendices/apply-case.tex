@@ -5,7 +5,7 @@ This is the script\footnote{Available online at \url{https://github.com/thusoy/h
 
 Incoming traffic is only restricted in bandwidth, no latencies are being applied.
 
-The script automatically detects from the IP of the host running it which role it should be assigned in the case, which makes it fast and easy to script execution of the script across several machines. This is based on another YAML-file \texttt{rolemap.yml}, which holds a simple mapping from role names to their hostname. This enables the script to use the hostname of the current machine to find the role, and to use DNS to find the IP of the other machines, which is necessary as parameters to \texttt{tc}.
+The script automatically detects from the IP of the host running it which role it should be assigned in the case, which makes it fast and easy to automate execution of the script across several machines. This is based on another YAML-file \texttt{rolemap.yml}, which holds a simple mapping from role names to their hostname. This enables the script to use the hostname of the current machine to find the role, and to use DNS to find the IP of the other machines, which is necessary as parameters to \texttt{tc}.
 
 \inputminted[
     linenos,

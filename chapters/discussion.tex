@@ -19,6 +19,13 @@ Implementing a script demonstrating how the routing works was harder than expect
 Performance did not turn out to be an issue since the data sets in the test cases are quite small. This would also be the case in a production environment, as more than 96\% of conversations on appear.in had 5 or fewer participants\footnote{Full data in \autoref{appear.in-usage}}. Computational overhead is thus largely neglible.
 
 
+\section{VAS Fallback}
+
+In case a node does not have sufficient bandwidth for receiving $(n-1)$ streams of $BW_{min}$, the routing algorithm will fail. In case this happens, a smart system could fall back to a performing \gls{vas} for the most challenged nodes. However, in the case where the node has sufficient bandwidth for receiving \emph{some} streams, but not all, the user could be presented with an interface that allows prioritizing certain nodes for always being present, while the rest share a \gls{vas}-link to the node. If this is accomplished, services like appear.in could cover the entire bandwidth spectrum, as was illustrated in \autoref{fig:service-possibilities}.
+
+Further fallback is also possible, in the cases where either upload or download is less than $b$. If this is the case, the user could be prompted to join the conversation as a voice-only participant, enabling the service to smoothly accommodate all devices with bandwidth larger than 30--40 kbps in both directions. Many services allow the user to opt-in to voice-only, but the service could also detect when video is failing and then automatically switch over, or prompt the user\footnote{Skype already does this}. This step in itself does not require running the full approach, only that the service detects when video fails to deliver the expected \gls{qos}.
+
+
 \section{Finding Network Properties}
 
 The proposed approach is heavily reliant on having a fairly accurate representation of the actual capabilities of the network in a given conversation. Some of the properties we're looking for are relatively easy to establish, like latency between the nodes. If the service yields IP-addresses of all the participants when a new user joins, the user can ping those addresses and determine latency to all of them in hundreds of milliseconds.
@@ -37,17 +44,22 @@ This is not a hard requirement however, WebRTC has no dependency on centralizati
 
 \section{Limitations}
 
-The dynamic routing scheme proposed in this thesis is largely independent of underlying technology, but is intended to be built on top of \gls{webrtc}. The requirements to implement the suggested solution is that the platform allows clients to establish connections with a given bitrate (which WebRTC allows through modifying the SDP offer), and that streams can be routed arbitrarily. As connections have to be established in an ad-hoc way out-of-band in WebRTC, as long as the parties involved all share session keys, this should also be feasible.
-\todo{Write about what is required for deployment: arbitrary routing, client-specified bitrates, nat-traversal, ips of peers, latency/bandwidth discovery. Can webrtc forward video to other nodes?}
+The dynamic routing scheme proposed in this thesis is largely independent of underlying technology, but is intended to be built on top of \gls{webrtc}. The requirements to adopt the proposed approach is as follows:
 
+\begin{itemize}
+    \item Clients can establish connections with a given bitrate
+    \item Clients can reach other directly (ie known IP addresses)
+    \item Clients can route their video through parties not in the conversation
+    \item Clients can forward received video to other nodes
+    \item Clients can discover their own bandwidth
+    \item Clients can discover the latency to each of their peers
+\end{itemize}
 
-Scalability.
+I believe WebRTC fullfills all of these requirements, but I'm not entirely sure if it's easy to forward video from a client. If that's not possible, the approach still works, but nodes cannot be used as supernodes, thus repeaters have to be provided by the service provider if the limits posed by the peer-to-peer topology is to be overcome.
 
 As long as conversations are modelled as flow networks, any device or network characteristic that can be included in such a model and described as a linear function or approximation can be used to define the objective function. Our goal of maximum bandwidth at minimum latency could also have been minimum latency at minimum server costs, or minimal CPU usage at maximum bandwidth. Any combination is possible.
 
-Do we need LP?
-
-\todo[inline]{Find upper limits for performance of the solution. How big networks?}
+The proposed approach requires every element in the flow network to be modelled linearly, but I'm not totally certain if that's a hard requirement. I believe it would be possible to solve the problem also in a non-linear way, possibly using algorithms that do not try to be optimal. For the intended application, high precision of the results should not be necessary, thus it might be possible to simplify the model by skipping the linear approximation step in the modelling, and rather find an algorithm that approximates the solution directly.
 
 
 \section{Privacy}
@@ -56,15 +68,13 @@ For privacy-oriented consumers, the suggested solution opens up an interesting o
 
 For providers, this could be great news. They would not have to provide expensive infrastructure for call routing, and would rather focus on interfaces for finding friends and other complementary features like text chat, file sharing, call history, contact lists, etc.
 
-This would make the market more volatile, as there would be a lower investment barrier to be able provide a full-blown communication infrastructure. New providers with original ideas could quickly blossom, as users traditionally have not shown a lot of loyalty to most communications platforms\footnote{We've seen this several times recently, as users have migrated en masse from SMS to Facebook Messenger to Whatsapp to Snapchat. The only value a user sees in their provider seem to be whether they can reach their friends through them.}. Providing quick-bootable user-controlled server images could be a potential for innovation for companies. It boils down to where the user decides to put their trust, a powerful desktop at home could be used as a relay, or a cloud VPS could provide the same service, granted that you trust the company that provides them -- which does not have to be the same company that provides the room.
-
-This author believes this decentralizes and opens up communication, which is more in line with the Internet spirit than the current walled-garden solutions.
+This would make the market more volatile, as there would be a lower investment barrier to be able provide a full-blown communication infrastructure. New providers with original ideas could quickly blossom, as users traditionally have not shown a lot of loyalty to most communications platforms\footnote{We've seen this several times recently, as users have migrated en masse from SMS to Facebook Messenger to Whatsapp to Snapchat. The only value a user sees in their provider seem to be whether they can reach their friends through them.}. Providing quick-bootable user-controlled server images could be a potential for innovation for companies. It boils down to where the user decides to put their trust, a powerful desktop at home could be used as a relay, or a cloud VPS could provide the same service, granted that you trust the company that provides them -- which does not have to be the same company that provides the main service.
 
 
 \section{Dynamic Conversations}\label{sec:dynamic-conversations}
 
-In our solution, we have so far assumed that most of the properties in the network are static, like nodes, upload/download capacities, latencies, and possibly available CPU, if implemented. In reality however, many of these properties are likely to fluctuate during a conversation, either because the people join and leave conversations, users might be multi-tasking and running other IO-intensive applications on the nodes, or mobile users might have started a conversation over WiFi at home, but started walking to work and thus changed to a cellular connection mid-conversation.
+In our solution, we have so far assumed that most of the properties in the network are static, like the number of nodes, upload/download capacities, latencies, and possibly available CPU, if implemented. In reality however, many of these properties are likely to fluctuate during a conversation, either because the people join and leave conversations, users might be multi-tasking and running other IO-intensive applications on the nodes, or mobile users might have started a conversation over WiFi at home, but started walking to work and thus changed to a cellular connection mid-conversation.
 
-Regularly assessing the state of the conversation should be a natural extension of the system, and should not pose to large of a challenge for implementations. Push-based notifications should also be able to trigger a re-assessment, such as the room notifying of new nodes joining, to avoid any delay for events that everyone in a conversation should react to immediately. As the algorithm underlying most LP solvers, Simplex, is iterative in nature, it might be possible for a solution to a new configuration to start from a previous known good solution, and thus only incorporating the changes to the system to avoid a full re-computation of the topology, but this has not been considered a goal of a system in this first exploration of the idea.
+Regularly assessing the state of the conversation should be a natural extension of the system, and should not pose to large of a challenge for implementations. Push-based notifications should also be able to trigger a re-assessment, such as the provider notifying the peers of new nodes joining, to avoid any delay for events that everyone in a conversation should react to immediately. As the algorithm underlying most LP solvers, simplex, is iterative in nature, it might be possible for a solution to a new configuration to start from a previous known good solution, and thus only incorporating the changes to the system to avoid a full re-computation of the topology, but this has not been considered a goal of a system in this first exploration of the idea.
 
 The biggest challenge is ensuring the transitions between topologies become transparent to the user, but as users are more lenient with lagging video than lagging audio, audio could be duplicated on several topologies before video is switched. This could help audio run smoothly during the transition, while video might take a few moments to catch up.
