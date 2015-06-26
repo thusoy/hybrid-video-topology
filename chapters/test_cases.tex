@@ -23,7 +23,6 @@ We assume that the back-end networks are not saturated, and that each user is ba
     Friends & 7 & Group split in two locations, each subgroup having short latencies internally, but larger latencies to the other group. Heterogeneous bandwidths across the board. \\ \hline
     \end{tabular}
 \end{center}
-\todo{What is n?}
 \todo{Restructure into subsections?}
 
 How realistic are these cases? The appear.in data set in \autoref{chp:appear.in-usage} shows that conversation frequency exponentially decays as a function of conversation size. More than half of the observed conversations are between two people. These conversations were not prioritized for the test cases, as it's easier to make hard test cases with larger conversations. And there's an asymmetry here, browsers that manage to deliver service under hard conditions in larger conversations are likely to ace hard conversations between two people, but the inverse is not necessarily true. No data was found on common inter-node latencies in conversations, thus we have no data to support whether the latencies in the test cases are realistic. If services start monitoring these metrics and combine them with bitrate analysis, they can extract under-performing conversation types based on QoS and add those conversations as future test cases.
