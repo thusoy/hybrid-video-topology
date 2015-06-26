@@ -1,8 +1,8 @@
-\subsection{Test Case ``traveller''}
+\subsection{Test Case ``Traveller''}
 
 A quick recap of the bandwidth limits put on the nodes in the ``traveller'' test case (read X (7/3) as node X having 7 Mbps downlink and 3 Mbps uplink): A (10/5), B (2/1), C (10/8).
 
-\autoref{fig:traveller-bitrate} shows the bitrates flowing between the nodes in the ``traveller'' test case. Remember what was mentioned earlier; the values reported here are only what was received at the node's interface, not what the application was consuming. This is important, as it seems from the bandwidths alone that everyone is doing fairly well in the Firefox case; but look closer. Node B only has a 2 Mbps downlink, but is sent more than 3 Mbps of data. Thus its link is completely saturated, which is again reflected in the latencies in \autoref{fig:traveller-latency}. We can also see that node B is saturating its own uplink as well, which also has a grave impact on the latencies.
+\autoref{fig:traveller-bitrate} shows the bitrates flowing between the nodes in the ``traveller'' test case. Remember what was mentioned earlier; the values reported here are only what was received at the node's interface, not what the application was consuming. This is important, as it seems from the bandwidths alone that everyone is doing fairly well in the Firefox case; but look closer. Node B only has a 2 Mbps downlink, but is sent more than 3 Mbps of data. Thus its link is completely saturated, which is reflected in the latencies in \autoref{fig:traveller-latency}. We can also see that node B is saturating its own uplink as well, which also has a grave impact on the latencies.
 
 Chrome balances this out much better, where A and C communicate unhindered by the constraints of node B (like the Firefox case), but also respect B's constraints and only send what it's capable of receiving. Thus, B's downlink has 43\% utilization, and likewise 66\% for the uplink. The full link utilization data is given in \autoref{tab:utilization-traveller}.
 

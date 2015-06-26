@@ -1,7 +1,7 @@
 \chapter{Suggested solution}
 \label{chp:suggested-solution}
 
-In this chapter we'll walk through how the problem can be modelled and solved using linear programming.
+In this chapter we'll walk through how the problem can be modelled as a multi-commodity flow problem and solved using linear programming.
 
 
 \section{Modelling}
@@ -31,7 +31,7 @@ One other thing we notice from our initial graph compared to traditional flow pr
     \label{fig:node-splitting}
 \end{figure}
 
-As we now have a well-specified way to go from a given conversation to a graph that can be solved by max-flow algorithms, the entire problem can be solved by joining all the different subproblems under the same resource constraints, and solve as a multi-commodity max-flow problem. This class of problems can be solved with \gls{lp} \cite{ahuja1988network}, which can be summarized in canonical form as in \autoref{eq:lp}
+As we now have a well-specified way to go from a given conversation to a graph that can be solved by max-flow algorithms, the entire problem can be solved by joining all the different subproblems under the same resource constraints, and solve as a multi-commodity max-flow problem. This class of problems can be solved with \acrfull{lp} \cite{ahuja1988network}, which can be summarized in canonical form as in \autoref{eq:lp}.
 
 \begin{align}\label{eq:lp}
     \text{maximize}\qquad &\mathbf{c^Tx} \\
@@ -39,35 +39,41 @@ As we now have a well-specified way to go from a given conversation to a graph t
     \text{and}\qquad &\mathbf{x} \geq \mathbf{0} \nonumber
 \end{align}
 
-The vector $\mathbf{x}$ is the variables we're trying to find a solution for, each entry in the vector defines a flow on a given edge in the graph. The vector $\mathbf{c}$ scores each flow to determine the total gain, while the matrix $A$ is the set of constraints put on the system, like staying below bandwidth, flow conversation among non-source and non-sink nodes, and so on.
+The vector $\mathbf{x}$ is the variables we're trying to find a solution for, each entry in the vector defines a flow on a given edge in the graph for a given commodity. The vector $\mathbf{c}$ scores each flow to determine how much it influences the objective (hereafter known as the \emph{gain}), while the matrix $A$ and the vector $\mathbf{b}$ is the set of constraints put on the system, like staying below bandwidth, flow conversation among non-source and non-sink nodes, and so on.
 
 As \gls{lp} is a well-known and very general technique that's effective to a vast collection of problems, there are lots of LP-solvers freely available\footnote{\url{https://en.wikipedia.org/wiki/Linear_programming\#Solvers_and_scripting_.28programming.29_languages}}. This simplifies building a solution on top of \gls{lp}; if you can model your problem as a linear program, it can be efficiently solved by existing, well-tested code. For our experimental solution we chose a solver somewhat arbitrarily among those which had Python bindings, and picked \gls{glpk}.
 
 
 \section{Maximization}
 
-Thus, our reformulated problem is to \emph{maximize} bandwidth of each commodity at a \emph{minimal} latency. Formulated for each node in a conversation, this becomes our \emph{objective function}. The weighting between the two can be parametrized and left for implementations to decide.
+As our objective is to maximize the QoE, we can formulate our problem as an LP by encoding the QoE as a function of the observed QoS in the system. We defined the QoS as a function of bandwidth and latency,
+
+As was explained in the introduction, our problem is to \emph{maximize} bandwidth of each commodity at a \emph{minimal} latency. Summed for each node in a conversation, this becomes our \emph{objective function}, which is the first line in \autoref{eq:lp}. The weighting between the two can be parametrized and left for implementations to decide.
 
 Given those factors, our problem is solved by finding a solution to the problem in \autoref{eq:objective}, where $x^k$ is a matrix with the amount of commodity $k$ transmitted on each edge, $c(i, j)$ is a cost function for the edge between $i$ and $j$, and $g_i$ is a vector of how much each device has to gain from receiving something. The gain is reflected in the device types, a phone will require less bandwidth to satisfy the user than a desktop computer with a large display will, thus introducing the gain makes sure the system will allocate bandwidth to each device's potential and capability. $s_k$ and $t_k$ is the source and sink for commodity $k$, $d_k$ is the gain. $u_{i, j}$ is the capacity of the link between $i$ and $j$.
 
 \begin{gather}\label{eq:objective}
-    max \sum_{k \in K} (d_{t_k} \sum_{w \in V} log(x_{w, t_k}^k) - \sum_e \frac{1}{(u_e - x_e^k)})\\
+    max \sum_{k \in K} (d_{t_k} \sum_{w \in V} log(x_{w, t_k}^k) - \sum_{e \in E} \frac{1}{(u_e - x_e^k)})\\
     \text{subject to} \nonumber \\
     \sum_{k \in K} \sum_{(i, j) \in E} x_{i, j}^k = 0, \qquad{} i, j \neq s_k, t_k \label{eq:flow-conservation} \\
     \sum_i \sum_j (\sum_{k \in K}x_{i, j}^k) < u_{i, j} \label{eq:bwlim}
 \end{gather}
 
 
-In plain English: For each commodity, maximize the gain of sending that commodity to it's receiver, minus the link cost sending said commodity induces (\autoref{eq:objective}), while all nodes conserve bandwidth except the source and sink for a commodity (\autoref{eq:flow-conservation}) and that no link exceeds its capacity (\autoref{eq:bwlim}). The observant reader will note that we require each sink to receive each commodity, instead of having each source send each commodity. We'll come back to this decision in \autoref{sec:repeaters}
+In plain English: For each commodity, maximize the gain of sending that commodity to its receiver, minus the link cost sending said commodity induces (\autoref{eq:objective}), while all nodes conserve bandwidth except the source and sink for a commodity (\autoref{eq:flow-conservation}) and that no link exceeds its capacity (\autoref{eq:bwlim}). The observant reader will note that we require each sink to \emph{receive} each commodity, instead of having each source \emph{send} each commodity. We'll come back to this decision in \autoref{sec:repeaters}.
 
-In any case, this raises some other issues that has to be handled. The objective function has to be linear to be solved as a linear program, but several of our parameters are non-linear. Perceived gain from increasing bandwidth is non-linear, the cost of link utilization is non-linear, and perceived gain from reducing latency is probably non-linear. However, all of these can be approximated arbitrarily close by a piecewise linear function, as illustrated in \autoref{fig:bitrate-quality}. This too can be parametrized, as either the number of pieces to divide into or as the maximum deviation from the true allowed.
+This raises some other issues that has to be handled. The objective function has to be linear to be solved as a linear program, but several of its parameters are non-linear. Perceived gain from increasing bandwidth is non-linear, the cost of link utilization is non-linear, and perceived gain from reducing latency is probably non-linear, according to the Weber-Fechner law. However, all of these can be approximated arbitrarily close by a piecewise linear function, as illustrated in \autoref{fig:bitrate-quality}. This too can be parametrized, as either the number of pieces to divide into or as the maximum deviation from the true allowed.
 
-These different cases will be discussed in the following paragraphs, before we arrive at our final objective function.
+These different cases will be discussed in the following paragraphs.
 
 
 \section{Perceived Gain From Bandwidth}
 
-Increasing the bitrate of video is subject to diminishing returns, increasing the bitrate from 1 Mbps to 2 Mbps yields a bigger return for the user than going from 4 Mbps to 5 Mbps. x264, the H.264 encoder powering applications like VLC, HandBrake and ffmpeg, uses an exponential scale for the relationship between bitrate and perceived quality\footnote{\url{https://trac.ffmpeg.org/wiki/Encode/H.264\#crf}}, as illustrated in \autoref{fig:bitrate-quality}.
+Increasing the bitrate of video is subject to diminishing returns, increasing the bitrate from 1 Mbps to 2 Mbps yields a bigger return for the user than going from 4 Mbps to 5 Mbps. This follows from the Weber-Fechner law.
+
+If gain from increased bandwidth was linear, increasing traffic from a given node from 4 Mbps to 5 Mbps would yield the same return as bumping another node from 1 Mbps to 2 Mbps, and thus the algorithm would be unlikely to find a fair allocation of bandwidth. Having the bandwidth gain follow a logarithmic function automatically ensures that everyone will be allocated a fair share, and still allows nodes with excess bandwidth to grow further than more constrained nodes.
+
+To illustrate how we model this, imagine that instead of node splitting like we did above, we're doing \emph{edge splitting}, replacing a single edge connecting two nodes with a set of edges, which can have different capacities and costs. Note that we only have to split the edge coming into the node, there's nothing that affects the objective on the outgoing one. This results in a linear approximation of the actual logarithmic function, as illustrated in \autoref{fig:bitrate-quality}.
 
 \begin{figure}
     \centering
@@ -92,20 +98,15 @@ Increasing the bitrate of video is subject to diminishing returns, increasing th
         \end{axis}
     \end{tikzpicture}
 
-    \caption{The logarithmic relationship between bitrate and quality in the x264 project (blue), and a linear approximation (red) with three pieces}
+    \caption{The logarithmic relationship between bitrate and quality (blue), and a three-part linear approximation (red)}
     \label{fig:bitrate-quality}
 \end{figure}
-
-With a linear gain from increased bandwidth, bumping traffic from a given node from 4 Mbps to 5 Mbps would yield the same return as bumping another node from 1 Mbps to 2 Mbps, and thus the algorithm would be unlikely to find a fair allocation of bandwidth. Encoding diminishing returns into the objective function ensures that everyone will be allocated a fair share, and still allows nodes with excess bandwidth to grow further than more constrained nodes.
-
-To illustrate how we model this, imagine that instead of node splitting like we did above, we're doing \emph{edge splitting}, replacing a single edge connecting to two nodes with a set of edges, which can have different capacities and costs. Note that we only have to split the edge coming into the node, there's nothing that affects the objective on the outgoing ones.
-
 
 \section{Link Utilization}
 
 The cost of utilizing a given network link is a function of the link's utilization. We can derive this cost from the queuing delay formula, $1/(1 - \mu/\lambda)$, where $\mu$ is the capacity of the link and $\lambda$ is the offered traffic. As can be seen in \autoref{fig:utility-latency}, this function is not linear, and can thus not be used directly in our objective function. Nonetheless, we can achieve the same goal -- punishing over-utilization of individual links -- by approximating the function with a piecewise linear function. Conceptually, we can approach this in the same way as for bandwidth gains by splitting the edges into the node. Thus a 8 Mbps link might be divided into four links of 2 Mbps, with exponentially increasing costs.
 
-Assuming that the weighting between the segments follows the queuing delay formula given above, the ratio between the extra punishment for using the last 10\% of a link and the gain from increasing bandwidth by those extra 10\% can be tuned by implementations. This ratio would basically be a measure of how heavily to hit the network to gain maximum quality. To avoid excessive packet loss, link utilization should probably not exceed 90\%, which can also be achieved by under-reporting the actual bandwidth to the algorithm. What the effects of that would be, compared to increasing the ratio towards more heavily punishing excessive link utilization, is unknown and requires more study to say anything conclusive about.
+Assuming that the weighting between the segments follows the queuing delay formula given above, the ratio between the extra punishment for using the last 10\% of a link and the gain from increasing bandwidth by those extra 10\% can be tuned by implementations. This ratio would basically be a measure of how heavily to hit the network to gain maximum quality. To avoid excessive packet loss, link utilization should probably not exceed 90\%, which can also be achieved by under-reporting the actual bandwidth to the algorithm. What the effects of that would be, compared to increasing the ratio towards more heavily punishing excessive link utilization, is unknown and requires more research to say anything conclusive about.
 
 We can formulate the cost multiplier of a link as $1 + k/(\mu - \lambda)$, where $k$ is a customizable parameter for how heavily link saturation should be punished. In our experiments, $k=10$ seems appropriate. We then partition this function into a small set of piecewise linear intervals, which we can model as parallel edges between two nodes, with different capacities and costs. Keeping this set small limits the number of variables in the resulting matrix, and thus keeps processing times reasonably low.
 
@@ -140,16 +141,16 @@ We can formulate the cost multiplier of a link as $1 + k/(\mu - \lambda)$, where
     \end{tabular}
 \end{center}
 
-To avoid having extra constraints to keep flowing video above a certain minimal threshold, we can replace link capacity with link \emph{slots}. A slot is the size of a minimal unit of video, like 512 kbps. This means that we only need to ensure at least one slot us used between each pair, instead of enforcing more fine-grained constraints. Using the partitioning in \autoref{tab:utilization-to-cost} as a guide, we can map any number of slots on a physical link into a set of edges $E$ in our graph where $|E| <= 4$. It would have been possible to instead of having a fixed set of parallel edges, just divide the each into the number of slots
+To avoid having extra constraints to keep flowing video above a certain minimal threshold, we can replace link capacity with link \emph{slots}. A slot is the size of a minimal unit of video, like 512 kbps. This means that we only need to ensure at least one slot is used between each pair, instead of enforcing more fine-grained constraints. Using the partitioning in \autoref{tab:utilization-to-cost} as a guide, we can map any number of slots on a physical link into a set of edges $E$ in our graph where $|E| <= 4$. The number of edges to split into determines how close the approximation is, at a cost of more variables in the objective. This can be tuned by implementations.
 
 As there's now two different edge splits on the edge between a node's internal and external parts, we have to insert a temporary node between them to separate the two edge sets.
 
-Thus, after doing the linear approximations a single node in our flow network ends up like depicted in \autoref{fig:double-edge-split}.
+Thus, after doing the linear approximations for both edge cost and bandwidth gains, a single node in our flow network ends up like depicted in \autoref{fig:double-edge-split}.
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{double-edge-split}
-    \caption{A (20/5) node after two rounds of edge splitting. g is the gain from the bandwidth over an edge, c is the cost.}
+    \caption{An example (20/5) node after two rounds of edge splitting. g is the gain from the bandwidth over an edge, c is the cost. How best to split the edges is up to implementations.}
     \label{fig:double-edge-split}
 \end{figure}
 
@@ -196,19 +197,19 @@ One alternative way to model the problem, is to skip the node splitting step of 
 
 \section{Repeaters}\label{sec:repeaters}
 
-This is all well and good, but solving our problem as we've posed it so far will only yield us something very close to what browsers figure out by trial and failure today. However, where today's solutions are topology-bound, we can go beyond those limitations, and use our established technique on slightly modified flow networks.
+This is all well and good, if we solve the maximization problem given earlier we will arrive at an optimal routing of video in any graph. Using this, a browser could immediately establish flows of sustainable bitrate for everyone in the conversation, without the slow creep to steady state that is the case today. However, where today's solutions are topology-bound, we can go beyond those limitations, and use our established technique on slightly modified flow networks.
 
-One thing we note with pure peer-to-peer topologies, is that required bandwidth in and out grows linearly with $n$, which quickly saturates constrained nodes. Going pure peer-to-peer is most often optimal in terms of latency, but if the necessary bandwidth is not available, we want to have the option to fall back to relaying some -- but not necessarily all -- nodes some unconstrained repeater. This repeater could be provided by the service provider in a data center somewhere, or could be one of the other nodes in the conversation with excess bandwidth available\footnote{These are the nodes Skype referred to as ``supernodes''}. We have assumed that repeaters are provided in data centers for now, but the constraints can easily be adapted to accommodate nodes as repeaters in a conversation.
+One thing we note with pure peer-to-peer topologies, is that required bandwidth in and out grows linearly with $n$, which quickly saturates constrained nodes. Going pure peer-to-peer is most often optimal in terms of latency, but if the necessary bandwidth is not available, we want to have the option to fall back to relaying some -- but not necessarily all -- nodes via some unconstrained repeater. This repeater could be provided by the service provider in a data center somewhere, or could be one of the other nodes in the conversation with excess bandwidth available\footnote{These are the nodes Skype referred to as ``supernodes'', see \cite{tree-topology-webrtc} for a study of supernodes in WebRTC.}. We have assumed that repeaters are provided in data centers for now, but the constraints can easily be adapted to accommodate nodes as repeaters in a conversation.
 
-Formulating the constraints get a bit weird for repeaters, as they \emph{do not} conserve either bandwidth or commodities. We say that repeaters can \emph{mangle} commodities, which means it can receive the commodity $k$ sent from node A to node B, and can send it as commodity $k$ to B, but it can also send it as commodity $m$ to node C, assuming $m$ is the commodity sent by node A to node C. This is less awkward if the alternative model suggested in \autoref{sec:alternative-model} is implemented, but there was only time to implement one model for this thesis, so that is left as exercise for the reader.
+Formulating the constraints get a bit weird for repeaters, as they \emph{do not} conserve either bandwidth or commodities. We say that repeaters can \emph{mangle} commodities, which means it can receive the commodity $k$ sent from node A to node B, and can send it as commodity $k$ to B, but it can also send it as commodity $m$ to node C, assuming $m$ is the commodity sent by node A to node C. This is less awkward if the alternative model suggested in \autoref{sec:alternative-model} is implemented, but there was only time to implement one model for this thesis. This mangling is why we require each commodity to be received in the objective, it allows receivers to change the commodity to something else than what was sent.
 
-There is some constraints on repeaters though, namely that the incoming amount of one commodity has to be equal to the outgoing amount of all other commodities from the same source. Practically speaking, repeaters can not change the bitrate of incoming video, either up or down. That way, a repeater is a pure IO-bound device, which does not require much else than a fast Internet connection to be operated.
+There are some constraints on repeaters though, namely that the incoming amount of one commodity has to be equal to the outgoing amount of all other commodities from the same source. Practically speaking, repeaters can not change the bitrate of incoming video, either up or down. That way, a repeater is a pure IO-bound device, which does not require much else than a fast Internet connection to be operated.
 
 Note that since commodities are routed independently in our flow network, it's possible for a node to use a repeater only for outgoing traffic, but still receive incoming traffic directly from its peers. This will probably often be the case, as many consumer connections are still highly asymmetric in inbound/outbound capacity.
 
 Repeaters are also practical since they're not required to know the contents of the packages it forwards, and thus anyone with spare bandwidth can provide a repeater for anyone to use, without compromising the confidentiality of those conversations.
 
-Deployment wise, repeaters are practically the same as \glspl{sfu}, thus adding repeaters to a network should not be a challenging task. The biggest difference between repeaters and SFUs is in who controls the sent data; traditional SFUs handle that themselves, negotiating with each peer which stream it should receive based on it's capabilities. Repeaters would be instructed by either the sending node or the room which streams should be routed where, thus a repeater is a slightly simpler unit.
+Deployment wise, repeaters are practically the same as \glspl{sfu}, thus adding repeaters to a network should not be a challenging task. The biggest difference between repeaters and SFUs is in who controls the sent data; traditional SFUs handle that themselves, negotiating with each peer which stream it should receive based on it's capabilities. Repeaters would be instructed by either the sending node or the service provider which streams should be routed where, thus a repeater is a slightly simpler unit.
 
 
 \section{Transcoders}
@@ -226,7 +227,7 @@ Transcoders are to \glspl{mcu} what repeaters are to \glspl{sfu}; much the same,
 
 \section{Implementation}\label{sec:implementation}
 
-The sample implementation is in Python and uses GLPK for solving the created linear program. The script makes to attempt to optimize the creation of the linear program, and since it's written quite modular it will as a consequence iterate over every single edge dozens of times. Thus, the creation of the linear program is often more expensive than the actual solving of said program. While it's true that there will always be a cost of creating the linear program, since both the $O(n^4)$ objective function has to be created along with $O(n^4)$ constraints, the $n$ is usually small enough not to make the total running time unmanageable. If the approach is to be used in situations where $n$ can be large, more research is needed into optimizing this step.
+The sample implementation is in Python and uses GLPK for solving the created linear program. The script makes no attempt to optimize the creation of the linear program, thus it iterates over every single edge dozens of times. Hence, the creation of the linear program is often more expensive than the actual solving of said program. While it's true that there will always be a cost of creating the linear program, since the $O(n^4)$ objective function has to be created along with $O(n^4)$ constraints, the $n$ is usually small enough not to make the total running time unmanageable\footnote{Even with 20 nodes, $n^4$ is only 160,000 operations.}. If the approach is to be used in situations where $n$ can be large, more research is needed into optimizing this step.
 
 The provided implementation does not fully implement everything discussed here, as time was limited. The script is capable of finding optimal routes for the objective as specified in reasonable time, but does not implement any approximation of the non-linear functions. Thus there's no punishment for maximizing network links, which means all nodes end up with 100\% utilization of their uplink, as long as someone has the capacity to receive. The script supports adding repeaters to the mix, routing video through them for nodes that are otherwise incapable of receiving video.
 
@@ -277,10 +278,10 @@ How does the approach scale with the size of the conversation? Our objective fun
         \end{tikzpicture}
         \subcaption{Memory usage}
     \end{subfigure}
-    \caption{Resource consumption for the sample implementation}
+    \caption{Resource consumption for the sample implementation on desktop computer with Intel i7 860 CPU (four cores, 2.8GHz)}
     \label{fig:script-runtimes}
 \end{figure}
 
 The script was run with a minimal video unit of 400 kbps, which allows even the weakest node in the friends case (node G, with 4 Mbps up) enough slots to stream to all other nodes. While the included script is not feature-complete, it does create test cases close to the correct size, which we can use to give some inclination to expected running time, and how it scales. The tests for 8 and 9 nodes were run by adding one and two extra nodes to the friends test case.
 
-\todo{Write interpretation of script runtimes}
+The best fit found for the sample data was a cubic fit\footnote{However, the quadratic fit was not much worse, at $R^2=0.9974$. The data set is small, more data is needed to say anything conclusively.}, with $R^2=0.9995$, indicating that we can expect something close to $O(n^3)$ for this approach. As mentioned earlier, since the $n$ is very small in most of the scenarious, performance is not expected to be an issue. The actual solving step took 0.4s in the 9 person case, which is far less than the actual wait today to establish a connection anyway. The time taken to build the flow network is more significant in the sample implementation, but since this is highly unoptimized Python, I expect this can be reduced substantially.

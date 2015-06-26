@@ -2,7 +2,7 @@
 
 Quick refresher on ``standup'' bandwidth limits: A (30/20), B (30/15), C (8/6) and D (6/3).
 
-The key challenge in this case is node D, with only 6 Mbps available on the downlink, slightly upped by node C with 8 Mbps. Observed bitrates from the test are given in \autoref{fig:standup-bitrate}. Firefox displays much of the same things we saw for the ``traveller'' test case; Node C doesn't have any troubles in this test, but node D is completely saturated. Node D receives 2.1 Mbps from each of the other three nodes, which again destroys the latencies in the conversation. Even though node D sends to its fullest capacity, hardly anything of this is correctly received by the other nodes. This probably implies that among the data Firefox is actually putting onto the wire, not enough of it reaches the destinations unfragmented, and thus the receiver is incapable of reconstructing a complete frame to show to the user. Node C doesn't entirely saturate it's uplink however, so there's obviously \emph{some way} streams are limited in Firefox, but it's clearly not adequate.
+The key challenge in this case is node D, with only 6 Mbps available on the downlink, slightly upped by node C with 8 Mbps. Observed bitrates from the test are given in \autoref{fig:standup-bitrate}. Firefox displays much of the same behavior we saw in the ``traveller'' test case; Node C doesn't have any troubles in this test, but node D is completely saturated. Node D receives 2.1 Mbps from each of the other three nodes, which again destroys the latencies in the conversation. Even though node D sends to its fullest capacity, hardly anything of this is correctly received by the other nodes. This probably implies that among the data Firefox is actually putting onto the wire, not enough of it reaches the destinations unfragmented, and thus the receiver is incapable of reconstructing a complete frame to show to the user. Node C doesn't entirely saturate it's uplink however, so there's obviously \emph{some way} streams are limited in Firefox, but it's clearly not adequate.
 
 Chrome handles the two challenged nodes elegantly, with 61/76\% downlink/uplink utilization on node C, and 85/80\% utilization on node D. The complete link utilization results are given in \autoref{tab:utilization-standup}.
 
@@ -23,7 +23,7 @@ Chrome handles the two challenged nodes elegantly, with 61/76\% downlink/uplink 
     \end{tabular}
 \end{center}
 
-Latencies are depicted in \autoref{fig:standup-latency}.
+Latencies are depicted in \autoref{fig:standup-latency}. While Chrome generally perform okay, we see that even though nodes C and D are not saturating their connections, they observe latencies which are significantly more delayed compared to the two other nodes. Both C and D would have a noticable delay in this test case, which detracts from the QoE. On Firefox only nodes A to C can communicate.
 
 \begin{figure}
     \centering
@@ -96,6 +96,6 @@ Latencies are depicted in \autoref{fig:standup-latency}.
         \end{tikzpicture}
         \subcaption{Chrome}
     \end{subfigure}
-    \caption{Observed latencies in the ``standup'' test case}
+    \caption{Observed latencies in the ``standup'' test case. Firefox out-of-bounds values are, left to right: 4.8 s, 3.5 s, 7.8 s, and > 11 s for everything in to D.}
     \label{fig:standup-latency}
 \end{figure}

@@ -1,6 +1,6 @@
 \subsection{Test Case ``Friends''}
 
-Quick refresher of bandwidth limits for nodes in the ``friends'' test case, there's two groups (A-C and D-G) with high inter-group latency: A (15/15), B (50/50), C (14/8), D (15/9), E (30/20), F (40/30), and G (9/4).
+Quick refresher of the ``friends'' test case; there's two groups (A--C and D--G), with high latency between the groups, and the following bandwidth limits: A (15/15), B (50/50), C (14/8), D (15/9), E (30/20), F (40/30), and G (9/4).
 
 \autoref{fig:friends-bitrate} shows that for the most resource-constrained nodes, Firefox -- not unexpectedly -- again completely saturates the links. Both C and G have 100\% utilization of their uplinks. G is the only node that also has a saturated downlink, and again we see the results this have on the latencies in \autoref{fig:friends-latency}.
 
@@ -23,20 +23,21 @@ The link utilizations are given in \autoref{tab:friends-utilization}.
     \end{tabular}
 \end{center}
 
-On Chrome, resources are not distributed evenly among its peers. We see this in the data for node G, which is constrained to 9/4 bandwidth. Of it's 4 Mbps, we see that node E receives a little more than 1 Mbps of this, while the two other nearby nodes (D and F) lie around 500 kbps each. Among the remote nodes, node C receives $\approx$350 kbps, while A and B share the scraps that remain, with $\approx$200 kbps each.
+On Chrome, bandwidth is not distributed evenly among its peers. We see this in the data for node G. Of it's 4 Mbps uplink, we see that node E receives a little more than 1 Mbps of this, while F gets around 400 kbps. Node C and D both receive $\approx$350 kbps, while A gets a full 720 kbps. B are left with the scraps that remain, at $\approx$130 kbps.
 
-As there's a lot of data points with wildly varying magnitude for Firefox in this case, the results have been split in two; one logarithmic view giving a rough overview of how the nodes performed (\autoref{fig:friends-latency-log}), and one cropped view, where only edges with latency less than 500 ms is included (\autoref{fig:friends-latency}). As we can see from the linear chart, there's only four nodes that observe latencies below 500 ms, and not even all of those can reasonably be expected to be able to hold a conversation. A and B can talk together; A and E can talk, although a little more strained with latencies around 400 ms. B and E can not talk, as B doesn't receive E's stream in reasonable time; B and F however \emph{can} talk together.
+We observe something similar for nodes C and D, with their 8 Mbps and 9 Mbps uplinks, respectively. Well, almost -- node C is well received by most of the nodes in the other group (D, E and F), which all get more than 1.5 Mbps. The local nodes A and B however, get only 1 Mbps and 450 kbps -- which shows that being latencies \emph{does not} seem to significantly influence who gets a fair share. Granted, this dataset is only from one single test run, more data is needed to say anything conclusively about whether this is consistent behavior, but the data seem to imply that even a minute is not enough to reach fairness for Chrome.
 
-To summarize, out of 42 pairs of nodes in the test case, only three of them are able to communicate bidirectionally with Firefox. In practice, this is a conversation all parties abandon immediately.
+Node D repeats much of what we saw in node C, where the remote nodes all get more than of the local ones. This might be due to D being the first of the second group into the conversation, establishing connections with the remote nodes before any of the other local nodes are present. Thus when the other nodes in D's group joins, they get to share whatever capacity D has left. How the distribution evolves with time was not studied in this thesis, but might provide insight into how long it would take to reach fairness.
 
-We observe something similar for nodes C and D, which are constrained to 8 Mbps and 9 Mbps, respectively. Well, almost -- node C is well received by nodes B, D and E, while nodes A and F are left with hardly anything -- which shows that being local or remote \emph{does not} seem to significantly influence who gets a fair share. Granted, this dataset is only from one single test run, more data is needed to say anything conclusively about whether this is expected behavior, but our data seem to imply that even a minute is not enough to reach fairness for Chrome.
-
-Node D repeats much of what we saw in node C, but with a stronger bias towards \emph{remote} nodes, which all got more than any individual local node. This might be due to D being the first of the second group into the conversation, establishing connections with the remote nodes before any of the other local nodes are present. Thus when the other nodes in D's group joins, they get to share whatever capacity D has left. How the distribution evolves with time was not studied in this thesis, but might provide insight into how long it would take to reach fairness.
-
-In any case, if it takes more than 10-30 seconds to establish fairness, we consider it likely that the users will leave the platform and not wait for stuff to smoothen out, at least if video is of any importance in the conversation. Audio will not be hit as hard by uneven distribution, but if your goal as a service provider is to deliver video conferencing, video quality and quick connection times will be how you're compared to other providers.
+In any case, if it takes more than 10-30 seconds to establish fairness, I consider it likely that the users will leave the platform and not wait for stuff to smoothen out, at least if video is of any importance in the conversation. Audio will not be hit as hard by uneven distribution, but if your goal as a service provider is to deliver video conversations, video quality and quick connection times will be how you're compared to other providers.
 
 Uneven uplink distribution is not only bad for fairness in the conversation, but also for battery consumption. We can assume node G's video is encoded at least three times, possibly four in this test case\footnote{A and B could have shared the same stream, C, D and F could have shared a stream, and E has a stream of its own}, even though all of the nodes have spare downlink capacity for sharing one $\approx$600 kbps stream ($4~\text{Mbps}/6$).
 
+As there's a lot of data points with wildly varying magnitude for Firefox in this case, the latency results have been split in two; one logarithmic view giving a rough overview of how the nodes performed (\autoref{fig:friends-latency-log}), and one cropped view, where only edges with latency less than 500 ms is included (\autoref{fig:friends-latency}). As we can see from the linear chart, there's only four nodes that observe latencies below 500 ms, and not even all of those can reasonably be expected to be able to hold a conversation. A and B can talk together; A and E can talk, although a little more strained with latencies around 400 ms. B and E can not talk, as B doesn't receive E's stream in reasonable time; B and F however \emph{can} talk together.
+
+To summarize, out of 42 pairs of nodes in the test case, only three of them are able to communicate bidirectionally with Firefox. In practice, this is a conversation all parties abandon immediately.
+
+The latency results on Chrome reinforce the impression we got from the ``standup'' test case, that nodes with severely constrained connections will also experience much more severe latencies. In this case, nodes C, D and G will all experience noticeable latency. We also note that node C, which favored the remote nodes with it's bandwidth, experiences significantly higher latencies from the two other nodes in its own group than from the remote ones.
 
 \begin{figure}
     \centering
@@ -93,7 +94,7 @@ Uneven uplink distribution is not only bad for fairness in the conversation, but
         \input{data/appear.in-friends/latency.tex}
     \end{axis}
     \end{tikzpicture}
-    \caption{Test results for the ``friends'' test case in Firefox, log scale}
+    \caption{Observed latencies for the ``friends'' test case in Firefox, log scale}
     \label{fig:friends-latency-log}
 \end{figure}
 
