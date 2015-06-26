@@ -35,6 +35,10 @@ This is not a hard requirement however, WebRTC has no dependency on centralizati
 
 \section{Limitations}
 
+The dynamic routing scheme proposed in this thesis is largely independent of underlying technology, but is intended to be built on top of \gls{webrtc}. The requirements to implement the suggested solution is that the platform allows clients to establish connections with a given bitrate (which WebRTC allows through modifying the SDP offer), and that streams can be routed arbitrarily. As connections have to be established in an ad-hoc way out-of-band in WebRTC, as long as the parties involved all share session keys, this should also be feasible.
+\todo{Write about what is required for deployment: arbitrary routing, client-specified bitrates, nat-traversal, ips of peers, latency/bandwidth discovery. Can webrtc forward video to other nodes?}
+
+
 Scalability.
 
 As long as conversations are modelled as flow networks, any device or network characteristic that can be included in such a model and described as a linear function or approximation can be used to define the objective function. Our goal of maximum bandwidth at minimum latency could also have been minimum latency at minimum server costs, or minimal CPU usage at maximum bandwidth. Any combination is possible.

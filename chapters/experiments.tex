@@ -75,7 +75,7 @@ The relevant values offered by the \texttt{getStats}-API on Chrome\footnote{Docu
     \end{tabular}
 \end{center}
 
-It's a bit sad to see that all of the values are casted to strings in Chrome. This is not the case on Firefox, where appropriate types are used. As we also see, all of the timing-related values we're interested are vendor-prefixed on Chrome, which hints to their unspecified nature. Note that both browsers report more data than what is shown here, this is only the data I consider to be relevant for our bandwidth and latency measurements (and link quality, thus the ones related to packet loss). Chrome is also very helpful in providing why resolution is limited (received resolution is present in the full data set), which could be incorporated into more advanced models.
+It's a bit sad to see that all of the values are casted to strings in Chrome. This is not the case on Firefox, where appropriate types are used. As we also see, all of the timing-related values we're interested are vendor-prefixed on Chrome, which hints to their unspecified nature. Note that both browsers report more data than what is shown here, this is only the data I consider to be relevant for our bandwidth and latency measurements (and link quality, thus the ones related to packet loss). Chrome is also very helpful in providing why resolution is limited (received resolution is present in the full data set), which could be incorporated into more advanced models. when the \texttt{getStats} API specification\footnote{\url{http://w3c.github.io/webrtc-stats/}} reaches stable in the W3C, I expect these differences to disappear. Note that Firefox has the API closest to the proposed specification as of the time of writing.
 
 
 \subsection{Constraining Nodes}
