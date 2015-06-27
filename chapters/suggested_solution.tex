@@ -48,7 +48,7 @@ As \gls{lp} is a well-known and very general technique that's effective to a vas
 
 To approach the problem as an LP, we need to have a well-defined objective; the function the LP will try to maximize. To formulate the objective, we need to understand how several performance parameters of the system affect the QoSE.
 
-We can start by decomposing the problem, by first looking at how to measure the QoSE from a single node's perspective to one other peer. We then aggregate all of those pairs to form the full QoSE as observed by that node, and aggregate that for all nodes in the conversation. A natural even distribution occurs here due to the \gls{wfl} and the logarithmic nature of the QoSE. If the QoSE was a linear function of performance, a small set of nodes could devour all the resources, and the QoSE would have been the same as if the resources were divided evenly. However, the logarithmic shape of the QoSE ensures that there's diminishing returns for resource consumption, thus when one node is receiving 2 Mbps, and one other is receiving 1 Mbps, increasing the latter from 1 Mbps to 2 Mbps has a greater impact on QoSE than increasing the former from 2 Mbps to 3 Mbps.
+We can start by decomposing the problem, by first looking at how to measure the QoSE from a single node's perspective to one other peer. We then aggregate all of those pairs to form the full QoSE as observed by that node, and aggregate that for all nodes in the conversation. A natural even distribution occurs here due to the \gls{wfl} and the logarithmic nature of the QoSE. If the QoSE was a linear function of performance, a small set of nodes could devour all the resources, and the QoSE would have been the same as if the resources were divided evenly. However, the logarithmic shape of the QoSE ensures that there's diminishing returns for resource consumption, thus when one node is receiving 2 Mbps, and one other is receiving 1 Mbps, increasing the latter from 1 Mbps to 2 Mbps has a greater impact on the QoSE than increasing the former from 2 Mbps to 3 Mbps.
 
 As this thesis only considers bandwidth and latency, the QoSE for a single node to a single peer will be a function of these two variables. No research was found on how these two affect the QoSE for video conversations\footnote{Much research has been done on QoS in relation to Video-on-Demand, but while the bitstream might be similar, the environment and expectations for real-time communication is entirely different from VOD, and thus not considered directly applicable in this setting}, so we'll take some grand assumptions here, and if further research is done on this topic, the model can be refined by incorpororating actual results at this step.
 
@@ -126,7 +126,7 @@ First, assuming that the latency is fixed, we will adopt a QoSE model from the b
             \end{axis}
         \end{tikzpicture}
         \subcaption{QoSE as a function of latency}
-        \label{fig:qos-bandwidth}
+        \label{fig:qos-latency}
     \end{subfigure}
     \caption{Assumed QoSE on the signal between a single pair of nodes}
     \label{fig:qos}
