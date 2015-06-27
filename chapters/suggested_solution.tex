@@ -1,4 +1,4 @@
-\chapter{Suggested solution}
+\chapter{Analytical Study}
 \label{chp:suggested-solution}
 
 In this chapter we'll walk through how the problem can be modelled as a multi-commodity flow problem and solved using linear programming.
@@ -12,7 +12,7 @@ If we change perspective slightly, we see that this is not a single flow problem
 
 This time around, imagine that we have a separate flow problem for each \emph{pair} of nodes; we have one problem routing node A's video to node B, we have one problem routing node A's video to node C, etc. This yields a total of $n(n-1)$ problems, which is $O(n^2)$. Modelling the problem this way means we don't have to add any supersinks to connect the targets; each node can act as sink for the video stream, hereafter known as the \emph{commodity}, destined for itself.
 
-One other thing we notice from our initial graph compared to traditional flow problems is that we notice that we have \emph{node constraints} in the initial graph, while flow problems only work on \emph{edge constraints}. To accommodate this, we split each node into two parts, hereafter called the external and internal part, as illustrated in \autoref{fig:node-splitting}.
+One other thing we notice from our initial graph compared to traditional flow problems is that we notice that we have \emph{node constraints} in the initial graph, while flow problems only work with \emph{edge constraints}. To accommodate this, we split each node into two parts, hereafter called the external and internal part, as illustrated in \autoref{fig:node-splitting}.
 
 \begin{figure}
     \centering
