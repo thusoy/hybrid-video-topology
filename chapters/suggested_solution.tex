@@ -44,27 +44,107 @@ The vector $\mathbf{x}$ is the variables we're trying to find a solution for, ea
 As \gls{lp} is a well-known and very general technique that's effective to a vast collection of problems, there are lots of LP-solvers freely available\footnote{\url{https://en.wikipedia.org/wiki/Linear_programming\#Solvers_and_scripting_.28programming.29_languages}}. This simplifies building a solution on top of \gls{lp}; if you can model your problem as a linear program, it can be efficiently solved by existing, well-tested code. For our experimental solution we chose a solver somewhat arbitrarily among those which had Python bindings, and picked \gls{glpk}.
 
 
-\section{Maximization}
+\section{Objective}
 
-As our objective is to maximize the QoE, we can formulate our problem as an LP by encoding the QoE as a function of the observed QoS in the system. We defined the QoS as a function of bandwidth and latency,
+To approach the problem as an LP, we need to have a well-defined objective; the function the LP will try to maximize. To formulate the objective, we need to understand how several performance parameters of the system affect the QoSE.
 
-As was explained in the introduction, our problem is to \emph{maximize} bandwidth of each commodity at a \emph{minimal} latency. Summed for each node in a conversation, this becomes our \emph{objective function}, which is the first line in \autoref{eq:lp}. The weighting between the two can be parametrized and left for implementations to decide.
+We can start by decomposing the problem, by first looking at how to measure the QoSE from a single node's perspective to one other peer. We then aggregate all of those pairs to form the full QoSE as observed by that node, and aggregate that for all nodes in the conversation.
 
-Given those factors, our problem is solved by finding a solution to the problem in \autoref{eq:objective}, where $x^k$ is a matrix with the amount of commodity $k$ transmitted on each edge, $c(i, j)$ is a cost function for the edge between $i$ and $j$, and $g_i$ is a vector of how much each device has to gain from receiving something. The gain is reflected in the device types, a phone will require less bandwidth to satisfy the user than a desktop computer with a large display will, thus introducing the gain makes sure the system will allocate bandwidth to each device's potential and capability. $s_k$ and $t_k$ is the source and sink for commodity $k$, $d_k$ is the gain. $u_{i, j}$ is the capacity of the link between $i$ and $j$.
+As this thesis only considers bandwidth and latency, the QoSE for a single node to a single peer will be a function of these two variables. No research was found on how these two affect the QoSE for video conversations\footnote{Much research has been done on QoS in relation to Video-on-Demand, but while the bitstream might be similar, the environment and expectations for real-time communication is entirely different from VOD, and thus not considered directly applicable in this setting}, so we'll take some grand assumptions here, and if further research is done on this topic, the model can be refined by incorpororating actual results at this step.
 
-\begin{gather}\label{eq:objective}
-    max \sum_{k \in K} (d_{t_k} \sum_{w \in V} log(x_{w, t_k}^k) - \sum_{e \in E} \frac{1}{(u_e - x_e^k)})\\
-    \text{subject to} \nonumber \\
-    \sum_{k \in K} \sum_{(i, j) \in E} x_{i, j}^k = 0, \qquad{} i, j \neq s_k, t_k \label{eq:flow-conservation} \\
-    \sum_i \sum_j (\sum_{k \in K}x_{i, j}^k) < u_{i, j} \label{eq:bwlim}
+First, assuming that the latency is fixed, we will adopt a QoSE model from the bandwidth as given in \autoref{fig:qos-bandwidth}. The graph will be tuned to the node's device, as different devices have different saturation points for where there's nothing to gain from sending more data. Devices with larger displays and fast connections also have higher expectations to the quality of displayed video, thus the QoSE for a given bandwidth will be higher on smaller devices than large ones. Logarithmic functions has been used as per the \gls{wfl}.
+
+\begin{figure}
+    \begin{subfigure}{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+            \begin{axis}[
+                xlabel=Bandwidth,
+                width=\textwidth,
+                ylabel=QoSEBandwidth,
+                xmin=0,
+                xmax=10,
+                ymin=0,
+                x axis line style={->},
+                ticks=none,
+                major x tick style = {opacity=1},
+                minor tick length=0pt,
+                axis x line=bottom,
+                legend style={at={(1,0.20)}, anchor=south east,legend columns=1},
+                ]
+
+                \addplot+[domain=1:5,mark=none, color=blue]{1.5*ln(x*1.5)};
+                \addlegendentry{phone}
+
+                \addplot+[domain=1:6,mark=none, color=red]{1.3*ln(x*1.3)};
+                \addlegendentry{laptop}
+
+                \addplot+[domain=1:7,mark=none, color=black]{ln(x)};
+                \addlegendentry{desktop}
+
+                \addplot+[mark=none, color=blue] coordinates {
+                    (7,3.527)
+                    (10,3.527)
+                };
+                \addplot+[mark=none, color=red] coordinates {
+                    (6,2.670)
+                    (10,2.670)
+                };
+                \addplot+[style=solid, mark=none, color=black] coordinates {
+                    (5,1.609)
+                    (10,1.609)
+                };
+            \end{axis}
+        \end{tikzpicture}
+        \subcaption{QoSE as a function of bandwidth}
+        \label{fig:qos-bandwidth}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{.48\textwidth}
+        \centering
+        \begin{tikzpicture}
+            \begin{axis}[
+                xlabel=Latency,
+                width=\textwidth,
+                ylabel=QoSELatency,
+                xmin=0,
+                xmax=10,
+                ymin=0,
+                x axis line style={->},
+                ticks=none,
+                major x tick style = {opacity=1},
+                minor tick length=0pt,
+                axis x line=bottom,
+                legend style={at={(1,0.20)}, anchor=south east,legend columns=1},
+                ]
+
+                \addplot+[domain=2:10,mark=none, color=blue]{5-1.2^(x-2)};
+                \addplot+[mark=none, color=blue] coordinates {
+                    (0,4)
+                    (2,4)
+                };
+            \end{axis}
+        \end{tikzpicture}
+        \subcaption{QoSE as a function of latency}
+        \label{fig:qos-bandwidth}
+    \end{subfigure}
+    \caption{Assumed QoSE on the signal between a single pair of nodes}
+    \label{fig:qos}
+\end{figure}
+
+As for latency, we assume it follows a function somewhat like the one depicted in \autoref{fig:qos-latency}. Given these two functions for QoSE, we combine them by simply adding them together, with a tunable weighting factor $w$, which says how heavily latency should count into the QoSE. When considering the QoSE as delivered to a single node, we also need to subtract the cost of using its connection, as saturating the connection will have grave impact on queueing delays and packet loss. Formally, if we consider our flow network as a graph $G = (V, E)$, with $d_i$ as node $i$'s device. $x^c_{i,j}$ is the bandwidth of a commodity $c$ on the edge $(i,j)$, $l_{i,j}$ is the latency between nodes $i$ and $j$, and $k_{i,j}$ is the commodity from $i$ to $j$. $C$ is the set of all commodities. With $QoSEBandwidth$ and $QoSELatency$ as given in \autoref{fig:qos}, we can formulate the QoSE for the entire conversation as
+
+\begin{gather}\label{eq:qos-pair}
+    QoSEPair(i, j) = QoSEBandwidth(x_{i, j}^{k_{i, j}}, d_i) + w \times QoSELatency(l_{i,j}) \\
+    QoSENode(i) = \sum_{j \in V} QoSEPair(i, j) - \sum_{c \in C} \frac{1}{u_{i,j} - x_{i,j}^{c}} \\
+    QoSE = \sum_{i \in V} QoSENode(i) \label{eq:qos}
 \end{gather}
 
+\autoref{eq:qos} is then the QoSE of the entire graph, which becomes the objective function in our LP. Note that this is an assumption, more research should be conducted into finding the actual relationships involved.
 
-In plain English: For each commodity, maximize the gain of sending that commodity to its receiver, minus the link cost sending said commodity induces (\autoref{eq:objective}), while all nodes conserve bandwidth except the source and sink for a commodity (\autoref{eq:flow-conservation}) and that no link exceeds its capacity (\autoref{eq:bwlim}). The observant reader will note that we require each sink to \emph{receive} each commodity, instead of having each source \emph{send} each commodity. We'll come back to this decision in \autoref{sec:repeaters}.
+This raises some other issues that has to be handled. The objective function has to be linear to be solved as a linear program, but several of its parameters are non-linear. However, all of these can be approximated arbitrarily close by piecewise linear functions, as illustrated in \autoref{fig:bitrate-quality}. This too can be parametrized, as either the number of pieces to divide into or as the maximum deviation.
 
-This raises some other issues that has to be handled. The objective function has to be linear to be solved as a linear program, but several of its parameters are non-linear. Perceived gain from increasing bandwidth is non-linear, the cost of link utilization is non-linear, and perceived gain from reducing latency is probably non-linear, according to the Weber-Fechner law. However, all of these can be approximated arbitrarily close by a piecewise linear function, as illustrated in \autoref{fig:bitrate-quality}. This too can be parametrized, as either the number of pieces to divide into or as the maximum deviation from the true allowed.
-
-These different cases will be discussed in the following paragraphs.
+In the following paragrphs we'll discuss how to transform the problem to a linear one that we can solve.
 
 
 \section{Perceived Gain From Bandwidth}
@@ -80,8 +160,8 @@ To illustrate how we model this, imagine that instead of node splitting like we 
 
     \begin{tikzpicture}
         \begin{axis}[
-            xlabel={Bitrate},
-            ylabel={Quality},
+            xlabel={Bandwidth},
+            ylabel={QoSE},
             xmin=0,
             ymin=0,
             x axis line style={->},
