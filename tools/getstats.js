@@ -1,6 +1,8 @@
 /*
 Loosely based on getStats.js by Muaz Khan (available at
-github.com/muaz-khan/getStats, MIT license)
+github.com/muaz-khan/getStats)
+
+(c) 2015 by Tarjei Husøy, MIT license
 */
 
 (function () {
