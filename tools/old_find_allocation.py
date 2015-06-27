@@ -196,6 +196,14 @@ def solve_case(args):
         logger.info('Constraint: %s', constraint)
         prob += constraint
 
+    # Don't exceed the bandwidth saturation point
+    saturation_point = '2Mbit'
+    slots = parse_bandwidth_into_slots(saturation_point)
+    for commodity in commodities():
+        proxy = commodity.receiver + 'proxy'
+        constraint = variables[proxy][commodity.receiver][commodity] <= slots
+        add_constraint(constraint, 'Prevent saturation')
+
     # All commodities must be sent by the correct parties
     # Note: Node should not need to send a commodity if a repeater does, and the
     # repeater receives another commodity from this node
