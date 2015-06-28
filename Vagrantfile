@@ -15,6 +15,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # doesn't already exist on the user's system.
   config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
 
-  config.vm.provision "shell", inline: "apt-get update && apt-get install -y texlive texlive-generic-extra texlive-latex-extra texlive-science texlive-lang-european graphviz python-pygments"
+  config.vm.provision "shell", inline: "apt-get update && apt-get install -y texlive texlive-generic-extra texlive-latex-extra texlive-science texlive-lang-european graphviz python-pygments python3-yaml inkscape"
 
 end
