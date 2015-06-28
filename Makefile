@@ -39,6 +39,7 @@ bitrates:
 	./tools/latexify_csv_bitrate_traces.py -n 120 data/appear.in-final-vanilla-3p/*-bitrates.csv > data/appear.in-final-vanilla-3p/bitrate-tcpdump.tex
 
 utilization:
+	test -d tmp || mkdir tmp
 	for case in traveller standup friends; do ./tools/calculate_link_utilization.py data/appear.in-$$case/bitrate.tex -c $$case > tmp/$$case-utilization-firefox.tex; done
 	for case in traveller standup friends; do ./tools/calculate_link_utilization.py data/appear.in-final-$$case/bitrate-getstats.tex -c $$case > tmp/$$case-utilization-chrome.tex; done
 
