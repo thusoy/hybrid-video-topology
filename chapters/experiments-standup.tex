@@ -6,6 +6,7 @@ The key challenge in this case is node D, with only 6 Mbps available on the down
 
 Chrome handles the two challenged nodes elegantly, with 61/76\% downlink/uplink utilization on node C, and 85/80\% utilization on node D. The complete link utilization results are given in \autoref{tab:utilization-standup}.
 
+\clearpage
 \begin{center}
     \captionof{table}{Link utilization in the ``friends'' test case}
     \label{tab:utilization-standup}
@@ -23,7 +24,7 @@ Chrome handles the two challenged nodes elegantly, with 61/76\% downlink/uplink 
     \end{tabular}
 \end{center}
 
-Latencies are depicted in \autoref{fig:standup-latency}. While Chrome generally performs okay, we see that even though nodes C and D are not saturating their connections, they observe latencies which are significantly more delayed compared to the two other nodes. Both C and D would have a noticable delay in this test case, which detracts from the QoE. On Firefox only nodes A to C can communicate.
+Latencies are depicted in \autoref{fig:standup-latency}. While Chrome generally performs okay, we see that even though nodes C and D are not saturating their connections, they observe latencies which are significantly more delayed compared to the two other nodes. Both C and D would have a noticeable delay in this test case. On Firefox only nodes A to C can communicate.
 
 \begin{figure}
     \centering

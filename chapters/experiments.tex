@@ -12,7 +12,7 @@ Since the test covers two different browsers which do not share a common API (mo
 \begin{figure}
     \centering
     \includegraphics[width=.7\textwidth]{example-screenshot}
-    \caption{An example screenshot from a Firefox test run on node A. The nodes are, from top left and clockwise, A, C, B and D. We can see how the $\approx$33 ms refresh rate manifests itself, as the visible times are .928, .959, .990, and 0.021.}
+    \caption{An example screenshot from a Firefox test run on node A. The nodes are, from top left and clockwise, A, C, B and D. We can see how the $\approx$33 ms refresh rate manifests itself, as the visible times are .928, .959, .990, and 0.021 (node A, barely visible behind the .990).}
     \label{fig:example-screenshot}
 \end{figure}
 
@@ -34,7 +34,7 @@ For all test cases the test was first run without any traffic shaping applied, s
 
 \subsection{getStats}
 
-The relevant values offered by the \texttt{getStats}-API on Chrome\footnote{Documentation is very poor for the \texttt{getStats}-API, as the specification is not completed yet, so the most reliable reference is the source: \url{https://chromium.googlesource.com/external/webrtc/+/master/talk/app/webrtc/statstypes.cc}} and Firefox is presented in \autoref{tab:incoming-video} and \autoref{tab:outgoing-video}. The values reported here were dumped from what's returned by the browser.
+The relevant values offered by the \texttt{getStats}-API on Chrome\footnote{Documentation is very poor for the \texttt{getStats}-API as the specification is not completed yet, therefore the most reliable reference is the source: \url{https://chromium.googlesource.com/external/webrtc/+/master/talk/app/webrtc/statstypes.cc}} and Firefox is presented in \autoref{tab:incoming-video} and \autoref{tab:outgoing-video}. The values reported here is what's returned by the browser.
 
 \begin{center}
     \captionof{table}{Incoming video data}
@@ -75,7 +75,7 @@ The relevant values offered by the \texttt{getStats}-API on Chrome\footnote{Docu
     \end{tabular}
 \end{center}
 
-It's a sad to see that all of the values are casted to strings in Chrome. This is not the case on Firefox, where appropriate types are used. As we also see, all of the timing-related values we're interested in are vendor-prefixed on Chrome, which hints to their unspecified nature. Note that both browsers report more data than what is shown here, this is only the data I consider to be relevant for link quality measurements. Chrome is very helpful in providing why resolution is limited\footnote{Although I would prefer to see a single value ``limitedResolution'', which could be either \texttt{false}, \texttt{``cpu''}, \texttt{``bandwidth''} or \texttt{``view''}, to make it a bit less verbose and easier to extend.} (received resolution is present in the full data set), which could be incorporated into more advanced models. When the \texttt{getStats} API specification\footnote{\url{http://w3c.github.io/webrtc-stats/}} reaches stable in the W3C, I expect most of these differences to disappear. Note that Firefox has the API closest to the proposed specification as of the time of writing.
+It's sad to see that all values are casted to strings in Chrome. This is not the case on Firefox, where appropriate types are used. As we also see, all of the timing-related values we're interested in are vendor-prefixed on Chrome, which hints to their unspecified nature. Note that both browsers report more data than what is shown here, this is only the data I consider to be relevant for link quality measurements. Chrome is very helpful in providing why resolution is limited\footnote{Although it would be preferable to see a single value ``limitedResolution'', which could be either \texttt{false}, \texttt{``cpu''}, \texttt{``bandwidth''} or \texttt{``view''}, to make it a bit less verbose and easier to extend.} (received resolution is present in the full data set), which could be incorporated into more advanced models. When the \texttt{getStats} API specification\footnote{\url{http://w3c.github.io/webrtc-stats/}} reaches stable in the W3C, I expect most of these differences to disappear. Note that Firefox has the API closest to the proposed specification as of the time of writing.
 
 The values of jitterBufferMs, renderDelayMs, decodeMs and currentDelayMs was summed to get the observed latency. This was based on some trial and error to see what best aligned with the observed latencies using the timer, as outlined in \autoref{chp:getstats-vs-timer}, since they are not documented anywhere. A more thorough reading of the source code might reveal a more accurate combination, but there was no time to do this for this thesis.
 
@@ -84,12 +84,12 @@ The values of jitterBufferMs, renderDelayMs, decodeMs and currentDelayMs was sum
 
 To configure the cluster according to the different test cases, we utilized the Linux traffic control utility \texttt{tc}, which is capable of rate-limiting incoming and outgoing traffic, as well as delaying traffic destined for certain hosts. A small script was developed to act as a glue layer between a representation of a network and \texttt{tc}, making configuration repeatable and easily parametrized. The script is included in \autoref{chp:apply-case}. The test cases from \autoref{chp:test-cases} were serialized into \gls{yaml}, and the same case definitions could then be used by both the script configuring the nodes, and for the sample solution provided in \autoref{chp:suggested-solution}.
 
-Applying a given test case is thus completely independent of the actual network utilized in the test cluster, keeping all intelligence on the nodes themselves. This removed the need for expensive routers or having to customize the application code, thus making the method application-agnostic and applicable to any peer-to-peer solution, not just appear.in.
+Applying a given test case is thus completely independent of the actual network utilized in the test cluster, keeping all intelligence on the nodes themselves. This removed the need for expensive routers or having to customize the application code, thus making the method application-agnostic and applicable to any peer-to-peer solution, not only to appear.in.
 
 
 \subsection{Automated Testing?}\label{subsec:automated-testing}
 
-Ideally, testing would be automated and not require running a graphical environment, to allow tests to be run often and in response to events such as commits. This could be possible using by running a browser in a fake framebuffer like \texttt{Xvfb}\footnote{\url{http://www.x.org/releases/X11R7.6/doc/man/man1/Xvfb.1.xhtml}} and faking out a media stream\footnote{Chrome: \texttt{-{}-use-fake-device-for-media-stream}, Firefox: \texttt{getUserMedia(\{fake: true, <...>\})}. More info about this approach can be found at \url{http://images.tmcnet.com/expo/webrtc-conference/presentations/san-jose-14/D3-2_Testing_v2_2.pdf}}. Both browsers should be able to be tested in such a setting, but data would be limited to what can be extracted through the \texttt{getStats}-API as described above. Still, it's better than nothing. It is thus possible to automate this, but was considered out of scope for this thesis.
+Ideally, testing would be automated and not require running a graphical environment, to allow tests to be run often and in response to events such as commits. This could be possible using by running a browser in a fake framebuffer like \texttt{Xvfb}\footnote{\url{http://www.x.org/releases/X11R7.6/doc/man/man1/Xvfb.1.xhtml}} and faking out a media stream\footnote{Chrome: \texttt{-{}-use-fake-device-for-media-stream}, Firefox: \texttt{getUserMedia(\{fake: true, <...>\})}. More info about this approach can be found at \url{http://images.tmcnet.com/expo/webrtc-conference/presentations/san-jose-14/D3-2_Testing_v2_2.pdf}}. Both browsers should be able to be tested in such a setting, but data would be limited to what can be extracted through the \texttt{getStats}-API as described above. Therefore it is possible to automate this, but was considered out of scope for this thesis.
 
 Chrome runs regular interoperability tests with Firefox\footnote{Google blogged about this: \url{http://googletesting.blogspot.se/2014/09/chrome-firefox-webrtc-interop-test-pt-2.html}}, but these tests only test that calls can be established, and do not test any network configurations or measure statistics. Integrating the results from this thesis into this test suite is encouraged for more insight into the performance and behavior of WebRTC implementations. The W3C also maintain a test suite for implementations\footnote{\url{http://www.webrtc.org/testing/w3c-conformance-tests}}, but those only test compatibility with the APIs, and not network behavior.
 
@@ -109,9 +109,9 @@ Taking several samples to improve accuracy leads us to another weakness, which i
 
 In general for these cases, the recorded timestamp was consistently interpreted to be the latest of what could be distinguished in the screenshot.
 
-Even assuming that the timestamps are comprehensible and fairly accurate, there's still a possibility of human error when lots of numbers has to be recorded in this way. To minimize the risk of any mistyped numbers making it into the dataset, any observation outside 1.5 standard deviations of the mean (a range which should include 87\% of the numbers observed) was re-interpreted to verify. There's still a chance of smaller errors making it into the dataset, but we assume that these are small enough and distributed evenly among the nodes to not significantly influence any conclusions drawn.
+Even assuming that the timestamps are comprehensible and fairly accurate, there's still a possibility of human error when many numbers has to be recorded in this way. To minimize the risk of any mistyped numbers making it into the dataset, any observation outside 1.5 standard deviations of the mean (a range which should include 87\% of the numbers observed) was re-interpreted to verify. There's still a chance of smaller errors making it into the dataset, but we assume that these are small enough and distributed evenly among the nodes to not significantly influence any conclusions drawn.
 
-As not enough cameras of any single model was available for the experiments, two different models\footnote{HP Webcam HD-4110 and Tandberg (now Cisco) PrecisionHD} had to be used. These had slightly different performance characteristics; the cameras were put side by side with a timer and showed a mean difference of 39.6 ms, but with a relatively large standard deviation of 19.5 ms. As the same effects related to refresh rates as discussed above applies, pretty much all the samples were at a 30 ms or 60 ms interval of each other.\footnote{Out of 20 samples, 1 was 0 ms, 13 were 30 ms, 5 were 60 ms, and 1 was 90 ms. Which really means that the sample is in the range of 0--29 ms difference, 30--60 ms difference, and so on.} As the difference was assumed to be normally distributed, the mean was simply added to all measurements from the slower camera model to compensate.
+As not enough cameras of any single model was available for the experiments, two different models\footnote{HP Webcam HD-4110 and Tandberg (now Cisco) PrecisionHD} had to be used. These had slightly different performance characteristics; the cameras were put side by side with a timer and showed a mean difference of 39.6 ms, but with a relatively large standard deviation of 19.5 ms. As the same effects related to refresh rates as discussed above applies, all samples were at a 30 ms or 60 ms difference of each other.\footnote{Out of 20 samples, 1 was 0 ms, 13 were 30 ms, 5 were 60 ms, and 1 was 90 ms. Which really means that the sample is in the range of 0--29 ms difference, 30--60 ms difference, and so on.} As the difference was assumed to be normally distributed, the mean was simply added to all measurements from the slower camera model to compensate.
 
 For measuring bandwidth utilization between nodes, our method of using \texttt{tcpdump} is not entirely satisfactory, as there's no way to report actual \emph{consumed} bandwidth by the application. This is because the traffic control features of the Linux kernel lies above \texttt{libpcap}, the library that performs packet capture for \texttt{tcpdump} in the network stack. Effectively this means that any incoming bandwidth reported by \texttt{libpcap} will be before the rate limiting performed by \texttt{tc}. Thus, \texttt{tcpdump} cannot report the actual bandwidth consumed by application, only what was received by the network interface. Nonetheless, the bandwidth \emph{sent} by each node is what was actually sent by the application, but there's no guarantee that the receiver was capable of consuming it all. This is good enough for us though, as we can aggregate the data sent by all nodes to determine how saturated a given node's network link is.
 
@@ -124,22 +124,21 @@ For the most accurate comparison of bitrate, it would have been preferable to us
 
 \subsection{How To Read the Graphs}
 
-As there will be a lot of graphs in this chapter, a good understanding of how to read them is essential. \autoref{fig:graph-tutorial} gives you a quick primer.
+As there will be a lot of graphs in this chapter, a good understanding of how to read them is essential. \autoref{fig:graph-tutorial} gives a quick primer.
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{graph-tutorial}
-    \caption{How to read bandwidth graphs. Latency graphs are the same, just different units.}
+    \caption{How to read bandwidth graphs. Latency graphs are similar, only with different units.}
     \label{fig:graph-tutorial}
 \end{figure}
 
-For each node on the x-axis, if it's a latency chart the node's happier the more of the latencies are low. If it's a bitrate chart, the node's happier the more of the bars are high.
+For latency graphs, the lower the observed latency the better. For bandwidth the opposite applies; the more the better. However, this should be seen in context to how widely distributed a node's bandwidth is. If the node does not evenly distribute it's available resources when neither itself nor the peer is constrained by bandwidth, it has failed to reach an even, stable state.
 
-Before we embark on the test cases, we put our two sampling methods up against each other, to see whether the results are comparable. For each of the conversation sizes (3, 4, and 7), the results were equal across the board for both browsers. Both had a consistent stable bandwidth at slightly less than 2.1 Mbps, and latencies below 200 ms (Chrome slightly less). The results are included in \autoref{chp:getstats-vs-timer}.
+Before we embark on the test cases, we put our two sampling methods up against each other, to see whether the results are comparable. The results were fairly equal across the board, and considered good enough to indicate any serious performance discrepancies. The results are included in \autoref{chp:getstats-vs-timer}.
 
 \input{chapters/experiments-traveller}
 
 \input{chapters/experiments-standup}
 
 \input{chapters/experiments-friends}
-

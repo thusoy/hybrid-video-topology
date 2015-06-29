@@ -60,7 +60,7 @@ Browser breakdown, by total sessions and new sessions, is given in \autoref{fig:
         \end{tikzpicture}
         \subcaption{Breakdown of new users on appear.in, browsers with more than 1\% from mid May to mid June 2015}
     \end{subfigure}
-    \caption{New users compared to all sessions on appear.in}
+    \caption{New users compared to all sessions on appear.in, mid-May to mid-June 2015}
     \label{fig:browsers}
 \end{figure}
 
@@ -71,6 +71,7 @@ Browser breakdown, by total sessions and new sessions, is given in \autoref{fig:
             ybar,
             width=\linewidth,
             xtick=data,
+            height=200,
             table/col sep=comma,
             xticklabels from table={data/analytics-appear.in/devices.csv}{Device},
             nodes near coords={\pgfmathprintnumber[fixed zerofill, precision=1]{\pgfplotspointmeta}},
@@ -83,6 +84,8 @@ Browser breakdown, by total sessions and new sessions, is given in \autoref{fig:
 
         \end{axis}
     \end{tikzpicture}
+    \caption{Devices used on appear.in, mid-May to mid-June 2015}
+    \label{fig:devices}
 \end{figure}
 
 \begin{figure}
