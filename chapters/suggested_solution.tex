@@ -309,6 +309,8 @@ The sample implementation is in Python and uses GLPK for solving the created lin
 
 The provided implementation does not fully implement everything discussed here, as time was limited. The script is capable of finding optimal routes for the objective as specified in reasonable time, but does not implement any approximation of the non-linear functions. Thus there's no punishment for maximizing network links, which means all nodes end up with 100\% utilization of their uplink, as long as someone has the capacity to receive. The script supports adding repeaters to the mix, routing video through them for nodes that are otherwise incapable of receiving video.
 
+Source code for the implementation is included in \autoref{chp:get-bw-alloc}.
+
 
 \section{Scaling}\label{sec:results}
 

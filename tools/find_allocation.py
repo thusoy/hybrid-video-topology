@@ -194,7 +194,8 @@ def get_edge_latency(node, other_node):
             # A -> B not defined, lookup B -> A
             edge_latency = case['nodes'][other_node[0]][node[0]].split()[0]
     else:
-        # TODO: Add edge cost for parallell edges between proxies and their nodes
+        # TODO: Add edge cost for parallell edges between proxies and their
+        # nodes
         edge_latency = '0ms'
     return int(edge_latency.strip('ms'))
 
@@ -205,11 +206,11 @@ def get_objective(variables, number_of_edges):
         commodity = commodity_from_nodes(node, other_node)
         other_proxy = other_node + 'proxy'
         edges = get_edges(number_of_edges)
-        for edge_number, edge in enumerate(edges):
+        for edge_num, edge in enumerate(edges):
             # Add bandwidth-gains to objective
             device_class = case['nodes'][other_node]['class']
             gain = device_gain[device_class]
-            edge_var = variables[other_proxy][other_node][commodity][edge_number]
+            edge_var = variables[other_proxy][other_node][commodity][edge_num]
             gainconst = 10
             objective += gainconst * gain * edge_var
             # objective -= edge.cost * edge_var
@@ -323,8 +324,8 @@ def add_repeater_flow_conservation(variables):
         for commodity in commodities():
             if commodity.sender == node:
                 left_side += variables[proxy][repeater][commodity][0]
-                receiver_ext = commodity.receiver + 'proxy'
-                right_side.append(variables[repeater][receiver_ext][commodity][0])
+                recv_ext = commodity.receiver + 'proxy'
+                right_side.append(variables[repeater][recv_ext][commodity][0])
 
                 # Never send traffic back to source (hopefully not needed)
                 sender_ext = commodity.sender + 'proxy'
@@ -540,40 +541,8 @@ def solve_case(args, number_of_edges):
             solve_time = endtime - starttime
             build_time = starttime - global_start_time
             retrace_time = time.time() - endtime
-            fh.write('%.3f,%.3f,%.3f,%d' % (solve_time, build_time, retrace_time, memory_used) + '\n')
-
-
-import unittest
-class VideoSolverTestCase(unittest.TestCase):
-
-    def test_get_exit_path_from_node_with_cycle(self):
-        graph = {
-            'Aext': {
-                'Bext': [1]
-            },
-            'Bext': {
-                'B': [1],
-                'Cext': [1]
-            },
-            'B': {
-                'Bext': [1],
-            },
-            'Cext': {}
-        }
-        expected_path = ['Cext', 'Bext', 'B', 'Bext', 'Aext']
-        commodity = 0
-        path = get_exit_path_from_proxy(graph, 'Bext', ['Aext', 'B'], commodity)
-        self.assertEqual(path, expected_path)
-
-
-    def test_bandwidth_parsing(self):
-        test_values = {
-            '10Mbit': 10000000,
-            '3kbit': 3000,
-            '14Gbit': 14000000000,
-        }
-        for bw, expected in test_values.items():
-            self.assertEqual(parse_bandwidth_into_slots(bw), expected)
+            fh.write('%.3f,%.3f,%.3f,%d' % (solve_time, build_time,
+                retrace_time, memory_used) + '\n')
 
 
 if __name__ == '__main__':
