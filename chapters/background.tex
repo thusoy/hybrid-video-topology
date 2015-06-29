@@ -29,7 +29,7 @@ Both H.26x and VPx can be hardware-accelerated, and are deployed in several prod
 
 \subsection{Continuous Presence vs. Voice-Activated Switching}
 
-There are mainly two different ways to do video conversations, Continuous Presence and \acrfull{vas}. Continuous Presence means that all parties in the conversation are visible to all other parties at the same time. \gls{vas} means that only one party is visible, typically the one detected by the system as talking at any given time. There's also hybrid schemes, like Google Hangouts, where all parties are shown to everyone, but the active speaker is shown much bigger than the rest. Each node can override locally who's to be shown up big.
+There are mainly two different ways to do video conversations, Continuous Presence and \acrfull{vas}. Continuous Presence means that all parties in the conversation are visible to all other parties at the same time. \gls{vas} means that only one party is visible, typically the one detected by the system as talking at any given time. There's also hybrid schemes, like Google Hangouts, where all parties are shown to everyone, but the active speaker is shown bigger than the rest. Each node can override locally who's shown up big.
 
 Clearly, in larger conversations, there's a huge difference in network impact of the two technologies, as a VAS-based solution will always just require a single video link in and out, while Continuous Presence requires bandwidth to scale linearly with the size of the conversation. \autoref{fig:service-possibilities} summarizes the possible services that can be provided for different amounts of available bandwidth. A minimal video unit is the smallest bitrate it makes sense to encode video in. This will be service dependent, but we can imagine $\approx$400 kbps to be reasonable.
 
@@ -53,7 +53,7 @@ For WebRTC, STUN would be needed even in the absence of NATs, since JavaScript d
 
 \section{The current providers}
 
-A selection of widely-known video conversation services with different network architectures is summarized in \autoref{tab:existing-solutions}.
+A selection of widely known video conversation services with different network architectures is summarized in \autoref{tab:existing-solutions}.
 
 \begin{center}
 	\label{tab:existing-solutions}
@@ -70,7 +70,7 @@ A selection of widely-known video conversation services with different network a
 
 Notably absent here is FaceTime, Apple's video conversation service bundled with their devices. FaceTime's absence in this thesis is due to the lack of support for more than two people in a conversation, and the lack of support for non-Apple devices.
 
-We also note that Mozilla just entered the market in collaboration with Telefónica with their Hello service, bundled with recent versions of Firefox\footnote{https://www.mozilla.org/en-US/firefox/hello/}. Hello essentially provides the same service as appear.in, just bundled with the browser. Thus anything we say about appear.in applies to Firefox Hello as well (and all other peer-to-peer WebRTC services), and we'll therefore not consider them separately.
+We also note that Mozilla just entered the market in collaboration with Telefónica with their Hello service, bundled with recent versions of Firefox\footnote{https://www.mozilla.org/en-US/firefox/hello/}. Hello essentially provides the same service as appear.in, just bundled with the browser. Thus anything we say about appear.in applies to Firefox Hello as well (and all other peer-to-peer WebRTC services), and we'll not consider them separately.
 
 \subsection{appear.in}
 
@@ -90,7 +90,7 @@ Hangouts requires you to authenticate with a Google account, which makes anonymo
 
 Skype is probably the most well-known of the solutions we're looking at, being among the first to offer free video conferencing for personal use way back in 2003. Skype was also among the first to provide a \gls{voip}-service inter-operating with the \gls{pstn}, easing adoption for new users. The Skype topology is peer-to-peer, built on top of the file-sharing protocol powering Kazaa, which was developed by the same founders \cite{skype-history}. The protocol used is proprietary and requires installing the Skype application. For NAT-traversal, Skype initially used other Skype users known as supernodes as intermediaries, performing the same role as TURN-servers in the ICE framework. After the Microsoft acquisition in 2011, Skype dropped the client-hosted supernodes in favor of Microsoft-hosted ones, justified as a means to improve performance and security for users \cite{skype-topo-change}. A Skype conversation has a soft limit on five people for the best user experience, and a hard limit on 10 users.
 
-Skype requires a standalone application to run, which is available on allmost all platforms out there, including Windows, Mac, Linux, Android, iOS, Windows Phone, BlackBerry, most tablets, TVs, video game consoles and more. The benefit of native applications is closer access to hardware for more efficient video processing. The downside is often that they -- like Skype -- do not use open protocols, are not standardized and offer no transparency.
+Skype requires a standalone application to run, which is available on almost all platforms out there, including Windows, Mac, Linux, Android, iOS, Windows Phone, BlackBerry, most tablets, TVs, video game consoles and more. The benefit of native applications is closer access to hardware for more efficient video processing. The downside is often that they -- like Skype -- do not use open protocols, are not standardized and offer no transparency.
 
 
 \subsection{Cisco}

@@ -6,7 +6,7 @@ In this chapter we'll take a step back, and try to evaluate both the experiments
 
 \section{Experimental Results}
 
-We saw in the experiments that both browsers struggle in heavily constrained environments, but in their own way. Firefox is unable to accomodate constrained nodes at all, while Chrome is very slow at reaching an even distribution of connection resources. Being able to know within seconds of a node joining how best to allocate resources would be of high value.
+We saw in the experiments that both browsers struggle in heavily constrained environments, but in their own way. Firefox is unable to accommodate constrained nodes at all, while Chrome is very slow at reaching an even distribution of connection resources. Being able to know within seconds of a node joining how best to allocate resources would be of high value.
 
 Our experiments were run in browser-homogeneous environments; all browsers in a conversation were the same. It would be interesting to see how the test cases would have evolved in a more realistic scenario, where some of the users are running Firefox and others are running Chrome. Our ``traveller'' test case for example, where one node has severely limited bandwidth and higher latencies than the two others, would make an interesting test. How does Firefox act as the limited node, when the two others are Chrome, compared to how Chrome acts as limited, when the two others are Firefox? As we saw in our results, Chrome is much better at negotiating bitrates that don't saturate a node's link, would this also be the case if the sender is Firefox? Results from such a test could indicate where exactly Firefox is failing; whether it's not adhering to signals sent by the limited node, or whether the limited node fails to send to appropriate signals.
 
@@ -15,9 +15,9 @@ These sort of cross-browser tests could also provide tremendous value to the bro
 
 \section{Implementation}
 
-Implementing a script demonstrating how the routing works was harder than expected, and not all desired features could be implemented. As every edge in the flow network is a variable, and since they all will contribute with either cost or gain, you need to keep track of them somehow. The sample script did this with lists within nested maps, which quickly got unwieldly and hard to work with.
+Implementing a script demonstrating how the routing works was harder than expected, and not all desired features could be implemented. As every edge in the flow network is a variable, and since almost all will contribute with either cost or gain, you need to keep track of them somehow. The sample script did this with lists within nested maps, which quickly got unwieldy and hard to work with.
 
-Performance did not turn out to be an issue since the data sets in the test cases are quite small. This would also be the case in a production environment, as more than 96\% of conversations on appear.in had 5 or fewer participants\footnote{Full data in \autoref{chp:appear.in-usage}}. Computational overhead is thus largely neglible.
+Performance did not turn out to be an issue since the data sets in the test cases are quite small. This would also be the case in a production environment, as more than 96\% of conversations on appear.in had 5 or fewer participants\footnote{Full data in \autoref{chp:appear.in-usage}}. Computational overhead is thus largely negligible.
 
 
 \section{VAS Fallback}
@@ -56,7 +56,7 @@ The dynamic routing scheme proposed in this thesis is largely independent of und
     \item Clients can forward received video to other nodes
 \end{itemize}
 
-I believe WebRTC fullfills all of these requirements, but I'm not entirely sure if it's easy to forward video from a client. If that's not possible, the approach still works, but nodes cannot be used as supernodes, thus repeaters have to be provided by the service provider if the limits posed by the peer-to-peer topology is to be overcome.
+I believe WebRTC fulfills all of these requirements, but I'm not entirely sure if it's easy to forward video from a client. If that's not possible, the approach still works, but nodes cannot be used as supernodes, thus repeaters have to be provided by the service provider if the limits posed by the peer-to-peer topology is to be overcome.
 
 As long as conversations are modelled as flow networks, any device or network characteristic that can be included in such a model and described as a linear function or approximation can be used to define the objective function. Our goal of maximum bandwidth at minimum latency could also have been minimum latency at minimum server costs, or minimal CPU usage at maximum bandwidth. Any combination is possible.
 
